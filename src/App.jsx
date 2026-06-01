@@ -755,7 +755,7 @@ export default function App() {
           <button className="btn btn-ghost" onClick={() => navigate("home")} style={{ fontSize: 13, padding: "7px 14px" }}>← Volver</button>
           <button className="btn btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }}
             onClick={() => { const url = window.location.href; window.open(`https://wa.me/?text=${encodeURIComponent(`¿Conoces a ${selProf.nombre}? Mira sus reseñas en ProfesoresUCSUR 👇\n${url}`)}`, "_blank"); }}>
-            📲 Compartir
+            📲 Compartir por WhatsApp
           </button>
         </div>
 
