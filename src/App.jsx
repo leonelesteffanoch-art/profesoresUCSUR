@@ -17,32 +17,34 @@ const db = getFirestore(firebaseApp);
 const auth = getAuth(firebaseApp);
 
 const COL_RESENAS = "resenas";
-const B="#1560AA", BD="#0C447C", BL="#deeaf8", OR="#E87722";
+const B = "#1560AA", BD = "#0C447C", BL = "#deeaf8", OR = "#E87722";
 
 const FAC_COLOR = {
-  "Ciencias de la Arquitectura":"#B45309","Ciencias Biológicas":"#059669",
-  "Ciencias de la Comunicación y Creatividad":"#9333EA","Ciencias Empresariales":"#0891B2",
-  "Ciencias de la Ingenieria":"#1560AA","Ciencias de la Salud":"#E87722",
-  "Ciencias Políticas y Derecho":"#7C3AED","Ciencias de la Educación":"#DB2777",
+  "Ciencias de la Arquitectura": "#B45309", "Ciencias Biológicas": "#059669",
+  "Ciencias de la Comunicación y Creatividad": "#9333EA", "Ciencias Empresariales": "#0891B2",
+  "Ciencias de la Ingenieria": "#1560AA", "Ciencias de la Salud": "#E87722",
+  "Ciencias Políticas y Derecho": "#7C3AED", "Ciencias de la Educación": "#DB2777",
 };
 const FAC_BG = {
-  "Ciencias de la Arquitectura":"#fef3c7","Ciencias Biológicas":"#d1fae5",
-  "Ciencias de la Comunicación y Creatividad":"#f3e8ff","Ciencias Empresariales":"#e0f2fe",
-  "Ciencias de la Ingenieria":"#deeaf8","Ciencias de la Salud":"#fff3e0",
-  "Ciencias Políticas y Derecho":"#ede9fe","Ciencias de la Educación":"#fce7f3",
+  "Ciencias de la Arquitectura": "#fef3c7", "Ciencias Biológicas": "#d1fae5",
+  "Ciencias de la Comunicación y Creatividad": "#f3e8ff", "Ciencias Empresariales": "#e0f2fe",
+  "Ciencias de la Ingenieria": "#deeaf8", "Ciencias de la Salud": "#fff3e0",
+  "Ciencias Políticas y Derecho": "#ede9fe", "Ciencias de la Educación": "#fce7f3",
 };
 const FAC_EMOJI = {
-  "Ciencias de la Arquitectura":"🏛️","Ciencias Biológicas":"🔬",
-  "Ciencias de la Comunicación y Creatividad":"🎨","Ciencias Empresariales":"📊",
-  "Ciencias de la Ingenieria":"⚙️","Ciencias de la Salud":"🩺",
-  "Ciencias Políticas y Derecho":"⚖️","Ciencias de la Educación":"📚",
+  "Ciencias de la Arquitectura": "🏛️", "Ciencias Biológicas": "🔬",
+  "Ciencias de la Comunicación y Creatividad": "🎨", "Ciencias Empresariales": "📊",
+  "Ciencias de la Ingenieria": "⚙️", "Ciencias de la Salud": "🩺",
+  "Ciencias Políticas y Derecho": "⚖️", "Ciencias de la Educación": "📚",
 };
-const FACULTADES = ["Todas","Ciencias de la Arquitectura","Ciencias Biológicas","Ciencias de la Comunicación y Creatividad","Ciencias Empresariales","Ciencias de la Ingenieria","Ciencias de la Salud","Ciencias Políticas y Derecho","Ciencias de la Educación"];
-const CRIT = ["claridad","puntualidad","trato","examenes"];
-const CRIT_LABEL = {claridad:"Claridad",puntualidad:"Puntualidad",trato:"Trato",examenes:"Exámenes"};
-const CRIT_ICON = {claridad:"💡",puntualidad:"⏰",trato:"🤝",examenes:"📝"};
-const FORM_EMPTY = {texto:"",claridad:0,puntualidad:0,trato:0,examenes:0,carrera:"",ciclo:""};
-const ADD_EMPTY = {nombre:"",facultad:"Ciencias de la Ingenieria",curso:"",bio:""};
+const FACULTADES = ["Todas", "Ciencias de la Arquitectura", "Ciencias Biológicas", "Ciencias de la Comunicación y Creatividad", "Ciencias Empresariales", "Ciencias de la Ingenieria", "Ciencias de la Salud", "Ciencias Políticas y Derecho", "Ciencias de la Educación"];
+const FACULTADES_FORM = FACULTADES.filter(f => f !== "Todas");
+const CRIT = ["claridad", "puntualidad", "trato", "examenes"];
+const CRIT_LABEL = { claridad: "Claridad", puntualidad: "Puntualidad", trato: "Trato", examenes: "Exámenes" };
+const CRIT_ICON = { claridad: "💡", puntualidad: "⏰", trato: "🤝", examenes: "📝" };
+// ── NUEVO: form incluye facultadAlumno y carrera ──
+const FORM_EMPTY = { texto: "", claridad: 0, puntualidad: 0, trato: 0, examenes: 0, facultadAlumno: "", carrera: "", ciclo: "" };
+const ADD_EMPTY = { nombre: "", facultad: "Ciencias de la Ingenieria", curso: "", bio: "" };
 const FRASES_INICIO = [
   "Opiniones reales de estudiantes de la Científica del Sur.",
   "Descubre quiénes son los mejores profes este ciclo.",
@@ -52,113 +54,119 @@ const FRASES_INICIO = [
   "Elige tus cursos sabiamente."
 ];
 
-const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
-const initials = n => n.split(" ").map(x=>x[0]).slice(0,2).join("");
-const ratingColor = r => r>=4.5?"#059669":r>=3.5?"#1560AA":r>=2.5?"#E87722":"#DC2626";
-const ratingLabel = r => r>=4.5?"Excelente":r>=3.5?"Bueno":r>=2.5?"Regular":"Deficiente";
-const calcRating = rs => rs.length ? parseFloat(avg(rs.map(x=>avg(CRIT.map(c=>x.criterios[c])))).toFixed(1)) : 0;
+const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+const initials = n => n.split(" ").map(x => x[0]).slice(0, 2).join("");
+const ratingColor = r => r >= 4.5 ? "#059669" : r >= 3.5 ? "#1560AA" : r >= 2.5 ? "#E87722" : "#DC2626";
+const ratingLabel = r => r >= 4.5 ? "Excelente" : r >= 3.5 ? "Bueno" : r >= 2.5 ? "Regular" : "Deficiente";
+const calcRating = rs => rs.length ? parseFloat(avg(rs.map(x => avg(CRIT.map(c => x.criterios[c])))).toFixed(1)) : 0;
 const similarity = (a, b) => {
   a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
-  if(a===b) return 1;
-  if(a.includes(b)||b.includes(a)) return 0.9;
-  const wa=a.split(" "), wb=b.split(" ");
-  return wa.filter(w=>wb.some(x=>x.startsWith(w)||w.startsWith(x))).length/Math.max(wa.length,wb.length);
+  if (a === b) return 1;
+  if (a.includes(b) || b.includes(a)) return 0.9;
+  const wa = a.split(" "), wb = b.split(" ");
+  return wa.filter(w => wb.some(x => x.startsWith(w) || w.startsWith(x))).length / Math.max(wa.length, wb.length);
 };
-
-// ── Formatear fecha completa con hora ──
 const formatFecha = d => {
-  if(!d) return "";
+  if (!d) return "";
   const date = d?.toDate ? d.toDate() : new Date(d);
   const ahora = new Date();
   const diff = (ahora - date) / 1000;
-  if(diff < 60) return "Hace un momento";
-  if(diff < 3600) return `Hace ${Math.floor(diff/60)} min`;
-  if(diff < 86400) return `Hace ${Math.floor(diff/3600)}h`;
-  return date.toLocaleDateString("es-PE",{day:"numeric",month:"short",year:"numeric"}) +
-    " · " + date.toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
+  if (diff < 60) return "Hace un momento";
+  if (diff < 3600) return `Hace ${Math.floor(diff / 60)} min`;
+  if (diff < 86400) return `Hace ${Math.floor(diff / 3600)}h`;
+  return date.toLocaleDateString("es-PE", { day: "numeric", month: "short", year: "numeric" }) +
+    " · " + date.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 };
 
-const Stars = ({value, onChange, size=16, gap=2}) => (
-  <span style={{display:"inline-flex",gap}}>
-    {[1,2,3,4,5].map(s=>(
-      <span key={s} onClick={()=>onChange&&onChange(s)}
-        style={{fontSize:size,color:s<=Math.round(value)?OR:"#dde3ec",cursor:onChange?"pointer":"default",lineHeight:1,display:"inline-block",transition:"transform .1s"}}
-        onMouseEnter={e=>{if(onChange)e.target.style.transform="scale(1.25)"}}
-        onMouseLeave={e=>{if(onChange)e.target.style.transform="scale(1)"}}>★</span>
+const Stars = ({ value, onChange, size = 16, gap = 2 }) => (
+  <span style={{ display: "inline-flex", gap }}>
+    {[1, 2, 3, 4, 5].map(s => (
+      <span key={s} onClick={() => onChange && onChange(s)}
+        style={{ fontSize: size, color: s <= Math.round(value) ? OR : "#dde3ec", cursor: onChange ? "pointer" : "default", lineHeight: 1, display: "inline-block", transition: "transform .15s, color .15s" }}
+        onMouseEnter={e => { if (onChange) e.target.style.transform = "scale(1.3)" }}
+        onMouseLeave={e => { if (onChange) e.target.style.transform = "scale(1)" }}>★</span>
     ))}
   </span>
 );
 
-const Avatar = ({name, fac, size=48}) => (
-  <div style={{width:size,height:size,borderRadius:"50%",background:FAC_BG[fac]||BL,display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*.32,fontWeight:700,color:FAC_COLOR[fac]||B,flexShrink:0,border:`2.5px solid ${FAC_COLOR[fac]||B}30`,letterSpacing:"-.5px"}}>
+const Avatar = ({ name, fac, size = 48 }) => (
+  <div style={{ width: size, height: size, borderRadius: "50%", background: FAC_BG[fac] || BL, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * .32, fontWeight: 700, color: FAC_COLOR[fac] || B, flexShrink: 0, border: `2.5px solid ${FAC_COLOR[fac] || B}40`, letterSpacing: "-.5px" }}>
     {initials(name)}
   </div>
 );
 
-const RatingChip = ({r, large=false}) => {
-  if(!r) return <span style={{color:"#bbb",fontSize:12}}>Sin calificar</span>;
+const RatingChip = ({ r, large = false }) => {
+  if (!r) return <span style={{ color: "#bbb", fontSize: 12 }}>Sin calificar</span>;
   const c = ratingColor(r);
   return large ? (
-    <div style={{textAlign:"center"}}>
-      <span style={{background:`${c}18`,color:c,fontWeight:700,fontSize:28,padding:"10px 18px",borderRadius:14,lineHeight:1.2,display:"inline-block"}}>★ {r.toFixed(1)}</span>
-      <div style={{fontSize:11,color:c,fontWeight:600,marginTop:4}}>{ratingLabel(r)}</div>
+    <div style={{ textAlign: "center" }}>
+      <span style={{ background: `${c}18`, color: c, fontWeight: 700, fontSize: 28, padding: "10px 18px", borderRadius: 14, lineHeight: 1.2, display: "inline-block" }}>★ {r.toFixed(1)}</span>
+      <div style={{ fontSize: 11, color: c, fontWeight: 600, marginTop: 4 }}>{ratingLabel(r)}</div>
     </div>
-  ) : <span style={{background:`${c}18`,color:c,fontWeight:700,fontSize:15,padding:"3px 10px",borderRadius:10}}>{r.toFixed(1)}</span>;
+  ) : <span style={{ background: `${c}18`, color: c, fontWeight: 700, fontSize: 15, padding: "3px 10px", borderRadius: 10 }}>{r.toFixed(1)}</span>;
 };
 
-const CritBar = ({label, icon, value, delay=0}) => (
-  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:9,animation:`fadeIn .4s ease ${delay}s both`}}>
-    <span style={{fontSize:14,width:20,textAlign:"center"}}>{icon}</span>
-    <span style={{fontSize:12,color:"#6b7a90",width:88,flexShrink:0}}>{label}</span>
-    <div style={{flex:1,background:"#edf1f7",borderRadius:6,height:9,overflow:"hidden"}}>
-      <div style={{width:`${value*20}%`,background:`linear-gradient(90deg,${B},${OR})`,height:"100%",borderRadius:6,transition:"width .6s ease"}}/>
+const CritBar = ({ label, icon, value, delay = 0 }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 9, animation: `fadeIn .4s ease ${delay}s both` }}>
+    <span style={{ fontSize: 14, width: 20, textAlign: "center" }}>{icon}</span>
+    <span style={{ fontSize: 12, color: "#6b7a90", width: 88, flexShrink: 0 }}>{label}</span>
+    <div style={{ flex: 1, background: "#edf1f7", borderRadius: 6, height: 9, overflow: "hidden" }}>
+      <div style={{ width: `${value * 20}%`, background: `linear-gradient(90deg,${B},${OR})`, height: "100%", borderRadius: 6, transition: "width .6s ease" }} />
     </div>
-    <span style={{fontSize:12,fontWeight:700,color:ratingColor(value),width:26,textAlign:"right"}}>{value>0?value.toFixed(1):"—"}</span>
+    <span style={{ fontSize: 12, fontWeight: 700, color: ratingColor(value), width: 26, textAlign: "right" }}>{value > 0 ? value.toFixed(1) : "—"}</span>
   </div>
 );
 
-const Toast = ({msg, onDone}) => {
-  useEffect(()=>{const t=setTimeout(onDone,3000);return()=>clearTimeout(t)},[]);
-  return <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",background:"#1a2540",color:"#fff",padding:"12px 22px",borderRadius:14,fontSize:13,fontWeight:500,zIndex:999,boxShadow:"0 4px 20px rgba(0,0,0,.2)",animation:"slideUp .3s ease"}}>{msg}</div>;
+const Toast = ({ msg, onDone }) => {
+  useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t) }, []);
+  return <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: "#1a2540", color: "#fff", padding: "12px 22px", borderRadius: 14, fontSize: 13, fontWeight: 500, zIndex: 9999, boxShadow: "0 4px 20px rgba(0,0,0,.25)", animation: "slideUp .3s ease", whiteSpace: "nowrap" }}>{msg}</div>;
 };
 
-const Divider = () => <hr style={{border:"none",borderTop:"1px solid #edf1f7",margin:"14px 0"}}/>;
+const Divider = () => <hr style={{ border: "none", borderTop: "1px solid #edf1f7", margin: "14px 0" }} />;
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:#eef2f9;-webkit-font-smoothing:antialiased}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#eef2f9;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f0f4fa}::-webkit-scrollbar-thumb{background:#c8d5e8;border-radius:3px}
-.card{background:#fff;border-radius:18px;border:1px solid #e2eaf5;transition:box-shadow .2s,transform .2s}
-.card-hover:hover{box-shadow:0 8px 28px rgba(21,96,170,.12);transform:translateY(-2px);cursor:pointer}
-.btn{border:none;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;transition:all .15s;font-family:inherit;padding:11px 22px}
+.card{background:#fff;border-radius:20px;border:1px solid #e2eaf5;box-shadow:0 2px 8px rgba(21,96,170,.04);transition:box-shadow .2s,transform .2s}
+.card-hover:hover{box-shadow:0 10px 32px rgba(21,96,170,.14);transform:translateY(-3px);cursor:pointer}
+.btn{border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s;font-family:inherit;padding:11px 22px;letter-spacing:.01em}
 .btn:active{transform:scale(.97)}
-.btn-blue{background:#1560AA;color:#fff}.btn-blue:hover{background:#0C447C}
-.btn-orange{background:#E87722;color:#fff}.btn-orange:hover{background:#c96818}
-.btn-ghost{background:#f0f4fa;color:#3a4a60}.btn-ghost:hover{background:#e2eaf5}
+.btn-blue{background:#1560AA;color:#fff;box-shadow:0 3px 12px rgba(21,96,170,.3)}.btn-blue:hover{background:#0C447C;box-shadow:0 4px 16px rgba(21,96,170,.4)}
+.btn-orange{background:linear-gradient(135deg,#E87722,#d96518);color:#fff;box-shadow:0 3px 12px rgba(232,119,34,.35)}.btn-orange:hover{box-shadow:0 4px 18px rgba(232,119,34,.5);transform:translateY(-1px)}
+.btn-ghost{background:#f0f4fa;color:#3a4a60;border:1.5px solid #e2eaf5}.btn-ghost:hover{background:#e2eaf5;border-color:#c8d5e8}
 .btn-red{background:#fef2f2;color:#DC2626;border:1px solid #fecaca}.btn-red:hover{background:#fee2e2}
 .btn-green{background:#d1fae5;color:#059669;border:1px solid #6ee7b7}.btn-green:hover{background:#a7f3d0}
-.input{width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #d8e3ef;font-size:14px;font-family:inherit;outline:none;transition:border .2s,box-shadow .2s;background:#fafcff}
+.btn-cta{background:linear-gradient(135deg,#E87722,#f09040);color:#fff;font-size:15px;padding:14px 28px;border-radius:14px;border:none;cursor:pointer;font-family:inherit;font-weight:800;box-shadow:0 4px 20px rgba(232,119,34,.45);transition:all .2s;letter-spacing:.01em}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(232,119,34,.55)}
+.input{width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #d8e3ef;font-size:14px;font-family:inherit;outline:none;transition:border .2s,box-shadow .2s;background:#fafcff;color:#1a2540}
 .input:focus{border-color:#1560AA;box-shadow:0 0 0 3px #1560AA18}
-.textarea{width:100%;min-height:100px;padding:12px 14px;border-radius:12px;border:1.5px solid #d8e3ef;font-size:14px;resize:vertical;font-family:inherit;outline:none;transition:border .2s;background:#fafcff}
+.textarea{width:100%;min-height:110px;padding:12px 14px;border-radius:12px;border:1.5px solid #d8e3ef;font-size:14px;resize:vertical;font-family:inherit;outline:none;transition:border .2s;background:#fafcff;color:#1a2540}
 .textarea:focus{border-color:#E87722;box-shadow:0 0 0 3px #E8772218}
 .pill{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
-.nav-link{color:rgba(255,255,255,.7);font-size:13px;font-weight:500;cursor:pointer;padding:7px 14px;border-radius:10px;transition:all .15s;white-space:nowrap}
-.nav-link:hover,.nav-link.active{color:#fff;background:rgba(255,255,255,.18)}
-.util-btn{background:none;border:1.5px solid #e2eaf5;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;color:#6b7a90;font-family:inherit}
+.nav-link{color:rgba(255,255,255,.7);font-size:13px;font-weight:600;cursor:pointer;padding:7px 13px;border-radius:10px;transition:all .15s;white-space:nowrap}
+.nav-link:hover,.nav-link.active{color:#fff;background:rgba(255,255,255,.2)}
+.util-btn{background:none;border:1.5px solid #e2eaf5;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;color:#6b7a90;font-family:inherit;font-weight:600}
 .util-btn:hover{border-color:#1560AA;color:#1560AA;background:#deeaf8}
-.tab{padding:8px 18px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
-.fade-in{animation:fadeIn .3s ease both}
-.shimmer{background:linear-gradient(90deg,#f0f4fa 25%,#e2eaf5 50%,#f0f4fa 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:10px}
+.tab{padding:8px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
+.fade-in{animation:fadeIn .35s ease both}
+.shimmer{background:linear-gradient(90deg,#f0f4fa 25%,#e2eaf5 50%,#f0f4fa 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px}
+.crit-box{background:#f7f9fc;border:1.5px solid #e2eaf5;border-radius:14px;padding:12px 14px;transition:all .2s;cursor:default}
+.crit-box.active{background:#fff8f2;border-color:#E8772260;box-shadow:0 2px 10px rgba(232,119,34,.1)}
+.add-banner{background:linear-gradient(135deg,#1560AA,#0C447C);border-radius:16px;padding:18px 22px;display:flex;align-items:center;gap:14px;margin-bottom:16px;box-shadow:0 4px 16px rgba(21,96,170,.25)}
+.step-badge{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid rgba(255,255,255,.35)}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 @media(max-width:600px){
-  .nav-link{padding:6px 8px;font-size:11px}
+  .nav-link{padding:6px 7px;font-size:11px}
   .pill{font-size:10px;padding:3px 8px}
   .tab{padding:6px 10px;font-size:11px}
-  .btn{padding:9px 16px;font-size:13px}
-  .card{border-radius:12px}
+  .btn{padding:9px 14px;font-size:13px}
+  .card{border-radius:14px}
+  .btn-cta{font-size:14px;padding:12px 22px}
 }
 `;
 
@@ -188,60 +196,61 @@ export default function App() {
   const [fraseInicio, setFraseInicio] = useState(FRASES_INICIO[0]);
   const [editCursoProf, setEditCursoProf] = useState(null);
   const [editCursoVal, setEditCursoVal] = useState("");
-  // ── NUEVO: reseñas de todos los profes para el admin ──
   const [todasResenas, setTodasResenas] = useState([]);
+  // votados: { [resId]: "util" | "noUtil" } — persiste en localStorage
+  const [votados, setVotados] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("rmp_votes") || "{}"); }
+    catch { return {}; }
+  });
   const formRef = useRef();
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db,"profesores"), snap => {
-      setProfesores(snap.docs.map(d=>({id:d.id,...d.data()})));
+    const unsub = onSnapshot(collection(db, "profesores"), snap => {
+      setProfesores(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
     });
     return () => unsub();
   }, []);
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db,"config","carreras"), snap => {
-      if(snap.exists()) setCarreras(snap.data());
+    const unsub = onSnapshot(doc(db, "config", "carreras"), snap => {
+      if (snap.exists()) setCarreras(snap.data());
     });
     return () => unsub();
   }, []);
 
-  // Reseñas del perfil seleccionado
   useEffect(() => {
-    if(!selProf) return;
-    const q = query(collection(db,"profesores",selProf.id,COL_RESENAS), orderBy("createdAt","desc"));
+    if (!selProf) return;
+    const q = query(collection(db, "profesores", selProf.id, COL_RESENAS), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, snap => {
-      setResenas(prev=>({...prev,[selProf.id]:snap.docs.map(d=>({id:d.id,...d.data()}))}));
+      setResenas(prev => ({ ...prev, [selProf.id]: snap.docs.map(d => ({ id: d.id, ...d.data() })) }));
     });
     return () => unsub();
   }, [selProf]);
 
-  // ── NUEVO: cuando el admin se loguea, carga TODAS las reseñas de todos los profes ──
   useEffect(() => {
-    if(!adminUser || profesores.length===0) return;
+    if (!adminUser || profesores.length === 0) return;
     const unsubs = profesores.map(p => {
-      const q = query(collection(db,"profesores",p.id,COL_RESENAS), orderBy("createdAt","desc"));
+      const q = query(collection(db, "profesores", p.id, COL_RESENAS), orderBy("createdAt", "desc"));
       return onSnapshot(q, snap => {
-        const rs = snap.docs.map(d=>({id:d.id, profId:p.id, profNombre:p.nombre, profFac:p.facultad, ...d.data()}));
-        setTodasResenas(prev=>{
-          const sinEste = prev.filter(r=>r.profId!==p.id);
-          return [...sinEste, ...rs].sort((a,b)=>{
-            const ta = a.createdAt?.toDate?.()?.getTime()||0;
-            const tb = b.createdAt?.toDate?.()?.getTime()||0;
-            return tb-ta;
+        const rs = snap.docs.map(d => ({ id: d.id, profId: p.id, profNombre: p.nombre, profFac: p.facultad, ...d.data() }));
+        setTodasResenas(prev => {
+          const sinEste = prev.filter(r => r.profId !== p.id);
+          return [...sinEste, ...rs].sort((a, b) => {
+            const ta = a.createdAt?.toDate?.()?.getTime() || 0;
+            const tb = b.createdAt?.toDate?.()?.getTime() || 0;
+            return tb - ta;
           });
         });
-        // También actualiza resenas para eliminarResena
-        setResenas(prev=>({...prev,[p.id]:snap.docs.map(d=>({id:d.id,...d.data()}))}));
+        setResenas(prev => ({ ...prev, [p.id]: snap.docs.map(d => ({ id: d.id, ...d.data() })) }));
       });
     });
-    return () => unsubs.forEach(u=>u());
+    return () => unsubs.forEach(u => u());
   }, [adminUser, profesores.length]);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db,"reportes"), snap => {
-      setReportes(snap.docs.map(d=>({id:d.id,...d.data()})));
+    const unsub = onSnapshot(collection(db, "reportes"), snap => {
+      setReportes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
     return () => unsub();
   }, []);
@@ -252,611 +261,739 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if(page==="home") setFraseInicio(FRASES_INICIO[Math.floor(Math.random()*FRASES_INICIO.length)]);
+    if (page === "home") setFraseInicio(FRASES_INICIO[Math.floor(Math.random() * FRASES_INICIO.length)]);
   }, [page]);
 
   const showToast = msg => setToast(msg);
 
-  const navigate = (p, prof=null) => {
+  const navigate = (p, prof = null) => {
     setPage(p); setFormErr(""); setForm(FORM_EMPTY);
     setAddProf(ADD_EMPTY); setAddMode("nuevo"); setAddProfSel(null); setAddCurso("");
-    if(prof) setSelProf(prof);
-    window.scrollTo(0,0);
+    if (prof) setSelProf(prof);
+    window.scrollTo(0, 0);
   };
 
   const submitResena = async () => {
-    if(!form.texto.trim()||CRIT.some(c=>form[c]===0)) { setFormErr("Completa todos los criterios y escribe un comentario."); return; }
+    if (!form.texto.trim() || CRIT.some(c => form[c] === 0)) {
+      setFormErr("Completa todos los criterios y escribe un comentario.");
+      return;
+    }
     try {
-      const r = {texto:form.texto, criterios:{claridad:form.claridad,puntualidad:form.puntualidad,trato:form.trato,examenes:form.examenes}, carrera:form.carrera||"", ciclo:form.ciclo||"", util:0, noUtil:0, createdAt:serverTimestamp()};
-      await addDoc(collection(db,"profesores",selProf.id,COL_RESENAS), r);
-      const allR = [r,...(resenas[selProf.id]||[])];
-      await updateDoc(doc(db,"profesores",selProf.id), {rating:calcRating(allR), totalReseñas:allR.length});
+      const r = {
+        texto: form.texto,
+        criterios: { claridad: form.claridad, puntualidad: form.puntualidad, trato: form.trato, examenes: form.examenes },
+        // ── NUEVO: guarda facultad y carrera del alumno ──
+        facultadAlumno: form.facultadAlumno || "",
+        carrera: form.carrera || "",
+        ciclo: form.ciclo || "",
+        util: 0, noUtil: 0, createdAt: serverTimestamp()
+      };
+      await addDoc(collection(db, "profesores", selProf.id, COL_RESENAS), r);
+      const allR = [r, ...(resenas[selProf.id] || [])];
+      await updateDoc(doc(db, "profesores", selProf.id), { rating: calcRating(allR), totalReseñas: allR.length });
       setForm(FORM_EMPTY); setFormErr("");
       showToast("✅ ¡Reseña publicada de forma anónima!");
-    } catch(e) { showToast("❌ Error al publicar. Verifica tu conexión."); }
+    } catch (e) { showToast("❌ Error al publicar. Verifica tu conexión."); }
   };
 
   const submitAddProf = async () => {
-    if(!addProf.nombre.trim()) { showToast("⚠️ Escribe el nombre del profesor."); return; }
-    if(!addProf.curso.trim()) { showToast("⚠️ Escribe al menos un curso."); return; }
-    const similar = profesores.find(p=>similarity(p.nombre,addProf.nombre)>0.85);
-    if(similar) { showToast(`⚠️ Ya existe "${similar.nombre}". ¿Quisiste agregar un curso?`); setAddProfSel(similar); setAddMode("curso"); setAddCurso(addProf.curso); return; }
+    if (!addProf.nombre.trim()) { showToast("⚠️ Escribe el nombre del profesor."); return; }
+    if (!addProf.curso.trim()) { showToast("⚠️ Escribe al menos un curso."); return; }
+    const similar = profesores.find(p => similarity(p.nombre, addProf.nombre) > 0.85);
+    if (similar) { showToast(`⚠️ Ya existe "${similar.nombre}". ¿Quisiste agregar un curso?`); setAddProfSel(similar); setAddMode("curso"); setAddCurso(addProf.curso); return; }
     try {
-      await addDoc(collection(db,"profesores"), {nombre:addProf.nombre.trim(), facultad:addProf.facultad, cursos:[addProf.curso.trim()], bio:addProf.bio.trim()||"Profesor de la Universidad Científica del Sur.", rating:0, totalReseñas:0, createdAt:serverTimestamp()});
+      await addDoc(collection(db, "profesores"), { nombre: addProf.nombre.trim(), facultad: addProf.facultad, cursos: [addProf.curso.trim()], bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", rating: 0, totalReseñas: 0, createdAt: serverTimestamp() });
       showToast("✅ ¡Profesor agregado!");
-      setTimeout(()=>navigate("home"), 1200);
-    } catch(e) { showToast("❌ Error al agregar. Verifica tu conexión."); }
+      setTimeout(() => navigate("home"), 1200);
+    } catch (e) { showToast("❌ Error al agregar. Verifica tu conexión."); }
   };
 
   const submitAgregarCurso = async () => {
-    if(!addProfSel) return;
-    if(!addCurso.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if((addProfSel.cursos||[]).map(c=>c.toLowerCase()).includes(addCurso.trim().toLowerCase())) { showToast("⚠️ Ese curso ya está registrado."); return; }
+    if (!addProfSel) return;
+    if (!addCurso.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
+    if ((addProfSel.cursos || []).map(c => c.toLowerCase()).includes(addCurso.trim().toLowerCase())) { showToast("⚠️ Ese curso ya está registrado."); return; }
     try {
-      await updateDoc(doc(db,"profesores",addProfSel.id), {cursos:[...(addProfSel.cursos||[]),addCurso.trim()]});
+      await updateDoc(doc(db, "profesores", addProfSel.id), { cursos: [...(addProfSel.cursos || []), addCurso.trim()] });
       showToast(`✅ Curso "${addCurso.trim()}" agregado a ${addProfSel.nombre}`);
-      setTimeout(()=>navigate("home"), 1200);
-    } catch(e) { showToast("❌ Error al agregar el curso."); }
+      setTimeout(() => navigate("home"), 1200);
+    } catch (e) { showToast("❌ Error al agregar el curso."); }
   };
 
   const eliminarCurso = async (prof, curso) => {
-    if(!window.confirm(`¿Eliminar el curso "${curso}" de ${prof.nombre}?`)) return;
+    if (!window.confirm(`¿Eliminar el curso "${curso}" de ${prof.nombre}?`)) return;
     try {
-      await updateDoc(doc(db,"profesores",prof.id), {cursos:(prof.cursos||[]).filter(c=>c!==curso)});
+      await updateDoc(doc(db, "profesores", prof.id), { cursos: (prof.cursos || []).filter(c => c !== curso) });
       showToast("✅ Curso eliminado.");
-    } catch(e) { showToast("❌ Error al eliminar el curso."); }
+    } catch (e) { showToast("❌ Error al eliminar el curso."); }
   };
 
   const adminAgregarCurso = async (prof) => {
-    if(!editCursoVal.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if((prof.cursos||[]).map(c=>c.toLowerCase()).includes(editCursoVal.trim().toLowerCase())) { showToast("⚠️ Ese curso ya existe."); return; }
+    if (!editCursoVal.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
+    if ((prof.cursos || []).map(c => c.toLowerCase()).includes(editCursoVal.trim().toLowerCase())) { showToast("⚠️ Ese curso ya existe."); return; }
     try {
-      await updateDoc(doc(db,"profesores",prof.id), {cursos:[...(prof.cursos||[]),editCursoVal.trim()]});
+      await updateDoc(doc(db, "profesores", prof.id), { cursos: [...(prof.cursos || []), editCursoVal.trim()] });
       setEditCursoProf(null); setEditCursoVal("");
       showToast("✅ Curso agregado.");
-    } catch(e) { showToast("❌ Error al agregar el curso."); }
+    } catch (e) { showToast("❌ Error al agregar el curso."); }
   };
 
   const toggleUtil = async (profId, resId, tipo) => {
-    const r = resenas[profId]?.find(x=>x.id===resId); if(!r) return;
-    try { await updateDoc(doc(db,"profesores",profId,COL_RESENAS,resId), {[tipo]:(r[tipo]||0)+1}); }
-    catch(e) { showToast("❌ Error al registrar tu voto."); }
+    // Bloquear si ya votó en esta reseña
+    if (votados[resId]) return;
+    const r = resenas[profId]?.find(x => x.id === resId); if (!r) return;
+    try {
+      await updateDoc(doc(db, "profesores", profId, COL_RESENAS, resId), { [tipo]: (r[tipo] || 0) + 1 });
+      // Persistir voto en localStorage y en estado
+      const nuevos = { ...votados, [resId]: tipo };
+      setVotados(nuevos);
+      localStorage.setItem("rmp_votes", JSON.stringify(nuevos));
+    }
+    catch (e) { showToast("❌ Error al registrar tu voto."); }
   };
 
   const eliminarProfesor = async (p) => {
-    if(!window.confirm(`¿Eliminar a ${p.nombre} y todas sus reseñas?`)) return;
+    if (!window.confirm(`¿Eliminar a ${p.nombre} y todas sus reseñas?`)) return;
     try {
-      const rSnap = await getDocs(collection(db,"profesores",p.id,COL_RESENAS));
-      for(const r of rSnap.docs) await deleteDoc(doc(db,"profesores",p.id,COL_RESENAS,r.id));
-      await deleteDoc(doc(db,"profesores",p.id));
+      const rSnap = await getDocs(collection(db, "profesores", p.id, COL_RESENAS));
+      for (const r of rSnap.docs) await deleteDoc(doc(db, "profesores", p.id, COL_RESENAS, r.id));
+      await deleteDoc(doc(db, "profesores", p.id));
       showToast(`🗑️ ${p.nombre} eliminado.`);
-    } catch(e) { showToast("❌ Error al eliminar."); }
+    } catch (e) { showToast("❌ Error al eliminar."); }
   };
 
   const eliminarResena = async (p, r) => {
-    if(!window.confirm("¿Eliminar esta reseña?")) return;
+    if (!window.confirm("¿Eliminar esta reseña?")) return;
     try {
-      const profObj = typeof p === "string" ? profesores.find(x=>x.id===p) : p;
-      if(!profObj) return;
-      await deleteDoc(doc(db,"profesores",profObj.id,COL_RESENAS,r.id));
-      const remaining = (resenas[profObj.id]||[]).filter(x=>x.id!==r.id);
+      const profObj = typeof p === "string" ? profesores.find(x => x.id === p) : p;
+      if (!profObj) return;
+      await deleteDoc(doc(db, "profesores", profObj.id, COL_RESENAS, r.id));
+      const remaining = (resenas[profObj.id] || []).filter(x => x.id !== r.id);
       const newRating = calcRating(remaining);
-      await updateDoc(doc(db,"profesores",profObj.id), {rating:newRating, totalReseñas:remaining.length});
-      setResenas(prev=>({...prev,[profObj.id]:remaining}));
-      setTodasResenas(prev=>prev.filter(x=>x.id!==r.id));
-      setProfesores(prev=>prev.map(x=>x.id===profObj.id?{...x,rating:newRating,totalReseñas:remaining.length}:x));
+      await updateDoc(doc(db, "profesores", profObj.id), { rating: newRating, totalReseñas: remaining.length });
+      setResenas(prev => ({ ...prev, [profObj.id]: remaining }));
+      setTodasResenas(prev => prev.filter(x => x.id !== r.id));
+      setProfesores(prev => prev.map(x => x.id === profObj.id ? { ...x, rating: newRating, totalReseñas: remaining.length } : x));
       showToast("🗑️ Reseña eliminada.");
-    } catch(e) { showToast("❌ Error al eliminar."); }
+    } catch (e) { showToast("❌ Error al eliminar."); }
   };
 
   const reportarResena = async (profId, resId, texto, profNombre) => {
-    if(!window.confirm("¿Reportar esta reseña como inapropiada o falsa?")) return;
-    if(reportes.some(r=>r.resId===resId)) { showToast("⚠️ Esta reseña ya fue reportada."); return; }
+    if (!window.confirm("¿Reportar esta reseña como inapropiada o falsa?")) return;
+    if (reportes.some(r => r.resId === resId)) { showToast("⚠️ Esta reseña ya fue reportada."); return; }
     try {
-      await addDoc(collection(db,"reportes"), {profId, resId, texto, profNombre, fecha:serverTimestamp(), estado:"pendiente"});
+      await addDoc(collection(db, "reportes"), { profId, resId, texto, profNombre, fecha: serverTimestamp(), estado: "pendiente" });
       showToast("⚠️ Reseña reportada. La revisaremos pronto.");
-    } catch(e) { showToast("❌ Error al enviar el reporte. Verifica tu conexión."); }
+    } catch (e) { showToast("❌ Error al enviar el reporte. Verifica tu conexión."); }
   };
 
-  const allR = selProf ? (resenas[selProf.id]||[]) : [];
-  const critAvg = CRIT.reduce((acc,c)=>({...acc,[c]:allR.length?avg(allR.map(r=>r.criterios[c])):0}),{});
+  const allR = selProf ? (resenas[selProf.id] || []) : [];
+  const critAvg = CRIT.reduce((acc, c) => ({ ...acc, [c]: allR.length ? avg(allR.map(r => r.criterios[c])) : 0 }), {});
   const globalRating = calcRating(allR);
   const filtered = profesores
-    .filter(p=>p.nombre?.toLowerCase().includes(busqueda.toLowerCase())||p.cursos?.some(c=>c.toLowerCase().includes(busqueda.toLowerCase())))
-    .filter(p=>facFiltro==="Todas"||p.facultad===facFiltro)
-    .sort((a,b)=>sortBy==="rating"?b.rating-a.rating:(b.totalReseñas||0)-(a.totalReseñas||0));
+    .filter(p => p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busqueda.toLowerCase())))
+    .filter(p => facFiltro === "Todas" || p.facultad === facFiltro)
+    .sort((a, b) => sortBy === "rating" ? b.rating - a.rating : (b.totalReseñas || 0) - (a.totalReseñas || 0));
+
+  // ── Carreras disponibles según facultad elegida en el formulario ──
+  const carrerasForm = form.facultadAlumno ? (carreras[form.facultadAlumno] || []) : [];
 
   const Header = () => (
-    <div style={{background:`linear-gradient(135deg,${BD} 0%,${B} 100%)`,padding:"0 20px",display:"flex",alignItems:"center",gap:10,height:62,boxShadow:"0 2px 16px rgba(12,68,124,.3)",position:"sticky",top:0,zIndex:100}}>
-      <span onClick={()=>navigate("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-        <div style={{background:OR,borderRadius:12,width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:"0 2px 8px rgba(232,119,34,.4)"}}>★</div>
+    <div style={{ background: `linear-gradient(135deg,${BD} 0%,${B} 100%)`, padding: "0 20px", display: "flex", alignItems: "center", gap: 10, height: 64, boxShadow: "0 2px 20px rgba(12,68,124,.35)", position: "sticky", top: 0, zIndex: 100 }}>
+      <span onClick={() => navigate("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+        <div style={{ background: OR, borderRadius: 12, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, boxShadow: "0 2px 10px rgba(232,119,34,.45)" }}>★</div>
         <div>
-          <div style={{color:"#fff",fontWeight:700,fontSize:15,lineHeight:1.1}}>RateMyProfe</div>
-          <div style={{color:"rgba(255,255,255,.5)",fontSize:9.5,letterSpacing:.8,fontWeight:500}}>CIENTÍFICA DEL SUR</div>
+          <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, lineHeight: 1.1 }}>RateMyProfe</div>
+          <div style={{ color: "rgba(255,255,255,.45)", fontSize: 9, letterSpacing: 1, fontWeight: 600 }}>CIENTÍFICA DEL SUR</div>
         </div>
       </span>
-      <span style={{flex:1}}/>
-      <nav style={{display:"flex",gap:2,overflowX:"auto",flexShrink:1,minWidth:0}}>
-        {[["home","🏠 Inicio"],["ranking","🏆 Ranking"],["agregar","➕ Agregar"],["admin","⚙️"]].map(([p,l])=>(
-          <span key={p} className={`nav-link${page===p?" active":""}`} onClick={()=>navigate(p)} style={{padding:"7px 10px"}}>{l}</span>
+      <span style={{ flex: 1 }} />
+      <nav style={{ display: "flex", gap: 2, overflowX: "auto", flexShrink: 1, minWidth: 0 }}>
+        {[["home", "🏠 Inicio"], ["ranking", "🏆 Ranking"], ["agregar", "➕ Agregar profe"], ["admin", "⚙️"]].map(([p, l]) => (
+          <span key={p} className={`nav-link${page === p ? " active" : ""}`} onClick={() => navigate(p)}>{l}</span>
         ))}
       </nav>
     </div>
   );
 
   // ── HOME ──
-  if(page==="home") return (
-    <div style={{fontFamily:"Inter,sans-serif",minHeight:"100vh",background:"#eef2f9"}}>
-      <style>{css}</style><Header/>
-      <div style={{background:`linear-gradient(150deg,${BD} 0%,${B} 55%,#2176c7 100%)`,padding:"60px 20px 80px", minHeight: "45vh", display: "flex", flexDirection: "column", justifyContent: "center", position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-50,right:-50,width:200,height:200,borderRadius:"50%",background:"rgba(232,119,34,.1)",pointerEvents:"none"}}/>
-        <div style={{maxWidth:600,margin:"0 auto",textAlign:"center",position:"relative"}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,.12)",borderRadius:20,padding:"5px 14px",marginBottom:16}}>
-            <span style={{fontSize:12,color:"rgba(255,255,255,.9)",fontWeight:500}}>🔒 100% anónimo · sin registro</span>
+  if (page === "home") return (
+    <div style={{ fontFamily: "Plus Jakarta Sans,sans-serif", minHeight: "100vh", background: "#eef2f9" }}>
+      <style>{css}</style><Header />
+      {/* Hero */}
+      <div style={{ background: `linear-gradient(150deg,${BD} 0%,${B} 55%,#2176c7 100%)`, padding: "52px 20px 72px", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: -60, right: -60, width: 240, height: 240, borderRadius: "50%", background: "rgba(232,119,34,.12)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -40, left: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,.05)", pointerEvents: "none" }} />
+        <div style={{ maxWidth: 620, margin: "0 auto", textAlign: "center", position: "relative" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,.13)", borderRadius: 20, padding: "5px 16px", marginBottom: 18, border: "1px solid rgba(255,255,255,.15)" }}>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,.9)", fontWeight: 600 }}>🔒 100% anónimo · sin registro</span>
           </div>
-          <h1 style={{color:"#fff",fontSize:26,fontWeight:700,marginBottom:8,lineHeight:1.2}}>¿Qué profesor te tocó este ciclo?</h1>
-          <p style={{color:"rgba(255,255,255,.65)",fontSize:14,marginBottom:24}}>{fraseInicio}</p>
-          <div style={{display:"flex",gap:10,background:"rgba(255,255,255,.12)",borderRadius:16,padding:8}}>
-            <input className="input" value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="🔍  Buscar por nombre o curso..." style={{flex:1,border:"none",background:"rgba(255,255,255,.95)"}}/>
+          <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 800, marginBottom: 10, lineHeight: 1.25 }}>¿Qué profesor te tocó este ciclo?</h1>
+          <p style={{ color: "rgba(255,255,255,.65)", fontSize: 14, marginBottom: 26 }}>{fraseInicio}</p>
+          <div style={{ display: "flex", gap: 10, background: "rgba(255,255,255,.13)", borderRadius: 16, padding: 8, border: "1px solid rgba(255,255,255,.1)" }}>
+            <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍  Buscar por nombre o curso..." style={{ flex: 1, border: "none", background: "rgba(255,255,255,.96)" }} />
           </div>
-          <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:18,flexWrap:"wrap"}}>
-            {[{n:profesores.length,l:"profesores",i:"👨‍🏫"},{n:profesores.reduce((total, p) => total + (p.totalReseñas || 0), 0), l:"reseñas", i:"💬"},{n:FACULTADES.length-1,l:"facultades",i:"🏫"}].map(s=>(
-              <div key={s.l} style={{background:"rgba(255,255,255,.15)",borderRadius:12,padding:"8px 16px",display:"flex",gap:6,alignItems:"center"}}>
-                <span style={{fontSize:16}}>{s.i}</span><span style={{color:"#fff",fontWeight:700,fontSize:15}}>{s.n}</span><span style={{color:"rgba(255,255,255,.65)",fontSize:12}}>{s.l}</span>
+          {/* Stats bar */}
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 20, flexWrap: "wrap" }}>
+            {[{ n: profesores.length, l: "profesores", i: "👨‍🏫" }, { n: profesores.reduce((t, p) => t + (p.totalReseñas || 0), 0), l: "reseñas", i: "💬" }, { n: FACULTADES.length - 1, l: "facultades", i: "🏫" }].map(s => (
+              <div key={s.l} style={{ background: "rgba(255,255,255,.15)", borderRadius: 12, padding: "8px 16px", display: "flex", gap: 6, alignItems: "center", border: "1px solid rgba(255,255,255,.1)" }}>
+                <span style={{ fontSize: 16 }}>{s.i}</span>
+                <span style={{ color: "#fff", fontWeight: 800, fontSize: 15 }}>{s.n}</span>
+                <span style={{ color: "rgba(255,255,255,.65)", fontSize: 12 }}>{s.l}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
-      <div style={{maxWidth:780,margin:"-22px auto 0",padding:"0 16px 48px"}}>
-        <div className="card" style={{padding:"12px 16px",marginBottom:14,marginTop:28,display:"flex",gap:8,alignItems:"center",overflowX:"auto"}}>
-          <div style={{display:"flex",gap:6,flexShrink:0}}>
-            {FACULTADES.map(f=>(
-              <button key={f} onClick={()=>setFacFiltro(f)}
-                style={{padding:"5px 13px",borderRadius:20,fontSize:12,cursor:"pointer",fontWeight:600,border:"1.5px solid",transition:"all .15s",whiteSpace:"nowrap",flexShrink:0,
-                  background:facFiltro===f?FAC_COLOR[f]||B:"transparent",
-                  color:facFiltro===f?"#fff":FAC_COLOR[f]||"#666",
-                  borderColor:facFiltro===f?FAC_COLOR[f]||B:FAC_BG[f]||"#e2eaf5"}}>
-                {f==="Todas"?"Todas":`${FAC_EMOJI[f]||""} ${f}`}
+
+      {/* ── BANNER de "¿No encuentras a tu profe?" ── */}
+      <div style={{ maxWidth: 780, margin: "12px auto 0", padding: "0 16px" }}>
+        <div className="add-banner" style={{ marginBottom: 0 }}>
+          <div style={{ fontSize: 28, flexShrink: 0 }}>👨‍🏫</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 14, marginBottom: 2 }}>¿No encuentras a tu profesor?</div>
+            <div style={{ color: "rgba(255,255,255,.65)", fontSize: 12 }}>Agrégalo en segundos para que todos puedan calificarlo.</div>
+          </div>
+          <button className="btn-cta" style={{ fontSize: 13, padding: "10px 18px" }} onClick={() => navigate("agregar")}>
+            ➕ Agregar profe
+          </button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 780, margin: "16px auto 0", padding: "0 16px 48px" }}>
+        {/* Filtros */}
+        <div className="card" style={{ padding: "12px 16px", marginBottom: 14, display: "flex", gap: 8, alignItems: "center", overflowX: "auto" }}>
+          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+            {FACULTADES.map(f => (
+              <button key={f} onClick={() => setFacFiltro(f)}
+                style={{ padding: "5px 13px", borderRadius: 20, fontSize: 12, cursor: "pointer", fontWeight: 700, border: "1.5px solid", transition: "all .15s", whiteSpace: "nowrap", flexShrink: 0, background: facFiltro === f ? FAC_COLOR[f] || B : "transparent", color: facFiltro === f ? "#fff" : FAC_COLOR[f] || "#666", borderColor: facFiltro === f ? FAC_COLOR[f] || B : FAC_BG[f] || "#e2eaf5" }}>
+                {f === "Todas" ? "Todas" : `${FAC_EMOJI[f] || ""} ${f}`}
               </button>
             ))}
           </div>
-          <div style={{marginLeft:"auto",flexShrink:0}}>
-            <select className="input" style={{width:"auto",padding:"6px 12px",fontSize:12}} value={sortBy} onChange={e=>setSortBy(e.target.value)}>
+          <div style={{ marginLeft: "auto", flexShrink: 0 }}>
+            <select className="input" style={{ width: "auto", padding: "6px 12px", fontSize: 12 }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
               <option value="rating">⭐ Mejor calificados</option>
               <option value="resenas">💬 Más reseñas</option>
             </select>
           </div>
         </div>
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          {loading&&[1,2,3].map(i=><div key={i} className="shimmer" style={{height:80}}/>)}
-          {!loading&&filtered.length===0&&(
-            <div className="card" style={{padding:48,textAlign:"center"}}>
-              <div style={{fontSize:40,marginBottom:12}}>🔍</div>
-              <div style={{color:"#aaa",fontSize:14}}>No se encontraron profesores.</div>
-              <button className="btn btn-ghost" onClick={()=>{setBusqueda("");setFacFiltro("Todas")}} style={{marginTop:12}}>Limpiar filtros</button>
+
+        {/* Lista */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {loading && [1, 2, 3].map(i => <div key={i} className="shimmer" style={{ height: 84 }} />)}
+          {!loading && filtered.length === 0 && (
+            <div className="card" style={{ padding: 48, textAlign: "center" }}>
+              <div style={{ fontSize: 44, marginBottom: 12 }}>🔍</div>
+              <div style={{ color: "#aaa", fontSize: 14, marginBottom: 16 }}>No se encontraron profesores.</div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+                <button className="btn btn-ghost" onClick={() => { setBusqueda(""); setFacFiltro("Todas"); }}>Limpiar filtros</button>
+                <button className="btn btn-orange" onClick={() => navigate("agregar")}>➕ Agregar profe nuevo</button>
+              </div>
             </div>
           )}
-          {filtered.map((p,i)=>(
-            <div key={p.id} className="card card-hover fade-in" onClick={()=>navigate("perfil",p)}
-              style={{padding:"16px 20px",display:"flex",alignItems:"center",gap:14,borderLeft:`4px solid ${FAC_COLOR[p.facultad]||B}`,animationDelay:`${i*.04}s`}}>
-              <Avatar name={p.nombre} fac={p.facultad} size={52}/>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontWeight:600,fontSize:15,color:"#1a2540",marginBottom:4}}>{p.nombre}</div>
-                <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                  <span className="pill" style={{background:FAC_BG[p.facultad]||BL,color:FAC_COLOR[p.facultad]||BD}}>{FAC_EMOJI[p.facultad]||""} {p.facultad}</span>
-                  {(p.cursos||[]).map(c=><span key={c} className="pill" style={{background:"#f3f6fb",color:"#5a6a80"}}>📚 {c}</span>)}
+          {filtered.map((p, i) => (
+            <div key={p.id} className="card card-hover fade-in" onClick={() => navigate("perfil", p)}
+              style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, borderLeft: `4px solid ${FAC_COLOR[p.facultad] || B}`, animationDelay: `${i * .04}s` }}>
+              <Avatar name={p.nombre} fac={p.facultad} size={52} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#1a2540", marginBottom: 5 }}>{p.nombre}</div>
+                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                  <span className="pill" style={{ background: FAC_BG[p.facultad] || BL, color: FAC_COLOR[p.facultad] || BD }}>{FAC_EMOJI[p.facultad] || ""} {p.facultad}</span>
+                  {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80" }}>📚 {c}</span>)}
                 </div>
               </div>
-              <div style={{textAlign:"right",flexShrink:0}}>
-                <RatingChip r={p.rating}/>
-                <div style={{marginTop:4}}><Stars value={p.rating} size={13} gap={1}/></div>
-                <div style={{fontSize:11,color:"#a0adb8",marginTop:3}}>{p.totalReseñas||0} reseñas</div>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <RatingChip r={p.rating} />
+                <div style={{ marginTop: 4 }}><Stars value={p.rating} size={13} gap={1} /></div>
+                <div style={{ fontSize: 11, color: "#a0adb8", marginTop: 3 }}>{p.totalReseñas || 0} reseñas</div>
               </div>
             </div>
           ))}
         </div>
       </div>
-      {toast&&<Toast msg={toast} onDone={()=>setToast(null)}/>}
+      {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
     </div>
   );
 
   // ── RANKING ──
-  if(page==="ranking") {
-    const withR=profesores.filter(p=>p.totalReseñas>0);
-    const top=[...withR].sort((a,b)=>b.rating-a.rating);
-    const worst=[...withR].sort((a,b)=>a.rating-b.rating);
-    const popular=[...profesores].sort((a,b)=>(b.totalReseñas||0)-(a.totalReseñas||0));
-    const maxR=Math.max(...profesores.map(p=>p.totalReseñas||0),1);
-    const podio=top.slice(0,3);
-    const ord=[1,0,2],heights=["60px","80px","44px"],medals=["🥇","🥈","🥉"];
+  if (page === "ranking") {
+    const withR = profesores.filter(p => p.totalReseñas > 0);
+    const top = [...withR].sort((a, b) => b.rating - a.rating);
+    const worst = [...withR].sort((a, b) => a.rating - b.rating);
+    const popular = [...profesores].sort((a, b) => (b.totalReseñas || 0) - (a.totalReseñas || 0));
+    const maxR = Math.max(...profesores.map(p => p.totalReseñas || 0), 1);
+    const podio = top.slice(0, 3);
+    const ord = [1, 0, 2], heights = ["60px", "80px", "44px"], medals = ["🥇", "🥈", "🥉"];
     return (
-      <div style={{fontFamily:"Inter,sans-serif",minHeight:"100vh",background:"#eef2f9"}}>
-        <style>{css}</style><Header/>
-        <div style={{maxWidth:780,margin:"0 auto",padding:"28px 16px 48px"}}>
-          <h2 style={{fontSize:20,fontWeight:700,color:BD,marginBottom:4}}>🏆 Ranking de profesores</h2>
-          <p style={{fontSize:13,color:"#8a99b0",marginBottom:20}}>Basado en calificaciones reales de estudiantes.</p>
-          <div style={{display:"flex",gap:4,background:"#e2eaf5",borderRadius:14,padding:4,width:"fit-content",marginBottom:20}}>
-            {[["top","⭐ Top rated"],["worst","💔 Peor rated"],["popular","🔥 Populares"]].map(([k,l])=>(
-              <button key={k} className="tab" onClick={()=>setRankTab(k)} style={{background:rankTab===k?B:"transparent",color:rankTab===k?"#fff":"#6b7a90"}}>{l}</button>
+      <div style={{ fontFamily: "Plus Jakarta Sans,sans-serif", minHeight: "100vh", background: "#eef2f9" }}>
+        <style>{css}</style><Header />
+        <div style={{ maxWidth: 780, margin: "0 auto", padding: "28px 16px 48px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: BD, marginBottom: 4 }}>🏆 Ranking de profesores</h2>
+          <p style={{ fontSize: 13, color: "#8a99b0", marginBottom: 22 }}>Basado en calificaciones reales de estudiantes.</p>
+          <div style={{ display: "flex", gap: 4, background: "#e2eaf5", borderRadius: 14, padding: 4, width: "fit-content", marginBottom: 22 }}>
+            {[["top", "⭐ Top rated"], ["worst", "💔 Peor rated"], ["popular", "🔥 Populares"]].map(([k, l]) => (
+              <button key={k} className="tab" onClick={() => setRankTab(k)} style={{ background: rankTab === k ? B : "transparent", color: rankTab === k ? "#fff" : "#6b7a90" }}>{l}</button>
             ))}
           </div>
-          {rankTab==="top"&&podio.length>0&&<>
-            <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",gap:16,marginBottom:24,paddingTop:20}}>
-              {ord.map((idx,i)=>{const p=podio[idx];if(!p)return null;return(
-                <div key={p.id} onClick={()=>navigate("perfil",p)} style={{display:"flex",flexDirection:"column",alignItems:"center",cursor:"pointer",flex:1,maxWidth:160}}>
-                  <span style={{fontSize:22,marginBottom:4}}>{medals[idx]}</span>
-                  <Avatar name={p.nombre} fac={p.facultad} size={idx===0?56:46}/>
-                  <div style={{fontSize:12,fontWeight:600,color:"#1a2540",marginTop:6,textAlign:"center"}}>{p.nombre.split(" ")[0]}</div>
-                  <RatingChip r={p.rating}/>
-                  <div style={{background:idx===0?OR:idx===1?"#a8b8cc":"#b8a090",height:heights[i],width:"100%",borderRadius:"10px 10px 0 0",marginTop:10,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:6}}>
-                    <span style={{color:"#fff",fontWeight:700,fontSize:16}}>#{idx+1}</span>
+          {rankTab === "top" && podio.length > 0 && <>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 16, marginBottom: 24, paddingTop: 20 }}>
+              {ord.map((idx, i) => { const p = podio[idx]; if (!p) return null; return (
+                <div key={p.id} onClick={() => navigate("perfil", p)} style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer", flex: 1, maxWidth: 160 }}>
+                  <span style={{ fontSize: 24, marginBottom: 4 }}>{medals[idx]}</span>
+                  <Avatar name={p.nombre} fac={p.facultad} size={idx === 0 ? 58 : 46} />
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1a2540", marginTop: 6, textAlign: "center" }}>{p.nombre.split(" ")[0]}</div>
+                  <RatingChip r={p.rating} />
+                  <div style={{ background: idx === 0 ? OR : idx === 1 ? "#a8b8cc" : "#b8a090", height: heights[i], width: "100%", borderRadius: "10px 10px 0 0", marginTop: 10, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 6 }}>
+                    <span style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>#{idx + 1}</span>
                   </div>
                 </div>
-              );})}
+              ); })}
             </div>
-            <div className="card" style={{padding:"4px 0"}}>
-              {top.slice(3).map((p,i)=>(
-                <div key={p.id} onClick={()=>navigate("perfil",p)}
-                  style={{display:"flex",alignItems:"center",gap:12,padding:"12px 18px",borderTop:i>0?"1px solid #edf1f7":"none",cursor:"pointer"}}
-                  onMouseEnter={e=>e.currentTarget.style.background="#f7f9fc"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                  <span style={{fontSize:13,color:"#a0adb8",fontWeight:600,width:28}}>#{i+4}</span>
-                  <Avatar name={p.nombre} fac={p.facultad} size={36}/>
-                  <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>{p.nombre}</div><div style={{fontSize:11,color:"#8a99b0"}}>{p.facultad}</div></div>
-                  <RatingChip r={p.rating}/>
+            <div className="card" style={{ padding: "4px 0" }}>
+              {top.slice(3).map((p, i) => (
+                <div key={p.id} onClick={() => navigate("perfil", p)}
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderTop: i > 0 ? "1px solid #edf1f7" : "none", cursor: "pointer" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <span style={{ fontSize: 13, color: "#a0adb8", fontWeight: 700, width: 28 }}>#{i + 4}</span>
+                  <Avatar name={p.nombre} fac={p.facultad} size={36} />
+                  <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{p.nombre}</div><div style={{ fontSize: 11, color: "#8a99b0" }}>{p.facultad}</div></div>
+                  <RatingChip r={p.rating} />
                 </div>
               ))}
             </div>
           </>}
-          {rankTab==="worst"&&<div className="card" style={{padding:"4px 0"}}>
-            {worst.map((p,i)=>(
-              <div key={p.id} onClick={()=>navigate("perfil",p)}
-                style={{display:"flex",alignItems:"center",gap:12,padding:"12px 18px",borderTop:i>0?"1px solid #edf1f7":"none",cursor:"pointer"}}
-                onMouseEnter={e=>e.currentTarget.style.background="#f7f9fc"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <span style={{fontSize:22}}>{i===0?"💀":i===1?"😬":"😕"}</span>
-                <Avatar name={p.nombre} fac={p.facultad} size={36}/>
-                <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>{p.nombre}</div><div style={{fontSize:11,color:"#8a99b0"}}>{p.facultad}</div></div>
-                <RatingChip r={p.rating}/>
+          {rankTab === "worst" && <div className="card" style={{ padding: "4px 0" }}>
+            {worst.map((p, i) => (
+              <div key={p.id} onClick={() => navigate("perfil", p)}
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderTop: i > 0 ? "1px solid #edf1f7" : "none", cursor: "pointer" }}
+                onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                <span style={{ fontSize: 22 }}>{i === 0 ? "💀" : i === 1 ? "😬" : "😕"}</span>
+                <Avatar name={p.nombre} fac={p.facultad} size={36} />
+                <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{p.nombre}</div><div style={{ fontSize: 11, color: "#8a99b0" }}>{p.facultad}</div></div>
+                <RatingChip r={p.rating} />
               </div>
             ))}
           </div>}
-          {rankTab==="popular"&&<div className="card" style={{padding:"4px 0"}}>
-            {popular.map((p,i)=>(
-              <div key={p.id} onClick={()=>navigate("perfil",p)}
-                style={{display:"flex",alignItems:"center",gap:12,padding:"12px 18px",borderTop:i>0?"1px solid #edf1f7":"none",cursor:"pointer"}}
-                onMouseEnter={e=>e.currentTarget.style.background="#f7f9fc"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <span style={{fontSize:13,color:"#a0adb8",fontWeight:600,width:28}}>#{i+1}</span>
-                <Avatar name={p.nombre} fac={p.facultad} size={36}/>
-                <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>{p.nombre}</div><div style={{fontSize:11,color:"#8a99b0"}}>{p.totalReseñas||0} reseñas · {p.facultad}</div></div>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <div style={{width:80,background:"#edf1f7",borderRadius:6,height:8,overflow:"hidden"}}>
-                    <div style={{width:`${((p.totalReseñas||0)/maxR)*100}%`,background:`linear-gradient(90deg,${B},${OR})`,height:"100%",borderRadius:6}}/>
+          {rankTab === "popular" && <div className="card" style={{ padding: "4px 0" }}>
+            {popular.map((p, i) => (
+              <div key={p.id} onClick={() => navigate("perfil", p)}
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderTop: i > 0 ? "1px solid #edf1f7" : "none", cursor: "pointer" }}
+                onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                <span style={{ fontSize: 13, color: "#a0adb8", fontWeight: 700, width: 28 }}>#{i + 1}</span>
+                <Avatar name={p.nombre} fac={p.facultad} size={36} />
+                <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{p.nombre}</div><div style={{ fontSize: 11, color: "#8a99b0" }}>{p.totalReseñas || 0} reseñas · {p.facultad}</div></div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 80, background: "#edf1f7", borderRadius: 6, height: 8, overflow: "hidden" }}>
+                    <div style={{ width: `${((p.totalReseñas || 0) / maxR) * 100}%`, background: `linear-gradient(90deg,${B},${OR})`, height: "100%", borderRadius: 6 }} />
                   </div>
-                  <span style={{fontSize:13,fontWeight:600,color:B}}>{p.totalReseñas||0}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: B }}>{p.totalReseñas || 0}</span>
                 </div>
               </div>
             ))}
           </div>}
         </div>
-        {toast&&<Toast msg={toast} onDone={()=>setToast(null)}/>}
+        {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
       </div>
     );
   }
 
   // ── AGREGAR ──
-  if(page==="agregar") {
-    const sugerencias = addProf.nombre.length>=2
-      ? profesores.filter(p=>similarity(p.nombre,addProf.nombre)>0.4).sort((a,b)=>similarity(b.nombre,addProf.nombre)-similarity(a.nombre,addProf.nombre)).slice(0,5)
+  if (page === "agregar") {
+    const sugerencias = addProf.nombre.length >= 2
+      ? profesores.filter(p => similarity(p.nombre, addProf.nombre) > 0.4).sort((a, b) => similarity(b.nombre, addProf.nombre) - similarity(a.nombre, addProf.nombre)).slice(0, 5)
       : [];
-    const cursosExistentes = [...new Set(profesores.filter(p=>p.facultad===addProf.facultad).flatMap(p=>p.cursos||[]))];
+    const cursosExistentes = [...new Set(profesores.filter(p => p.facultad === addProf.facultad).flatMap(p => p.cursos || []))];
     return (
-      <div style={{fontFamily:"Inter,sans-serif",minHeight:"100vh",background:"#eef2f9"}}>
-        <style>{css}</style><Header/>
-        <div style={{maxWidth:540,margin:"0 auto",padding:"32px 16px 48px"}}>
-          <div style={{textAlign:"center",marginBottom:24}}>
-            <div style={{fontSize:48,marginBottom:8}}>👨‍🏫</div>
-            <h2 style={{fontSize:20,fontWeight:700,color:BD,marginBottom:4}}>Agregar un profesor</h2>
-            <p style={{fontSize:13,color:"#8a99b0"}}>Ayuda a otros estudiantes agregando a un profesor o un nuevo curso.</p>
-          </div>
-          <div style={{display:"flex",gap:4,background:"#e2eaf5",borderRadius:14,padding:4,marginBottom:20}}>
-            {[["nuevo","➕ Nuevo profesor"],["curso","📚 Agregar curso"]].map(([m,l])=>(
-              <button key={m} className="tab" onClick={()=>{setAddMode(m);setAddProfSel(null);setAddCurso("");}}
-                style={{flex:1,background:addMode===m?B:"transparent",color:addMode===m?"#fff":"#6b7a90"}}>{l}</button>
+      <div style={{ fontFamily: "Plus Jakarta Sans,sans-serif", minHeight: "100vh", background: "#eef2f9" }}>
+        <style>{css}</style><Header />
+        <div style={{ maxWidth: 560, margin: "0 auto", padding: "32px 16px 48px" }}>
+
+          {/* ── Guía de pasos ── */}
+          <div style={{ background: `linear-gradient(135deg,${BD},${B})`, borderRadius: 18, padding: "22px 24px", marginBottom: 24, boxShadow: "0 4px 20px rgba(21,96,170,.25)" }}>
+            <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 14 }}>¿Cómo funciona?</div>
+            {[
+              ["1", "Elige qué quieres hacer abajo: agregar un profe nuevo o agregar un curso a uno que ya existe."],
+              ["2", "Completa el formulario con el nombre, facultad y el curso que dicta."],
+              ["3", "¡Listo! Otros alumnos ya podrán calificarlo."],
+            ].map(([n, t]) => (
+              <div key={n} style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: n === "3" ? 0 : 10 }}>
+                <div className="step-badge">{n}</div>
+                <p style={{ color: "rgba(255,255,255,.8)", fontSize: 13, lineHeight: 1.5 }}>{t}</p>
+              </div>
             ))}
           </div>
-          {addMode==="nuevo"&&(
-            <div className="card" style={{padding:26,display:"flex",flexDirection:"column",gap:16}}>
-              <div style={{position:"relative"}}>
-                <label style={{fontSize:13,fontWeight:500,color:"#3a4a60",display:"block",marginBottom:6}}>Nombre completo del profesor</label>
-                <input className="input" value={addProf.nombre} onChange={e=>setAddProf(p=>({...p,nombre:e.target.value}))} placeholder="Ej. Juan Pérez García" autoComplete="off"/>
-                {sugerencias.length>0&&(
-                  <div style={{marginTop:8,background:"#fff8f2",border:"1px solid #E87722",borderRadius:12,padding:"10px 14px"}}>
-                    <div style={{fontSize:11,color:"#E87722",fontWeight:600,marginBottom:8}}>⚠️ PROFESORES SIMILARES — ¿Ya existe?</div>
-                    {sugerencias.map(p=>(
-                      <div key={p.id} onClick={()=>{setAddProfSel(p);setAddMode("curso");}}
-                        style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderTop:"1px solid #fde8d0",cursor:"pointer"}}
-                        onMouseEnter={e=>e.currentTarget.style.opacity="0.7"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
-                        <Avatar name={p.nombre} fac={p.facultad} size={32}/>
-                        <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>{p.nombre}</div><div style={{fontSize:11,color:"#8a99b0"}}>{p.facultad} · {(p.cursos||[]).join(", ")}</div></div>
-                        <span style={{fontSize:11,color:OR,fontWeight:600}}>Agregar curso →</span>
+
+          <div style={{ display: "flex", gap: 4, background: "#e2eaf5", borderRadius: 14, padding: 4, marginBottom: 20 }}>
+            {[["nuevo", "➕ Nuevo profesor"], ["curso", "📚 Agregar curso"]].map(([m, l]) => (
+              <button key={m} className="tab" onClick={() => { setAddMode(m); setAddProfSel(null); setAddCurso(""); }}
+                style={{ flex: 1, background: addMode === m ? B : "transparent", color: addMode === m ? "#fff" : "#6b7a90", fontWeight: 700 }}>{l}</button>
+            ))}
+          </div>
+
+          {addMode === "nuevo" && (
+            <div className="card" style={{ padding: 26, display: "flex", flexDirection: "column", gap: 18 }}>
+              <div style={{ position: "relative" }}>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "#3a4a60", display: "block", marginBottom: 6 }}>Nombre completo del profesor</label>
+                <input className="input" value={addProf.nombre} onChange={e => setAddProf(p => ({ ...p, nombre: e.target.value }))} placeholder="Ej. Juan Pérez García" autoComplete="off" />
+                {sugerencias.length > 0 && (
+                  <div style={{ marginTop: 8, background: "#fff8f2", border: "1.5px solid #E87722", borderRadius: 12, padding: "12px 14px" }}>
+                    <div style={{ fontSize: 11, color: "#E87722", fontWeight: 700, marginBottom: 8 }}>⚠️ PROFESORES SIMILARES — ¿Ya existe?</div>
+                    {sugerencias.map(p => (
+                      <div key={p.id} onClick={() => { setAddProfSel(p); setAddMode("curso"); }}
+                        style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderTop: "1px solid #fde8d0", cursor: "pointer" }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = "0.7"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                        <Avatar name={p.nombre} fac={p.facultad} size={32} />
+                        <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{p.nombre}</div><div style={{ fontSize: 11, color: "#8a99b0" }}>{p.facultad} · {(p.cursos || []).join(", ")}</div></div>
+                        <span style={{ fontSize: 11, color: OR, fontWeight: 700 }}>Agregar curso →</span>
                       </div>
                     ))}
-                    <div style={{fontSize:11,color:"#8a99b0",marginTop:8}}>Si no es ninguno, continúa creando el nuevo profesor.</div>
+                    <div style={{ fontSize: 11, color: "#8a99b0", marginTop: 8 }}>Si no es ninguno, continúa creando el nuevo profesor.</div>
                   </div>
                 )}
               </div>
               <div>
-                <label style={{fontSize:13,fontWeight:500,color:"#3a4a60",display:"block",marginBottom:6}}>Facultad</label>
-                <select className="input" style={{cursor:"pointer"}} value={addProf.facultad} onChange={e=>setAddProf(p=>({...p,facultad:e.target.value}))}>
-                  {FACULTADES.filter(f=>f!=="Todas").map(f=><option key={f} value={f}>{f}</option>)}
+                <label style={{ fontSize: 13, fontWeight: 700, color: "#3a4a60", display: "block", marginBottom: 6 }}>Facultad del profesor</label>
+                <select className="input" style={{ cursor: "pointer" }} value={addProf.facultad} onChange={e => setAddProf(p => ({ ...p, facultad: e.target.value }))}>
+                  {FACULTADES.filter(f => f !== "Todas").map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{fontSize:13,fontWeight:500,color:"#3a4a60",display:"block",marginBottom:6}}>Curso que enseña</label>
-                <input className="input" value={addProf.curso} onChange={e=>setAddProf(p=>({...p,curso:e.target.value}))} placeholder="Ej. Cálculo III" autoComplete="off"/>
-                {cursosExistentes.length>0&&(
-                  <div style={{marginTop:8}}>
-                    <div style={{fontSize:11,color:"#8a99b0",marginBottom:6,fontWeight:500}}>CURSOS YA REGISTRADOS EN ESTA FACULTAD</div>
-                    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                      {cursosExistentes.map(c=>(
-                        <span key={c} onClick={()=>setAddProf(p=>({...p,curso:c}))}
-                          style={{background:addProf.curso===c?FAC_COLOR[addProf.facultad]||B:FAC_BG[addProf.facultad]||BL,color:addProf.curso===c?"#fff":FAC_COLOR[addProf.facultad]||BD,padding:"4px 12px",borderRadius:20,fontSize:12,fontWeight:500,cursor:"pointer",transition:"all .15s"}}>{c}</span>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "#3a4a60", display: "block", marginBottom: 6 }}>Curso que enseña</label>
+                <input className="input" value={addProf.curso} onChange={e => setAddProf(p => ({ ...p, curso: e.target.value }))} placeholder="Ej. Cálculo III" autoComplete="off" />
+                {cursosExistentes.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ fontSize: 11, color: "#8a99b0", marginBottom: 6, fontWeight: 600 }}>CURSOS YA REGISTRADOS EN ESTA FACULTAD</div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {cursosExistentes.map(c => (
+                        <span key={c} onClick={() => setAddProf(p => ({ ...p, curso: c }))}
+                          style={{ background: addProf.curso === c ? FAC_COLOR[addProf.facultad] || B : FAC_BG[addProf.facultad] || BL, color: addProf.curso === c ? "#fff" : FAC_COLOR[addProf.facultad] || BD, padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all .15s" }}>{c}</span>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
               <div>
-                <label style={{fontSize:13,fontWeight:500,color:"#3a4a60",display:"block",marginBottom:6}}>Descripción (opcional)</label>
-                <input className="input" value={addProf.bio} onChange={e=>setAddProf(p=>({...p,bio:e.target.value}))} placeholder="Ej. Doctor con 10 años de experiencia."/>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "#3a4a60", display: "block", marginBottom: 6 }}>Descripción <span style={{ fontWeight: 400, color: "#a0adb8" }}>(opcional)</span></label>
+                <input className="input" value={addProf.bio} onChange={e => setAddProf(p => ({ ...p, bio: e.target.value }))} placeholder="Ej. Doctor con 10 años de experiencia." />
               </div>
-              {addProf.nombre&&(
-                <div style={{background:"#f7f9fc",borderRadius:12,padding:"12px 14px",border:"1px dashed #d0dcea"}}>
-                  <div style={{fontSize:11,color:"#8a99b0",marginBottom:8,fontWeight:500}}>VISTA PREVIA</div>
-                  <div style={{display:"flex",gap:10,alignItems:"center"}}>
-                    <Avatar name={addProf.nombre} fac={addProf.facultad} size={40}/>
-                    <div><div style={{fontSize:13,fontWeight:600}}>{addProf.nombre}</div><div style={{fontSize:11,color:"#8a99b0"}}>{addProf.facultad}{addProf.curso&&` · ${addProf.curso}`}</div></div>
+              {addProf.nombre && (
+                <div style={{ background: "#f7f9fc", borderRadius: 12, padding: "12px 14px", border: "1px dashed #d0dcea" }}>
+                  <div style={{ fontSize: 11, color: "#8a99b0", marginBottom: 8, fontWeight: 600 }}>VISTA PREVIA</div>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <Avatar name={addProf.nombre} fac={addProf.facultad} size={40} />
+                    <div><div style={{ fontSize: 13, fontWeight: 700 }}>{addProf.nombre}</div><div style={{ fontSize: 11, color: "#8a99b0" }}>{addProf.facultad}{addProf.curso && ` · ${addProf.curso}`}</div></div>
                   </div>
                 </div>
               )}
-              <button className="btn btn-blue" onClick={submitAddProf} style={{width:"100%",padding:13}}>Agregar profesor</button>
+              <button className="btn btn-blue" onClick={submitAddProf} style={{ width: "100%", padding: 14, fontSize: 15 }}>Agregar profesor</button>
             </div>
           )}
-          {addMode==="curso"&&(
-            <div className="card" style={{padding:26,display:"flex",flexDirection:"column",gap:16}}>
+
+          {addMode === "curso" && (
+            <div className="card" style={{ padding: 26, display: "flex", flexDirection: "column", gap: 18 }}>
               <div>
-                <label style={{fontSize:13,fontWeight:500,color:"#3a4a60",display:"block",marginBottom:6}}>Buscar profesor</label>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "#3a4a60", display: "block", marginBottom: 6 }}>Buscar profesor existente</label>
                 <input className="input" placeholder="Escribe el nombre del profesor..." autoComplete="off"
-                  value={addProfSel?addProfSel.nombre:addProf.nombre}
-                  onChange={e=>{setAddProf(p=>({...p,nombre:e.target.value}));setAddProfSel(null);}}/>
-                {!addProfSel&&addProf.nombre.length>=2&&(
-                  <div style={{marginTop:6,border:"1.5px solid #d8e3ef",borderRadius:12,overflow:"hidden",background:"#fff",boxShadow:"0 4px 12px rgba(0,0,0,.08)"}}>
-                    {profesores.filter(p=>similarity(p.nombre,addProf.nombre)>0.3).sort((a,b)=>similarity(b.nombre,addProf.nombre)-similarity(a.nombre,addProf.nombre)).slice(0,6).map((p,i)=>(
-                      <div key={p.id} onClick={()=>setAddProfSel(p)}
-                        style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderTop:i>0?"1px solid #edf1f7":"none",cursor:"pointer"}}
-                        onMouseEnter={e=>e.currentTarget.style.background="#f7f9fc"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                        <Avatar name={p.nombre} fac={p.facultad} size={34}/>
-                        <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>{p.nombre}</div><div style={{fontSize:11,color:"#8a99b0"}}>{p.facultad}</div></div>
-                        <div style={{display:"flex",gap:4,flexWrap:"wrap",maxWidth:160}}>
-                          {(p.cursos||[]).slice(0,2).map(c=><span key={c} style={{fontSize:10,background:"#f3f6fb",padding:"2px 7px",borderRadius:10,color:"#5a6a80"}}>{c}</span>)}
-                          {(p.cursos||[]).length>2&&<span style={{fontSize:10,color:"#aaa"}}>+{p.cursos.length-2}</span>}
+                  value={addProfSel ? addProfSel.nombre : addProf.nombre}
+                  onChange={e => { setAddProf(p => ({ ...p, nombre: e.target.value })); setAddProfSel(null); }} />
+                {!addProfSel && addProf.nombre.length >= 2 && (
+                  <div style={{ marginTop: 6, border: "1.5px solid #d8e3ef", borderRadius: 12, overflow: "hidden", background: "#fff", boxShadow: "0 4px 16px rgba(0,0,0,.1)" }}>
+                    {profesores.filter(p => similarity(p.nombre, addProf.nombre) > 0.3).sort((a, b) => similarity(b.nombre, addProf.nombre) - similarity(a.nombre, addProf.nombre)).slice(0, 6).map((p, i) => (
+                      <div key={p.id} onClick={() => setAddProfSel(p)}
+                        style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderTop: i > 0 ? "1px solid #edf1f7" : "none", cursor: "pointer" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <Avatar name={p.nombre} fac={p.facultad} size={34} />
+                        <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{p.nombre}</div><div style={{ fontSize: 11, color: "#8a99b0" }}>{p.facultad}</div></div>
+                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", maxWidth: 160 }}>
+                          {(p.cursos || []).slice(0, 2).map(c => <span key={c} style={{ fontSize: 10, background: "#f3f6fb", padding: "2px 7px", borderRadius: 10, color: "#5a6a80" }}>{c}</span>)}
+                          {(p.cursos || []).length > 2 && <span style={{ fontSize: 10, color: "#aaa" }}>+{p.cursos.length - 2}</span>}
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              {addProfSel&&(
+              {addProfSel && (
                 <>
-                  <div style={{background:`${FAC_BG[addProfSel.facultad]||BL}`,borderRadius:12,padding:"14px 16px",border:`1.5px solid ${FAC_COLOR[addProfSel.facultad]||B}30`}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                      <Avatar name={addProfSel.nombre} fac={addProfSel.facultad} size={44}/>
-                      <div><div style={{fontSize:14,fontWeight:600}}>{addProfSel.nombre}</div><div style={{fontSize:12,color:"#6b7a90"}}>{addProfSel.facultad}</div></div>
-                      <button className="btn btn-ghost" style={{marginLeft:"auto",fontSize:11,padding:"4px 10px"}} onClick={()=>{setAddProfSel(null);setAddProf(p=>({...p,nombre:""}));}}>✕ Cambiar</button>
+                  <div style={{ background: `${FAC_BG[addProfSel.facultad] || BL}`, borderRadius: 12, padding: "14px 16px", border: `1.5px solid ${FAC_COLOR[addProfSel.facultad] || B}30` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                      <Avatar name={addProfSel.nombre} fac={addProfSel.facultad} size={44} />
+                      <div><div style={{ fontSize: 14, fontWeight: 700 }}>{addProfSel.nombre}</div><div style={{ fontSize: 12, color: "#6b7a90" }}>{addProfSel.facultad}</div></div>
+                      <button className="btn btn-ghost" style={{ marginLeft: "auto", fontSize: 11, padding: "4px 10px" }} onClick={() => { setAddProfSel(null); setAddProf(p => ({ ...p, nombre: "" })); }}>✕ Cambiar</button>
                     </div>
-                    <div style={{fontSize:11,color:"#6b7a90",marginBottom:6,fontWeight:500}}>CURSOS ACTUALES</div>
-                    <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                      {(addProfSel.cursos||[]).map(c=>(
-                        <span key={c} style={{background:"#fff",padding:"3px 10px",borderRadius:20,fontSize:12,color:FAC_COLOR[addProfSel.facultad]||BD,fontWeight:500,border:`1px solid ${FAC_COLOR[addProfSel.facultad]||B}30`}}>📚 {c}</span>
+                    <div style={{ fontSize: 11, color: "#6b7a90", marginBottom: 6, fontWeight: 600 }}>CURSOS ACTUALES</div>
+                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                      {(addProfSel.cursos || []).map(c => (
+                        <span key={c} style={{ background: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 12, color: FAC_COLOR[addProfSel.facultad] || BD, fontWeight: 600, border: `1px solid ${FAC_COLOR[addProfSel.facultad] || B}30` }}>📚 {c}</span>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label style={{fontSize:13,fontWeight:500,color:"#3a4a60",display:"block",marginBottom:6}}>Nuevo curso a agregar</label>
-                    <input className="input" value={addCurso} onChange={e=>setAddCurso(e.target.value)} placeholder="Ej. Cálculo III" autoComplete="off"/>
+                    <label style={{ fontSize: 13, fontWeight: 700, color: "#3a4a60", display: "block", marginBottom: 6 }}>Nuevo curso a agregar</label>
+                    <input className="input" value={addCurso} onChange={e => setAddCurso(e.target.value)} placeholder="Ej. Cálculo III" autoComplete="off" />
                   </div>
-                  <button className="btn btn-orange" onClick={submitAgregarCurso} style={{width:"100%",padding:13}}>Agregar curso a {addProfSel.nombre.split(" ")[0]}</button>
+                  <button className="btn btn-orange" onClick={submitAgregarCurso} style={{ width: "100%", padding: 14, fontSize: 15 }}>
+                    Agregar curso a {addProfSel.nombre.split(" ")[0]}
+                  </button>
                 </>
               )}
-              {!addProfSel&&<div style={{textAlign:"center",padding:"20px 0",color:"#aaa",fontSize:13}}>Busca y selecciona un profesor para agregar un curso</div>}
+              {!addProfSel && <div style={{ textAlign: "center", padding: "20px 0", color: "#aaa", fontSize: 13 }}>Busca y selecciona un profesor para agregar un curso</div>}
             </div>
           )}
         </div>
-        {toast&&<Toast msg={toast} onDone={()=>setToast(null)}/>}
+        {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
       </div>
     );
   }
 
   // ── PERFIL ──
-  if(page==="perfil"&&selProf) return (
-    <div style={{fontFamily:"Inter,sans-serif",minHeight:"100vh",background:"#eef2f9"}}>
-      <style>{css}</style><Header/>
-      <div style={{maxWidth:780,margin:"0 auto",padding:"20px 16px 48px"}}>
-        <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>
-          <button className="btn btn-ghost" onClick={()=>navigate("home")} style={{fontSize:13,padding:"7px 14px"}}>← Volver</button>
-          <button className="btn btn-ghost" style={{fontSize:13,padding:"7px 14px"}}
-            onClick={()=>{const url=window.location.href;window.open(`https://wa.me/?text=${encodeURIComponent(`¿Conoces a ${selProf.nombre}? Mira sus reseñas en RateMyProfe 👇\n${url}`)}`,"_blank");}}>
-            📲 Compartir en WhatsApp
+  if (page === "perfil" && selProf) return (
+    <div style={{ fontFamily: "Plus Jakarta Sans,sans-serif", minHeight: "100vh", background: "#eef2f9" }}>
+      <style>{css}</style><Header />
+      <div style={{ maxWidth: 780, margin: "0 auto", padding: "20px 16px 48px" }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+          <button className="btn btn-ghost" onClick={() => navigate("home")} style={{ fontSize: 13, padding: "7px 14px" }}>← Volver</button>
+          <button className="btn btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }}
+            onClick={() => { const url = window.location.href; window.open(`https://wa.me/?text=${encodeURIComponent(`¿Conoces a ${selProf.nombre}? Mira sus reseñas en RateMyProfe 👇\n${url}`)}`, "_blank"); }}>
+            📲 Compartir
           </button>
         </div>
-        <div className="card" style={{marginBottom:14,overflow:"hidden"}}>
-          <div style={{background:`linear-gradient(135deg,${FAC_COLOR[selProf.facultad]||BD}18,${OR}08)`,padding:"22px 24px 18px"}}>
-            <div style={{display:"flex",gap:16,alignItems:"flex-start",flexWrap:"wrap"}}>
-              <Avatar name={selProf.nombre} fac={selProf.facultad} size={68}/>
-              <div style={{flex:1,minWidth:160}}>
-                <h2 style={{fontSize:22,fontWeight:700,color:"#1a2540",marginBottom:6}}>{selProf.nombre}</h2>
-                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
-                  <span className="pill" style={{background:FAC_BG[selProf.facultad]||BL,color:FAC_COLOR[selProf.facultad]||BD,fontSize:12}}>{FAC_EMOJI[selProf.facultad]||""} {selProf.facultad}</span>
-                  {(selProf.cursos||[]).map(c=><span key={c} className="pill" style={{background:"#f3f6fb",color:"#5a6a80",fontSize:12}}>📚 {c}</span>)}
+
+        {/* Card del profe */}
+        <div className="card" style={{ marginBottom: 14, overflow: "hidden" }}>
+          <div style={{ background: `linear-gradient(135deg,${FAC_COLOR[selProf.facultad] || BD}18,${OR}08)`, padding: "22px 24px 18px" }}>
+            <div style={{ display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
+              <Avatar name={selProf.nombre} fac={selProf.facultad} size={68} />
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1a2540", marginBottom: 6 }}>{selProf.nombre}</h2>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                  <span className="pill" style={{ background: FAC_BG[selProf.facultad] || BL, color: FAC_COLOR[selProf.facultad] || BD, fontSize: 12 }}>{FAC_EMOJI[selProf.facultad] || ""} {selProf.facultad}</span>
+                  {(selProf.cursos || []).map(c => <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80", fontSize: 12 }}>📚 {c}</span>)}
                 </div>
-                {selProf.bio&&<p style={{fontSize:13,color:"#6b7a90",lineHeight:1.5}}>{selProf.bio}</p>}
+                {selProf.bio && <p style={{ fontSize: 13, color: "#6b7a90", lineHeight: 1.5 }}>{selProf.bio}</p>}
               </div>
-              <div style={{textAlign:"center",background:"#fff",borderRadius:16,padding:"16px 22px",border:"1px solid #e2eaf5",boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
-                <RatingChip r={globalRating} large/>
-                <Stars value={globalRating} size={14} gap={2}/>
-                <div style={{fontSize:11,color:"#a0adb8",marginTop:6}}>{allR.length} reseñas</div>
+              <div style={{ textAlign: "center", background: "#fff", borderRadius: 16, padding: "16px 22px", border: "1px solid #e2eaf5", boxShadow: "0 2px 10px rgba(0,0,0,.07)" }}>
+                <RatingChip r={globalRating} large />
+                <Stars value={globalRating} size={14} gap={2} />
+                <div style={{ fontSize: 11, color: "#a0adb8", marginTop: 6 }}>{allR.length} reseñas</div>
               </div>
             </div>
           </div>
-          <Divider/>
-          <div style={{padding:"0 24px 18px"}}>
-            {CRIT.map((c,i)=><CritBar key={c} label={CRIT_LABEL[c]} icon={CRIT_ICON[c]} value={critAvg[c]} delay={i*.05}/>)}
+          <Divider />
+          <div style={{ padding: "0 24px 18px" }}>
+            {CRIT.map((c, i) => <CritBar key={c} label={CRIT_LABEL[c]} icon={CRIT_ICON[c]} value={critAvg[c]} delay={i * .05} />)}
           </div>
         </div>
 
-        <div ref={formRef} className="card" style={{padding:22,marginBottom:14,border:`2px solid ${OR}30`}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
-            <div style={{background:`${OR}18`,borderRadius:10,padding:"6px 10px",fontSize:18}}>✍️</div>
-            <div><div style={{fontWeight:600,color:BD,fontSize:15}}>Dejar una reseña</div><div style={{fontSize:11,color:"#8a99b0"}}>🔒 Completamente anónima</div></div>
+        {/* ── CTA Banner: dejar reseña ── */}
+        <div style={{ background: `linear-gradient(135deg,${OR},#f09040)`, borderRadius: 16, padding: "16px 20px", marginBottom: 14, display: "flex", alignItems: "center", gap: 14, boxShadow: "0 4px 16px rgba(232,119,34,.3)", cursor: "pointer" }}
+          onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}>
+          <div style={{ fontSize: 28 }}>✍️</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ color: "#fff", fontWeight: 800, fontSize: 14 }}>¿Tuviste a {selProf.nombre.split(" ")[0]}?</div>
+            <div style={{ color: "rgba(255,255,255,.8)", fontSize: 12 }}>Deja tu reseña anónima y ayuda a otros estudiantes.</div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-            {CRIT.map(c=>(
-              <div key={c} style={{background:form[c]>0?"#fff8f2":"#f7f9fc",border:`1.5px solid ${form[c]>0?OR+"40":"#e2eaf5"}`,borderRadius:12,padding:"10px 14px",transition:"all .2s"}}>
-                <div style={{fontSize:12,color:"#6b7a90",marginBottom:5}}>{CRIT_ICON[c]} {CRIT_LABEL[c]}</div>
-                <Stars value={form[c]} onChange={v=>setForm(prev=>({...prev,[c]:v}))} size={24} gap={3}/>
+          <div style={{ background: "rgba(255,255,255,.25)", borderRadius: 10, padding: "8px 14px", color: "#fff", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
+            Calificar ↓
+          </div>
+        </div>
+
+        {/* Formulario de reseña */}
+        <div ref={formRef} className="card" style={{ padding: 22, marginBottom: 14, border: `2px solid ${OR}30` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+            <div style={{ background: `${OR}18`, borderRadius: 10, padding: "6px 10px", fontSize: 18 }}>✍️</div>
+            <div>
+              <div style={{ fontWeight: 800, color: BD, fontSize: 15 }}>Dejar una reseña anónima</div>
+              <div style={{ fontSize: 11, color: "#8a99b0" }}>🔒 Sin nombre, sin cuenta, 100% privado</div>
+            </div>
+          </div>
+
+          {/* Criterios */}
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#8a99b0", marginBottom: 8, letterSpacing: .5 }}>CALIFICA ESTOS CRITERIOS (obligatorio)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
+            {CRIT.map(c => (
+              <div key={c} className={`crit-box${form[c] > 0 ? " active" : ""}`}>
+                <div style={{ fontSize: 12, color: "#6b7a90", marginBottom: 6, fontWeight: 600 }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}</div>
+                <Stars value={form[c]} onChange={v => setForm(prev => ({ ...prev, [c]: v }))} size={26} gap={4} />
+                {form[c] > 0 && <div style={{ fontSize: 11, color: ratingColor(form[c]), fontWeight: 700, marginTop: 4 }}>{ratingLabel(form[c])}</div>}
               </div>
             ))}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+
+          {/* ── NUEVO: Facultad y Carrera libres ── */}
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#8a99b0", marginBottom: 8, letterSpacing: .5 }}>TU INFORMACIÓN <span style={{ fontWeight: 400 }}>(opcional)</span></div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             <div>
-              <label style={{fontSize:12,color:"#6b7a90",display:"block",marginBottom:5}}>🎓 Tu carrera (opcional)</label>
-              <select className="input" style={{padding:"9px 12px",fontSize:13}} value={form.carrera} onChange={e=>setForm(prev=>({...prev,carrera:e.target.value}))}>
-                <option value="">Selecciona tu carrera</option>
-                {(carreras[selProf.facultad]||[]).map(c=><option key={c} value={c}>{c}</option>)}
+              <label style={{ fontSize: 12, color: "#6b7a90", display: "block", marginBottom: 5, fontWeight: 600 }}>🏫 Tu facultad</label>
+              <select className="input" style={{ padding: "9px 12px", fontSize: 13 }} value={form.facultadAlumno}
+                onChange={e => setForm(prev => ({ ...prev, facultadAlumno: e.target.value, carrera: "" }))}>
+                <option value="">Selecciona tu facultad</option>
+                {FACULTADES_FORM.map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
             <div>
-              <label style={{fontSize:12,color:"#6b7a90",display:"block",marginBottom:5}}>📅 Tu ciclo (opcional)</label>
-              <select className="input" style={{padding:"9px 12px",fontSize:13}} value={form.ciclo} onChange={e=>setForm(prev=>({...prev,ciclo:e.target.value}))}>
-                <option value="">Selecciona tu ciclo</option>
-                {[1,2,3,4,5,6,7,8,9,10].map(n=><option key={n} value={n}>Ciclo {n}</option>)}
+              <label style={{ fontSize: 12, color: "#6b7a90", display: "block", marginBottom: 5, fontWeight: 600 }}>🎓 Tu carrera</label>
+              <select className="input" style={{ padding: "9px 12px", fontSize: 13 }} value={form.carrera}
+                onChange={e => setForm(prev => ({ ...prev, carrera: e.target.value }))}
+                disabled={!form.facultadAlumno || carrerasForm.length === 0}>
+                <option value="">{form.facultadAlumno ? "Selecciona tu carrera" : "Primero elige tu facultad"}</option>
+                {carrerasForm.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
           </div>
-          <textarea className="textarea" value={form.texto} onChange={e=>setForm(prev=>({...prev,texto:e.target.value}))} placeholder="Escribe tu opinión libremente..."/>
-          {formErr&&<div style={{color:"#DC2626",fontSize:12,marginTop:10,background:"#fef2f2",padding:"8px 14px",borderRadius:10,border:"1px solid #fecaca"}}>{formErr}</div>}
-          <button className="btn btn-orange" onClick={submitResena} style={{marginTop:14,width:"100%",padding:13,fontSize:15}}>Publicar reseña anónima</button>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 12, color: "#6b7a90", display: "block", marginBottom: 5, fontWeight: 600 }}>📅 Tu ciclo actual</label>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                <button key={n} onClick={() => setForm(prev => ({ ...prev, ciclo: prev.ciclo === String(n) ? "" : String(n) }))}
+                  style={{ padding: "6px 14px", borderRadius: 20, border: `1.5px solid`, fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all .15s", fontFamily: "inherit", background: form.ciclo === String(n) ? B : "transparent", color: form.ciclo === String(n) ? "#fff" : "#8a99b0", borderColor: form.ciclo === String(n) ? B : "#d8e3ef" }}>
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Comentario */}
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#8a99b0", marginBottom: 8, letterSpacing: .5 }}>TU OPINIÓN (obligatorio)</div>
+          <textarea className="textarea" value={form.texto} onChange={e => setForm(prev => ({ ...prev, texto: e.target.value }))} placeholder="Cuéntales a otros alumnos cómo es este profesor: sus clases, su trato, los exámenes..." />
+          {formErr && <div style={{ color: "#DC2626", fontSize: 12, marginTop: 10, background: "#fef2f2", padding: "8px 14px", borderRadius: 10, border: "1px solid #fecaca" }}>{formErr}</div>}
+          <button className="btn-cta" onClick={submitResena} style={{ marginTop: 16, width: "100%", display: "block", textAlign: "center" }}>
+            🔒 Publicar reseña anónima
+          </button>
         </div>
 
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <h3 style={{fontSize:16,fontWeight:700,color:BD}}>Reseñas ({allR.length})</h3>
-          {allR.length>0&&<span style={{fontSize:12,color:"#8a99b0"}}>Más recientes primero</span>}
+        {/* Reseñas */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: BD }}>Reseñas ({allR.length})</h3>
+          {allR.length > 0 && <span style={{ fontSize: 12, color: "#8a99b0" }}>Más recientes primero</span>}
         </div>
-        {allR.length===0&&<div className="card" style={{padding:40,textAlign:"center"}}><div style={{fontSize:40,marginBottom:10}}>📝</div><div style={{color:"#aaa",fontSize:14}}>¡Sé el primero en dejar una reseña!</div></div>}
-        {allR.map((r,idx)=>{
-          const rAvg=avg(CRIT.map(c=>r.criterios[c]));
+        {allR.length === 0 && (
+          <div className="card" style={{ padding: 40, textAlign: "center" }}>
+            <div style={{ fontSize: 44, marginBottom: 10 }}>📝</div>
+            <div style={{ color: "#aaa", fontSize: 14, marginBottom: 12 }}>¡Sé el primero en dejar una reseña!</div>
+            <button className="btn-cta" style={{ fontSize: 13, padding: "10px 20px" }} onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}>
+              ✍️ Dejar la primera reseña
+            </button>
+          </div>
+        )}
+        {allR.map((r, idx) => {
+          const rAvg = avg(CRIT.map(c => r.criterios[c]));
           return (
-            <div key={r.id} className="card fade-in" style={{padding:"16px 18px",marginBottom:10,animationDelay:`${idx*.05}s`}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <div style={{width:36,height:36,borderRadius:"50%",background:"#edf1f7",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🎓</div>
+            <div key={r.id} className="card fade-in" style={{ padding: "16px 18px", marginBottom: 10, animationDelay: `${idx * .05}s` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#edf1f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🎓</div>
                   <div>
-                    <div style={{fontSize:13,fontWeight:600,color:"#1a2540"}}>Estudiante anónimo</div>
-                    <div style={{fontSize:11,color:"#a0adb8",display:"flex",gap:6,flexWrap:"wrap"}}>
-                      {/* ── fecha completa con hora ── */}
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1a2540" }}>
+                      Estudiante anónimo
+                      {/* ── Muestra facultad y carrera del alumno ── */}
+                      {r.facultadAlumno && <span style={{ fontWeight: 400, color: "#8a99b0", fontSize: 11 }}> · {r.facultadAlumno.replace("Ciencias de la ", "").replace("Ciencias ", "")}</span>}
+                    </div>
+                    <div style={{ fontSize: 11, color: "#a0adb8", display: "flex", gap: 6, flexWrap: "wrap" }}>
                       <span>🕐 {formatFecha(r.createdAt)}</span>
-                      {r.carrera&&<span>· 🎓 {r.carrera}</span>}
-                      {r.ciclo&&<span>· 📅 Ciclo {r.ciclo}</span>}
+                      {r.carrera && <span>· 🎓 {r.carrera}</span>}
+                      {r.ciclo && <span>· 📅 Ciclo {r.ciclo}</span>}
                     </div>
                   </div>
                 </div>
-                <span style={{background:`${ratingColor(rAvg)}18`,color:ratingColor(rAvg),fontWeight:700,fontSize:14,padding:"4px 12px",borderRadius:10}}>★ {rAvg.toFixed(1)}</span>
+                <span style={{ background: `${ratingColor(rAvg)}18`, color: ratingColor(rAvg), fontWeight: 800, fontSize: 14, padding: "4px 12px", borderRadius: 10 }}>★ {rAvg.toFixed(1)}</span>
               </div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
-                {CRIT.map(c=><span key={c} style={{background:"#f3f6fb",borderRadius:8,padding:"3px 10px",fontSize:11,color:"#5a6a80"}}>{CRIT_ICON[c]} {CRIT_LABEL[c]}: <strong style={{color:ratingColor(r.criterios[c])}}>{r.criterios[c]}</strong></span>)}
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                {CRIT.map(c => <span key={c} style={{ background: "#f3f6fb", borderRadius: 8, padding: "3px 10px", fontSize: 11, color: "#5a6a80" }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}: <strong style={{ color: ratingColor(r.criterios[c]) }}>{r.criterios[c]}</strong></span>)}
               </div>
-              <p style={{fontSize:14,color:"#2d3a50",lineHeight:1.7}}>{r.texto}</p>
-              <Divider/>
-              <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-                <span style={{fontSize:12,color:"#8a99b0"}}>¿Te fue útil?</span>
-                <button className="util-btn" onClick={()=>toggleUtil(selProf.id,r.id,"util")}>👍 {r.util||0}</button>
-                <button className="util-btn" onClick={()=>toggleUtil(selProf.id,r.id,"noUtil")}>👎 {r.noUtil||0}</button>
-                <button className="util-btn"
-                  onClick={()=>reportarResena(selProf.id,r.id,r.texto,selProf.nombre)}
-                  style={{marginLeft:"auto",color:"#DC2626",borderColor:"#fecaca",opacity:reportes.some(x=>x.resId===r.id)?0.5:1}}
-                  disabled={reportes.some(x=>x.resId===r.id)}>
-                  🚨 {reportes.some(x=>x.resId===r.id)?"Reportada":"Reportar"}
+              <p style={{ fontSize: 14, color: "#2d3a50", lineHeight: 1.75 }}>{r.texto}</p>
+              <Divider />
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <span style={{ fontSize: 12, color: "#8a99b0" }}>¿Te fue útil?</span>
+                {(() => {
+                  const voto = votados[r.id];
+                  const yaVoto = !!voto;
+                  return (<>
+                    <button className="util-btn" onClick={() => toggleUtil(selProf.id, r.id, "util")}
+                      disabled={yaVoto}
+                      style={voto === "util" ? { background: "#deeaf8", borderColor: B, color: B, cursor: "default" } : yaVoto ? { opacity: 0.45, cursor: "not-allowed" } : {}}>
+                      👍 {r.util || 0}{voto === "util" && <span style={{ fontSize: 10, fontWeight: 700 }}> ✓</span>}
+                    </button>
+                    <button className="util-btn" onClick={() => toggleUtil(selProf.id, r.id, "noUtil")}
+                      disabled={yaVoto}
+                      style={voto === "noUtil" ? { background: "#fef2f2", borderColor: "#DC2626", color: "#DC2626", cursor: "default" } : yaVoto ? { opacity: 0.45, cursor: "not-allowed" } : {}}>
+                      👎 {r.noUtil || 0}{voto === "noUtil" && <span style={{ fontSize: 10, fontWeight: 700 }}> ✓</span>}
+                    </button>
+                  </>);
+                })()}
+                <button className="util-btn" onClick={() => reportarResena(selProf.id, r.id, r.texto, selProf.nombre)}
+                  style={{ marginLeft: "auto", color: "#DC2626", borderColor: "#fecaca", opacity: reportes.some(x => x.resId === r.id) ? 0.5 : 1 }}
+                  disabled={reportes.some(x => x.resId === r.id)}>
+                  🚨 {reportes.some(x => x.resId === r.id) ? "Reportada" : "Reportar"}
                 </button>
               </div>
             </div>
           );
         })}
       </div>
-      {toast&&<Toast msg={toast} onDone={()=>setToast(null)}/>}
+      {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
     </div>
   );
 
   // ── ADMIN ──
-  if(page==="admin") return (
-    <div style={{fontFamily:"Inter,sans-serif",minHeight:"100vh",background:"#eef2f9"}}>
-      <style>{css}</style><Header/>
+  if (page === "admin") return (
+    <div style={{ fontFamily: "Plus Jakarta Sans,sans-serif", minHeight: "100vh", background: "#eef2f9" }}>
+      <style>{css}</style><Header />
       {!adminUser ? (
-        <div style={{maxWidth:400,margin:"80px auto",padding:"0 16px"}}>
-          <div className="card" style={{padding:32,textAlign:"center"}}>
-            <div style={{fontSize:48,marginBottom:12}}>🔐</div>
-            <h2 style={{fontSize:20,fontWeight:700,color:BD,marginBottom:4}}>Panel de administrador</h2>
-            <p style={{fontSize:13,color:"#8a99b0",marginBottom:24}}>Acceso restringido</p>
-            <input className="input" type="email" value={adminEmail} onChange={e=>setAdminEmail(e.target.value)} placeholder="Correo electrónico" style={{marginBottom:10}}/>
-            <input className="input" type="password" value={adminPass} onChange={e=>setAdminPass(e.target.value)}
-              onKeyDown={async e=>{if(e.key==="Enter"){setAdminLoading(true);try{await signInWithEmailAndPassword(auth,adminEmail,adminPass);setAdminEmail("");setAdminPass("");}catch(e){showToast("❌ Correo o contraseña incorrectos.");}finally{setAdminLoading(false);}}}}
-              placeholder="Contraseña" style={{marginBottom:12}}/>
-            <button className="btn btn-blue" style={{width:"100%",padding:13}} disabled={adminLoading}
-              onClick={async()=>{setAdminLoading(true);try{await signInWithEmailAndPassword(auth,adminEmail,adminPass);setAdminEmail("");setAdminPass("");}catch(e){showToast("❌ Correo o contraseña incorrectos.");}finally{setAdminLoading(false);}}}>
-              {adminLoading?"Iniciando sesión...":"Ingresar"}
+        <div style={{ maxWidth: 400, margin: "80px auto", padding: "0 16px" }}>
+          <div className="card" style={{ padding: 32, textAlign: "center" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🔐</div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: BD, marginBottom: 4 }}>Panel de administrador</h2>
+            <p style={{ fontSize: 13, color: "#8a99b0", marginBottom: 24 }}>Acceso restringido</p>
+            <input className="input" type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="Correo electrónico" style={{ marginBottom: 10 }} />
+            <input className="input" type="password" value={adminPass} onChange={e => setAdminPass(e.target.value)}
+              onKeyDown={async e => { if (e.key === "Enter") { setAdminLoading(true); try { await signInWithEmailAndPassword(auth, adminEmail, adminPass); setAdminEmail(""); setAdminPass(""); } catch (e) { showToast("❌ Correo o contraseña incorrectos."); } finally { setAdminLoading(false); } } }}
+              placeholder="Contraseña" style={{ marginBottom: 12 }} />
+            <button className="btn btn-blue" style={{ width: "100%", padding: 14 }} disabled={adminLoading}
+              onClick={async () => { setAdminLoading(true); try { await signInWithEmailAndPassword(auth, adminEmail, adminPass); setAdminEmail(""); setAdminPass(""); } catch (e) { showToast("❌ Correo o contraseña incorrectos."); } finally { setAdminLoading(false); } }}>
+              {adminLoading ? "Iniciando sesión..." : "Ingresar"}
             </button>
           </div>
         </div>
       ) : (
-        <div style={{maxWidth:780,margin:"0 auto",padding:"28px 16px 48px"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+        <div style={{ maxWidth: 780, margin: "0 auto", padding: "28px 16px 48px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
             <div>
-              <h2 style={{fontSize:20,fontWeight:700,color:BD}}>⚙️ Panel de administrador</h2>
-              <p style={{fontSize:13,color:"#8a99b0"}}>Sesión: {adminUser.email}</p>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: BD }}>⚙️ Panel de administrador</h2>
+              <p style={{ fontSize: 13, color: "#8a99b0" }}>Sesión: {adminUser.email}</p>
             </div>
-            <button className="btn btn-ghost" style={{fontSize:13}} onClick={async()=>{await signOut(auth);navigate("home");}}>Cerrar sesión</button>
+            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => { await signOut(auth); navigate("home"); }}>Cerrar sesión</button>
           </div>
 
-          {/* Stats */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:20}}>
-            {[{label:"Profesores",n:profesores.length,icon:"👨‍🏫",color:B},{label:"Reseñas totales",n:todasResenas.length,icon:"💬",color:OR},{label:"Reportes",n:reportes.length,icon:"🚨",color:"#DC2626"}].map(s=>(
-              <div key={s.label} className="card" style={{padding:"16px 20px",borderLeft:`4px solid ${s.color}`}}>
-                <div style={{fontSize:24,marginBottom:4}}>{s.icon}</div>
-                <div style={{fontSize:26,fontWeight:700,color:s.color}}>{s.n}</div>
-                <div style={{fontSize:12,color:"#8a99b0"}}>{s.label}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 22 }}>
+            {[{ label: "Profesores", n: profesores.length, icon: "👨‍🏫", color: B }, { label: "Reseñas totales", n: todasResenas.length, icon: "💬", color: OR }, { label: "Reportes", n: reportes.length, icon: "🚨", color: "#DC2626" }].map(s => (
+              <div key={s.label} className="card" style={{ padding: "16px 20px", borderLeft: `4px solid ${s.color}` }}>
+                <div style={{ fontSize: 24, marginBottom: 4 }}>{s.icon}</div>
+                <div style={{ fontSize: 26, fontWeight: 800, color: s.color }}>{s.n}</div>
+                <div style={{ fontSize: 12, color: "#8a99b0" }}>{s.label}</div>
               </div>
             ))}
           </div>
 
-          {/* Reportes */}
-          {reportes.length>0&&<>
-            <h3 style={{fontSize:16,fontWeight:700,color:"#DC2626",marginBottom:12}}>🚨 Reseñas reportadas ({reportes.length})</h3>
-            <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
-              {reportes.map(rep=>{
-                const prof=profesores.find(p=>p.id===rep.profId);
-                const resena=(resenas[rep.profId]||[]).find(r=>r.id===rep.resId);
-                return(
-                  <div key={rep.id} className="card" style={{padding:"14px 18px",border:"1.5px solid #fecaca"}}>
-                    <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-                      <div style={{flex:1}}>
-                        <div style={{fontSize:12,color:"#DC2626",fontWeight:600,marginBottom:4}}>🚨 {prof?.nombre||"Profesor eliminado"}</div>
-                        <p style={{fontSize:13,color:"#2d3a50",lineHeight:1.6}}>{rep.texto}</p>
-                        {rep.fecha&&<div style={{fontSize:11,color:"#a0adb8",marginTop:4}}>🕐 {formatFecha(rep.fecha)}</div>}
+          {reportes.length > 0 && <>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: "#DC2626", marginBottom: 12 }}>🚨 Reseñas reportadas ({reportes.length})</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 22 }}>
+              {reportes.map(rep => {
+                const prof = profesores.find(p => p.id === rep.profId);
+                const resena = (resenas[rep.profId] || []).find(r => r.id === rep.resId);
+                return (
+                  <div key={rep.id} className="card" style={{ padding: "14px 18px", border: "1.5px solid #fecaca" }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 12, color: "#DC2626", fontWeight: 700, marginBottom: 4 }}>🚨 {prof?.nombre || "Profesor eliminado"}</div>
+                        <p style={{ fontSize: 13, color: "#2d3a50", lineHeight: 1.6 }}>{rep.texto}</p>
+                        {rep.fecha && <div style={{ fontSize: 11, color: "#a0adb8", marginTop: 4 }}>🕐 {formatFecha(rep.fecha)}</div>}
                       </div>
-                      <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
-                        <button className="btn btn-red" style={{fontSize:12,padding:"5px 12px"}}
-                          onClick={async()=>{try{if(resena&&prof)await eliminarResena(prof,resena);await deleteDoc(doc(db,"reportes",rep.id));showToast("🗑️ Reseña eliminada.");}catch(e){showToast("❌ Error al eliminar.");}}}>🗑️ Eliminar</button>
-                        <button className="btn btn-ghost" style={{fontSize:12,padding:"5px 12px"}}
-                          onClick={async()=>{await deleteDoc(doc(db,"reportes",rep.id));showToast("✅ Reporte descartado.");}}>Ignorar</button>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
+                        <button className="btn btn-red" style={{ fontSize: 12, padding: "5px 12px" }}
+                          onClick={async () => { try { if (resena && prof) await eliminarResena(prof, resena); await deleteDoc(doc(db, "reportes", rep.id)); showToast("🗑️ Reseña eliminada."); } catch (e) { showToast("❌ Error al eliminar."); } }}>🗑️ Eliminar</button>
+                        <button className="btn btn-ghost" style={{ fontSize: 12, padding: "5px 12px" }}
+                          onClick={async () => { await deleteDoc(doc(db, "reportes", rep.id)); showToast("✅ Reporte descartado."); }}>Ignorar</button>
                       </div>
                     </div>
                   </div>
@@ -865,71 +1002,70 @@ export default function App() {
             </div>
           </>}
 
-          {/* Profesores */}
-          <h3 style={{fontSize:16,fontWeight:700,color:BD,marginBottom:12}}>Profesores registrados</h3>
-          <div className="card" style={{padding:"4px 0",marginBottom:20}}>
-            {profesores.map((p,i)=>(
-              <div key={p.id} style={{borderTop:i>0?"1px solid #edf1f7":"none"}}>
-                <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 18px"}}>
-                  <Avatar name={p.nombre} fac={p.facultad} size={38}/>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:13,fontWeight:600}}>{p.nombre}</div>
-                    <div style={{fontSize:11,color:"#8a99b0",marginBottom:6}}>{p.facultad} · {p.totalReseñas||0} reseñas</div>
-                    <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                      {(p.cursos||[]).map(c=>(
-                        <span key={c} style={{background:"#f3f6fb",padding:"3px 8px",borderRadius:20,fontSize:11,color:"#5a6a80",display:"inline-flex",alignItems:"center",gap:4}}>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: BD, marginBottom: 12 }}>Profesores registrados</h3>
+          <div className="card" style={{ padding: "4px 0", marginBottom: 22 }}>
+            {profesores.map((p, i) => (
+              <div key={p.id} style={{ borderTop: i > 0 ? "1px solid #edf1f7" : "none" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px" }}>
+                  <Avatar name={p.nombre} fac={p.facultad} size={38} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{p.nombre}</div>
+                    <div style={{ fontSize: 11, color: "#8a99b0", marginBottom: 6 }}>{p.facultad} · {p.totalReseñas || 0} reseñas</div>
+                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                      {(p.cursos || []).map(c => (
+                        <span key={c} style={{ background: "#f3f6fb", padding: "3px 8px", borderRadius: 20, fontSize: 11, color: "#5a6a80", display: "inline-flex", alignItems: "center", gap: 4 }}>
                           📚 {c}
-                          <span onClick={()=>eliminarCurso(p,c)} style={{cursor:"pointer",color:"#DC2626",fontWeight:700,fontSize:12,lineHeight:1}} title="Eliminar curso">✕</span>
+                          <span onClick={() => eliminarCurso(p, c)} style={{ cursor: "pointer", color: "#DC2626", fontWeight: 700, fontSize: 12, lineHeight: 1 }} title="Eliminar curso">✕</span>
                         </span>
                       ))}
-                      <span onClick={()=>{setEditCursoProf(p.id);setEditCursoVal("");}}
-                        style={{background:"#deeaf8",padding:"3px 10px",borderRadius:20,fontSize:11,color:B,cursor:"pointer",fontWeight:500}}>+ Curso</span>
+                      <span onClick={() => { setEditCursoProf(p.id); setEditCursoVal(""); }}
+                        style={{ background: "#deeaf8", padding: "3px 10px", borderRadius: 20, fontSize: 11, color: B, cursor: "pointer", fontWeight: 600 }}>+ Curso</span>
                     </div>
-                    {editCursoProf===p.id&&(
-                      <div style={{display:"flex",gap:6,marginTop:8}}>
-                        <input className="input" value={editCursoVal} onChange={e=>setEditCursoVal(e.target.value)} placeholder="Nombre del curso..." style={{fontSize:12,padding:"6px 10px"}} onKeyDown={e=>{if(e.key==="Enter")adminAgregarCurso(p);}}/>
-                        <button className="btn btn-green" style={{fontSize:12,padding:"6px 12px",flexShrink:0}} onClick={()=>adminAgregarCurso(p)}>✓</button>
-                        <button className="btn btn-ghost" style={{fontSize:12,padding:"6px 12px",flexShrink:0}} onClick={()=>setEditCursoProf(null)}>✕</button>
+                    {editCursoProf === p.id && (
+                      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                        <input className="input" value={editCursoVal} onChange={e => setEditCursoVal(e.target.value)} placeholder="Nombre del curso..." style={{ fontSize: 12, padding: "6px 10px" }} onKeyDown={e => { if (e.key === "Enter") adminAgregarCurso(p); }} />
+                        <button className="btn btn-green" style={{ fontSize: 12, padding: "6px 12px", flexShrink: 0 }} onClick={() => adminAgregarCurso(p)}>✓</button>
+                        <button className="btn btn-ghost" style={{ fontSize: 12, padding: "6px 12px", flexShrink: 0 }} onClick={() => setEditCursoProf(null)}>✕</button>
                       </div>
                     )}
                   </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0,alignItems:"flex-end"}}>
-                    <RatingChip r={p.rating}/>
-                    <button className="btn btn-red" style={{fontSize:11,padding:"4px 10px"}} onClick={()=>eliminarProfesor(p)}>🗑️ Eliminar</button>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0, alignItems: "flex-end" }}>
+                    <RatingChip r={p.rating} />
+                    <button className="btn btn-red" style={{ fontSize: 11, padding: "4px 10px" }} onClick={() => eliminarProfesor(p)}>🗑️ Eliminar</button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* ── TODAS las reseñas ordenadas por fecha ── */}
-          <h3 style={{fontSize:16,fontWeight:700,color:BD,marginBottom:12}}>Reseñas recientes ({todasResenas.length})</h3>
-          {todasResenas.length===0&&<div style={{textAlign:"center",color:"#aaa",fontSize:13,padding:"20px 0"}}>Cargando reseñas...</div>}
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {todasResenas.map(r=>{
-              const rAvg=avg(CRIT.map(c=>r.criterios[c]));
-              const prof=profesores.find(p=>p.id===r.profId);
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: BD, marginBottom: 12 }}>Reseñas recientes ({todasResenas.length})</h3>
+          {todasResenas.length === 0 && <div style={{ textAlign: "center", color: "#aaa", fontSize: 13, padding: "20px 0" }}>Cargando reseñas...</div>}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {todasResenas.map(r => {
+              const rAvg = avg(CRIT.map(c => r.criterios[c]));
+              const prof = profesores.find(p => p.id === r.profId);
               return (
-                <div key={r.id} className="card" style={{padding:"14px 18px",display:"flex",gap:12,alignItems:"flex-start"}}>
-                  <Avatar name={r.profNombre||"?"} fac={r.profFac||""} size={36}/>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:4,flexWrap:"wrap"}}>
-                      <span style={{fontSize:13,fontWeight:600}}>{r.profNombre}</span>
-                      <span style={{background:`${ratingColor(rAvg)}18`,color:ratingColor(rAvg),fontWeight:700,fontSize:12,padding:"2px 8px",borderRadius:8}}>★ {rAvg.toFixed(1)}</span>
-                      {r.carrera&&<span style={{fontSize:11,color:"#8a99b0"}}>🎓 {r.carrera}</span>}
-                      {r.ciclo&&<span style={{fontSize:11,color:"#8a99b0"}}>Ciclo {r.ciclo}</span>}
+                <div key={r.id} className="card" style={{ padding: "14px 18px", display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  <Avatar name={r.profNombre || "?"} fac={r.profFac || ""} size={36} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 13, fontWeight: 700 }}>{r.profNombre}</span>
+                      <span style={{ background: `${ratingColor(rAvg)}18`, color: ratingColor(rAvg), fontWeight: 700, fontSize: 12, padding: "2px 8px", borderRadius: 8 }}>★ {rAvg.toFixed(1)}</span>
+                      {r.facultadAlumno && <span style={{ fontSize: 11, color: "#8a99b0" }}>🏫 {r.facultadAlumno.replace("Ciencias de la ", "").replace("Ciencias ", "")}</span>}
+                      {r.carrera && <span style={{ fontSize: 11, color: "#8a99b0" }}>🎓 {r.carrera}</span>}
+                      {r.ciclo && <span style={{ fontSize: 11, color: "#8a99b0" }}>Ciclo {r.ciclo}</span>}
                     </div>
-                    <p style={{fontSize:13,color:"#2d3a50",lineHeight:1.6,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:4}}>{r.texto}</p>
-                    <div style={{fontSize:11,color:"#a0adb8"}}>🕐 {formatFecha(r.createdAt)}</div>
+                    <p style={{ fontSize: 13, color: "#2d3a50", lineHeight: 1.6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 4 }}>{r.texto}</p>
+                    <div style={{ fontSize: 11, color: "#a0adb8" }}>🕐 {formatFecha(r.createdAt)}</div>
                   </div>
-                  <button className="btn btn-red" style={{fontSize:12,padding:"5px 12px",flexShrink:0}} onClick={()=>eliminarResena(prof||r.profId,r)}>🗑️</button>
+                  <button className="btn btn-red" style={{ fontSize: 12, padding: "5px 12px", flexShrink: 0 }} onClick={() => eliminarResena(prof || r.profId, r)}>🗑️</button>
                 </div>
               );
             })}
           </div>
         </div>
       )}
-      {toast&&<Toast msg={toast} onDone={()=>setToast(null)}/>}
+      {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
     </div>
   );
 
