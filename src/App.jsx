@@ -402,7 +402,7 @@ export default function App() {
       <span onClick={() => navigate("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
         <div style={{ background: OR, borderRadius: 12, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, boxShadow: "0 2px 10px rgba(232,119,34,.45)" }}>★</div>
         <div>
-          <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, lineHeight: 1.1 }}>RateMyProfe</div>
+          <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, lineHeight: 1.1 }}>ProfesoresUCSUR</div>
           <div style={{ color: "rgba(255,255,255,.45)", fontSize: 9, letterSpacing: 1, fontWeight: 600 }}>CIENTÍFICA DEL SUR</div>
         </div>
       </span>
@@ -754,7 +754,7 @@ export default function App() {
         <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
           <button className="btn btn-ghost" onClick={() => navigate("home")} style={{ fontSize: 13, padding: "7px 14px" }}>← Volver</button>
           <button className="btn btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }}
-            onClick={() => { const url = window.location.href; window.open(`https://wa.me/?text=${encodeURIComponent(`¿Conoces a ${selProf.nombre}? Mira sus reseñas en RateMyProfe 👇\n${url}`)}`, "_blank"); }}>
+            onClick={() => { const url = window.location.href; window.open(`https://wa.me/?text=${encodeURIComponent(`¿Conoces a ${selProf.nombre}? Mira sus reseñas en ProfesoresUCSUR 👇\n${url}`)}`, "_blank"); }}>
             📲 Compartir
           </button>
         </div>
