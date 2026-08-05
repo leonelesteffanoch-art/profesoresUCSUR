@@ -24,11 +24,13 @@ export const FAC_EMOJI = {
 export const FACULTADES = ["Todas", "Ciencias de la Arquitectura", "Ciencias Biológicas", "Ciencias de la Comunicación y Creatividad", "Ciencias Empresariales", "Ciencias de la Ingenieria", "Ciencias de la Salud", "Ciencias Políticas y Derecho", "Ciencias de la Educación"];
 export const FACULTADES_FORM = FACULTADES.filter(f => f !== "Todas");
 
+export const SEMESTRES = ["2026-1", "2025-2", "2025-1", "2024-2", "2024-1", "2023-2", "2023-1", "2022-2", "2022-1", "Anterior"];
+
 export const CRIT = ["claridad", "puntualidad", "trato", "examenes"];
 export const CRIT_LABEL = { claridad: "Claridad", puntualidad: "Puntualidad", trato: "Trato", examenes: "Exámenes" };
 export const CRIT_ICON = { claridad: "💡", puntualidad: "⏰", trato: "🤝", examenes: "📝" };
 
-export const FORM_EMPTY = { texto: "", claridad: 0, puntualidad: 0, trato: 0, examenes: 0, facultadAlumno: "", carrera: "", ciclo: "" };
+export const FORM_EMPTY = { texto: "", claridad: 0, puntualidad: 0, trato: 0, examenes: 0, facultadAlumno: "", carrera: "", ciclo: "", semestre: "" };
 export const ADD_EMPTY = { nombre: "", facultad: "Ciencias de la Ingenieria", curso: "", bio: "" };
 
 export const FRASES_INICIO = [

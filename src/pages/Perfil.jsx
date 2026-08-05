@@ -1,5 +1,6 @@
 import { useNavigate as useRouterNav } from "react-router-dom";
-import { FACULTADES_FORM, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, OR, BL, CRIT, CRIT_LABEL, CRIT_ICON } from "../constants.js";
+import { Helmet } from "react-helmet-async";
+import { FACULTADES_FORM, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, OR, BL, CRIT, CRIT_LABEL, CRIT_ICON, SEMESTRES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
@@ -28,6 +29,11 @@ export const Perfil = ({
 
   return (
     <div style={{ maxWidth: 780, margin: "0 auto", padding: "24px 16px 64px" }}>
+      <Helmet>
+        <title>{selProf.nombre} | ProfesoresUCSUR</title>
+        <meta name="description" content={`Lee las reseñas de ${selProf.nombre}, profesor de la facultad de ${selProf.facultad} en la Universidad Científica del Sur.`} />
+      </Helmet>
+      
       <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
         <button className="btn btn-ghost" onClick={() => routerNav(-1)} style={{ fontSize: 13, padding: "8px 16px" }}>← Volver</button>
         <button className="btn btn-ghost" style={{ fontSize: 13, padding: "8px 16px", color: "#059669" }}
@@ -144,6 +150,14 @@ export const Perfil = ({
             ))}
           </div>
         </div>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🗓️ Semestre cursado</label>
+          <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={form.semestre || ""}
+            onChange={e => setForm(prev => ({ ...prev, semestre: e.target.value }))}>
+            <option value="">No especificar</option>
+            {SEMESTRES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
 
         {/* Comentario */}
         <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>TU OPINIÓN <span style={{ color: OR }}>*</span></div>
@@ -190,6 +204,7 @@ export const Perfil = ({
                     <span>🕐 {formatFecha(r.createdAt)}</span>
                     {r.carrera && <span>· 🎓 {r.carrera}</span>}
                     {r.ciclo && <span>· 📅 Ciclo {r.ciclo}</span>}
+                    {r.semestre && <span>· 🗓️ {r.semestre}</span>}
                   </div>
                 </div>
               </div>

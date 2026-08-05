@@ -52,6 +52,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
         facultadAlumno: form.facultadAlumno || "",
         carrera: form.carrera || "",
         ciclo: form.ciclo || "",
+        semestre: form.semestre || "",
         util: 0, noUtil: 0, createdAt: serverTimestamp()
       };
       await addDoc(collection(db, "profesores", profId, COL_RESENAS), r);
