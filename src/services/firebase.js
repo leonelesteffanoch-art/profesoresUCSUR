@@ -1,18 +1,29 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAlh41094phxhm6NZDyzKFENmivi5ceRuI",
-  authDomain: "ratemyprofe-fea08.firebaseapp.com",
-  projectId: "ratemyprofe-fea08",
-  storageBucket: "ratemyprofe-fea08.firebasebasestorage.app",
-  messagingSenderId: "103032053506",
-  appId: "1:103032053506:web:74f887daba6bc94a6fac1b"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
 export const db = getFirestore(firebaseApp);
 export const auth = getAuth(firebaseApp);
+
+// Initialize App Check if SITE_KEY is configured
+if (import.meta.env.VITE_APP_CHECK_SITE_KEY) {
+  initializeAppCheck(firebaseApp, {
+    provider: new ReCaptchaV3Provider(import.meta.env.VITE_APP_CHECK_SITE_KEY),
+    isTokenAutoRefreshEnabled: true
+  });
+} else {
+  console.warn("Firebase App Check NO está activado. Añade VITE_APP_CHECK_SITE_KEY en tu .env");
+}
 
 export const COL_RESENAS = "resenas";

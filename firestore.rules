@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Función para verificar si es admin (tiene email, es decir, no es anónimo)
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email != null;
+    }
+
+    // Función para verificar si está logueado (incluye anónimos)
+    function isLogged() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    match /profesores/{profId} {
+      allow read: if true;
+      allow create: if isLogged() 
+                    && request.resource.data.nombre is string 
+                    && request.resource.data.nombre.size() > 0;
+      
+      // Permitir actualizar solo si es admin, o si solo se cambian rating/totalReseñas o cursos
+      allow update: if isAdmin() 
+                    || (isLogged() && request.resource.data.diff(resource.data).affectedKeys().hasAny(['rating', 'totalReseñas', 'cursos']));
+      
+      allow delete: if isAdmin();
+
+      match /resenas/{resenaId} {
+        allow read: if true;
+        allow create: if isLogged() 
+                      && request.resource.data.texto is string 
+                      && request.resource.data.texto.size() <= 500
+                      && request.resource.data.criterios.claridad >= 1
+                      && request.resource.data.criterios.claridad <= 5
+                      && request.resource.data.criterios.puntualidad >= 1
+                      && request.resource.data.criterios.puntualidad <= 5
+                      && request.resource.data.criterios.trato >= 1
+                      && request.resource.data.criterios.trato <= 5
+                      && request.resource.data.criterios.examenes >= 1
+                      && request.resource.data.criterios.examenes <= 5;
+        
+        allow update: if isAdmin() 
+                      || (isLogged() && request.resource.data.diff(resource.data).affectedKeys().hasAny(['util', 'noUtil']));
+        
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /reportes/{reporteId} {
+      allow create: if isLogged();
+      allow read, update, delete: if isAdmin();
+    }
+    
+    match /config/carreras {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

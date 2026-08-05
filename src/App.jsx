@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
 import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { db, auth, COL_RESENAS } from "./services/firebase.js";
 import { FORM_EMPTY, ADD_EMPTY, FRASES_INICIO, CRIT } from "./constants.js";
 import { calcRating, similarity } from "./utils/helpers.js";
@@ -207,7 +207,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, user => setAdminUser(user));
+    const unsub = onAuthStateChanged(auth, user => {
+      if (user) {
+        if (!user.isAnonymous) setAdminUser(user);
+        else setAdminUser(null);
+      } else {
+        setAdminUser(null);
+        signInAnonymously(auth).catch(e => console.error("Error en auth anónimo", e));
+      }
+    });
     return () => unsub();
   }, []);
 
