@@ -12,6 +12,12 @@
   --text-light: #8a99b0;
   --card-bg: rgba(255, 255, 255, 0.95);
   --border-color: #e2eaf5;
+  --input-bg: #fafcff;
+  --input-border: #d8e3ef;
+  --ghost-bg: #f0f4fa;
+  --ghost-bg-hover: #e2eaf5;
+  --ghost-text: #3a4a60;
+  --ghost-border-hover: #c8d5e8;
 }
 
 [data-theme="dark"] {
@@ -25,6 +31,12 @@
   --dark-blue: #1e40af;
   --light-blue: #1e3a5f;
   --primary-orange: #f59e0b;
+  --input-bg: rgba(15, 23, 42, 0.6);
+  --input-border: #334155;
+  --ghost-bg: rgba(255, 255, 255, 0.05);
+  --ghost-bg-hover: rgba(255, 255, 255, 0.1);
+  --ghost-text: #f1f5f9;
+  --ghost-border-hover: rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-track {
@@ -126,31 +138,31 @@ body {
 }
 
 .btn-ghost {
-  background: #f0f4fa;
-  color: #3a4a60;
+  background: var(--ghost-bg);
+  color: var(--ghost-text);
   border: 1.5px solid var(--border-color);
 }
 .btn-ghost:hover {
-  background: #e2eaf5;
-  border-color: #c8d5e8;
+  background: var(--ghost-bg-hover);
+  border-color: var(--ghost-border-hover);
 }
 
 .btn-red {
-  background: #fef2f2;
-  color: #DC2626;
-  border: 1px solid #fecaca;
+  background: rgba(220, 38, 38, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(220, 38, 38, 0.2);
 }
 .btn-red:hover {
-  background: #fee2e2;
+  background: rgba(220, 38, 38, 0.15);
 }
 
 .btn-green {
-  background: #d1fae5;
-  color: #059669;
-  border: 1px solid #6ee7b7;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 .btn-green:hover {
-  background: #a7f3d0;
+  background: rgba(16, 185, 129, 0.15);
 }
 
 .btn-cta {
@@ -179,11 +191,11 @@ body {
   width: 100%;
   padding: 12px 16px;
   border-radius: 12px;
-  border: 1.5px solid #d8e3ef;
+  border: 1.5px solid var(--input-border);
   font-size: 14px;
   font-family: inherit;
   transition: border 0.2s, box-shadow 0.2s;
-  background: #fafcff;
+  background: var(--input-bg);
   color: var(--text-dark);
 }
 .input:focus {
@@ -196,12 +208,12 @@ body {
   min-height: 110px;
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1.5px solid #d8e3ef;
+  border: 1.5px solid var(--input-border);
   font-size: 14px;
   resize: vertical;
   font-family: inherit;
   transition: border 0.2s, box-shadow 0.2s;
-  background: #fafcff;
+  background: var(--input-bg);
   color: var(--text-dark);
 }
 .textarea:focus {
