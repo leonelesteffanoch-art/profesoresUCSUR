@@ -1,51 +1,113 @@
+import { useState } from "react";
 import { B, BD, OR } from "../constants.js";
+import { ThemeToggle } from "./UI/ThemeToggle.jsx";
 
-export const Header = ({ page, navigate }) => (
-  <div style={{ 
-    background: `linear-gradient(135deg, ${BD} 0%, ${B} 100%)`, 
-    padding: "0 20px", 
-    display: "flex", 
-    alignItems: "center", 
-    gap: 10, 
-    height: 64, 
-    boxShadow: "0 4px 24px rgba(12,68,124,.4)", 
-    position: "sticky", 
-    top: 0, 
-    zIndex: 100 
-  }}>
-    <span onClick={() => navigate("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-      <div style={{ 
-        background: OR, 
-        borderRadius: 14, 
-        width: 40, 
-        height: 40, 
+export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const links = [
+    ["home", "🏠", "Inicio"], 
+    ["ranking", "🏆", "Ranking"], 
+    ["agregar", "➕", "Agregar profe"], 
+    ["admin", "⚙️", "Admin"]
+  ];
+
+  const handleNav = (p) => {
+    navigate(p);
+    setMenuOpen(false);
+  };
+
+  return (
+    <>
+      <header style={{ 
+        background: `linear-gradient(135deg, ${BD} 0%, ${B} 100%)`, 
+        padding: "0 20px", 
         display: "flex", 
         alignItems: "center", 
-        justifyContent: "center", 
-        fontSize: 22, 
-        boxShadow: "0 4px 12px rgba(232,119,34,.4)" 
-      }}>★</div>
-      <div>
-        <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, lineHeight: 1.1 }}>ProfesoresUCSUR</div>
-        <div style={{ color: "rgba(255,255,255,.6)", fontSize: 10, letterSpacing: 1.5, fontWeight: 700 }}>CIENTÍFICA DEL SUR</div>
-      </div>
-    </span>
-    <span style={{ flex: 1 }} />
-    <nav style={{ display: "flex", gap: 4, overflowX: "auto", flexShrink: 1, minWidth: 0, paddingRight: 4 }}>
-      {[
-        ["home", "🏠 Inicio"], 
-        ["ranking", "🏆 Ranking"], 
-        ["agregar", "➕ Agregar profe"], 
-        ["admin", "⚙️"]
-      ].map(([p, l]) => (
-        <span 
-          key={p} 
-          className={`nav-link${page === p ? " active" : ""}`} 
-          onClick={() => navigate(p)}
-        >
-          {l}
+        gap: 10, 
+        height: 64, 
+        boxShadow: "0 4px 24px rgba(12,68,124,.4)", 
+        position: "sticky", 
+        top: 0, 
+        zIndex: 100 
+      }}>
+        <span onClick={() => handleNav("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }} aria-label="Ir a inicio">
+          <div style={{ 
+            background: OR, 
+            borderRadius: 14, 
+            width: 40, 
+            height: 40, 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            fontSize: 22, 
+            boxShadow: "0 4px 12px rgba(232,119,34,.4)" 
+          }}>★</div>
+          <div>
+            <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, lineHeight: 1.1 }}>ProfesoresUCSUR</div>
+            <div style={{ color: "rgba(255,255,255,.6)", fontSize: 10, letterSpacing: 1.5, fontWeight: 700 }}>CIENTÍFICA DEL SUR</div>
+          </div>
         </span>
-      ))}
-    </nav>
-  </div>
-);
+        <span style={{ flex: 1 }} />
+        
+        <ThemeToggle isDark={darkMode} onToggle={() => setDarkMode(d => !d)} />
+
+        {/* Desktop nav */}
+        <nav className="desktop-nav">
+          {links.map(([p, icon, label]) => (
+            <span 
+              key={p} 
+              className={`nav-link${page === p ? " active" : ""}`} 
+              onClick={() => handleNav(p)}
+            >
+              {icon} {label}
+            </span>
+          ))}
+        </nav>
+
+        {/* Mobile hamburger */}
+        <button className="hamburger-btn" onClick={() => setMenuOpen(true)} aria-label="Abrir menú">
+          ☰
+        </button>
+      </header>
+
+      {/* Mobile drawer overlay */}
+      <div className={`mobile-menu-overlay${menuOpen ? " open" : ""}`} onClick={() => setMenuOpen(false)} />
+      <div className={`mobile-drawer${menuOpen ? " open" : ""}`}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ background: OR, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>★</div>
+            <span style={{ fontWeight: 800, fontSize: 15, color: "var(--text-dark)" }}>ProfesoresUCSUR</span>
+          </div>
+          <button 
+            onClick={() => setMenuOpen(false)} 
+            style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "var(--text-muted)", padding: 4 }}
+            aria-label="Cerrar menú"
+          >
+            ✕
+          </button>
+        </div>
+        {links.map(([p, icon, label]) => (
+          <div 
+            key={p} 
+            className={`mobile-nav-link${page === p ? " active" : ""}`}
+            onClick={() => handleNav(p)}
+          >
+            <span style={{ fontSize: 20 }}>{icon}</span>
+            <span>{label}</span>
+          </div>
+        ))}
+        <div style={{ marginTop: "auto", paddingTop: 24, borderTop: "1px solid var(--border-color)" }}>
+          <div 
+            className="mobile-nav-link" 
+            onClick={() => setDarkMode(d => !d)} 
+            style={{ color: "var(--text-muted)" }}
+          >
+            <span style={{ fontSize: 20 }}>{darkMode ? "☀️" : "🌙"}</span>
+            <span>{darkMode ? "Modo claro" : "Modo oscuro"}</span>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};

@@ -1,3 +1,4 @@
+import { useNavigate as useRouterNav } from "react-router-dom";
 import { FACULTADES_FORM, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, OR, BL, CRIT, CRIT_LABEL, CRIT_ICON } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
@@ -22,12 +23,13 @@ export const Perfil = ({
   reportarResena,
   formRef
 }) => {
+  const routerNav = useRouterNav();
   if (!selProf) return null;
 
   return (
     <div style={{ maxWidth: 780, margin: "0 auto", padding: "24px 16px 64px" }}>
       <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-        <button className="btn btn-ghost" onClick={() => navigate("home")} style={{ fontSize: 13, padding: "8px 16px" }}>← Volver</button>
+        <button className="btn btn-ghost" onClick={() => routerNav(-1)} style={{ fontSize: 13, padding: "8px 16px" }}>← Volver</button>
         <button className="btn btn-ghost" style={{ fontSize: 13, padding: "8px 16px", color: "#059669" }}
           onClick={() => { const url = window.location.href; window.open(`https://wa.me/?text=${encodeURIComponent(`¿Conoces a ${selProf.nombre}? Mira sus reseñas en ProfesoresUCSUR 👇\n${url}`)}`, "_blank"); }}>
           📲 Compartir por WhatsApp
@@ -145,8 +147,12 @@ export const Perfil = ({
 
         {/* Comentario */}
         <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>TU OPINIÓN <span style={{ color: OR }}>*</span></div>
-        <textarea className="textarea" style={{ fontSize: 14, padding: 16 }} value={form.texto} onChange={e => setForm(prev => ({ ...prev, texto: e.target.value }))} placeholder="Cuéntales a otros alumnos cómo es este profesor: sus clases, su trato, los exámenes..." />
-        {formErr && <div style={{ color: "#DC2626", fontSize: 13, marginTop: 12, background: "#fef2f2", padding: "10px 16px", borderRadius: 12, border: "1px solid #fecaca", fontWeight: 600 }}>{formErr}</div>}
+        <textarea className="textarea" style={{ fontSize: 14, padding: 16 }} value={form.texto} onChange={e => { if (e.target.value.length <= 500) setForm(prev => ({ ...prev, texto: e.target.value })); }} placeholder="Cuéntales a otros alumnos cómo es este profesor: sus clases, su trato, los exámenes..." maxLength={500} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+          <span style={{ fontSize: 12, color: form.texto.length >= 450 ? "#DC2626" : "var(--text-light)", fontWeight: 600, transition: "color .2s" }}>{form.texto.length} / 500</span>
+          {form.texto.length < 20 && form.texto.length > 0 && <span style={{ fontSize: 12, color: OR, fontWeight: 600 }}>Mínimo 20 caracteres</span>}
+        </div>
+        {formErr && <div style={{ color: "#DC2626", fontSize: 13, marginTop: 8, background: "#fef2f2", padding: "10px 16px", borderRadius: 12, border: "1px solid #fecaca", fontWeight: 600 }}>{formErr}</div>}
         <button className="btn-cta" onClick={submitResena} style={{ marginTop: 20, width: "100%", display: "block", textAlign: "center", fontSize: 16, padding: 16 }}>
           🔒 Publicar reseña anónima
         </button>

@@ -1,7 +1,9 @@
-import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD } from "../constants.js";
+import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
+import { AnimatedCounter } from "../components/UI/AnimatedCounter.jsx";
+import { SkeletonCard } from "../components/UI/SkeletonCard.jsx";
 
 export const Home = ({
   fraseInicio,
@@ -20,6 +22,8 @@ export const Home = ({
     .filter(p => facFiltro === "Todas" || p.facultad === facFiltro)
     .sort((a, b) => sortBy === "rating" ? (b.rating || 0) - (a.rating || 0) : (b.totalReseñas || 0) - (a.totalReseñas || 0));
 
+  const totalResenas = profesores.reduce((t, p) => t + (p.totalReseñas || 0), 0);
+
   return (
     <>
       {/* Hero */}
@@ -33,18 +37,20 @@ export const Home = ({
           <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, marginBottom: 10, lineHeight: 1.25, letterSpacing: "-.5px" }}>¿Qué profesor te tocó este ciclo?</h1>
           <p style={{ color: "rgba(255,255,255,.7)", fontSize: 15, marginBottom: 26, fontWeight: 500 }}>{fraseInicio}</p>
           <div style={{ display: "flex", gap: 10, background: "rgba(255,255,255,.15)", borderRadius: 16, padding: 8, border: "1px solid rgba(255,255,255,.15)", boxShadow: "0 8px 32px rgba(0,0,0,0.1)" }}>
-            <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar por nombre o curso..." style={{ flex: 1, border: "none", background: "rgba(255,255,255,.98)", fontSize: 15, padding: "14px 18px" }} />
+            <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar por nombre o curso..." aria-label="Buscar por nombre o curso" style={{ flex: 1, border: "none", background: "rgba(255,255,255,.98)", fontSize: 15, padding: "14px 18px" }} />
           </div>
-          {/* Stats bar */}
+          {/* Animated Stats bar */}
           <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
             {[
               { n: profesores.length, l: "profesores", i: "👨‍🏫" }, 
-              { n: profesores.reduce((t, p) => t + (p.totalReseñas || 0), 0), l: "reseñas", i: "💬" }, 
+              { n: totalResenas, l: "reseñas", i: "💬" }, 
               { n: FACULTADES.length - 1, l: "facultades", i: "🏫" }
             ].map(s => (
               <div key={s.l} style={{ background: "rgba(255,255,255,.12)", borderRadius: 12, padding: "8px 16px", display: "flex", gap: 8, alignItems: "center", border: "1px solid rgba(255,255,255,.08)" }}>
                 <span style={{ fontSize: 18 }}>{s.i}</span>
-                <span style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>{s.n}</span>
+                <span style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>
+                  <AnimatedCounter end={s.n} duration={1200} />
+                </span>
                 <span style={{ color: "rgba(255,255,255,.65)", fontSize: 13, fontWeight: 500 }}>{s.l}</span>
               </div>
             ))}
@@ -72,26 +78,20 @@ export const Home = ({
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             {FACULTADES.map(f => (
               <button key={f} onClick={() => setFacFiltro(f)}
+                aria-pressed={facFiltro === f}
                 style={{ 
-                  padding: "6px 14px", 
-                  borderRadius: 20, 
-                  fontSize: 13, 
-                  cursor: "pointer", 
-                  fontWeight: 700, 
-                  border: "1.5px solid", 
-                  transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", 
-                  whiteSpace: "nowrap", 
-                  flexShrink: 0, 
+                  padding: "6px 14px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontWeight: 700, 
+                  border: "1.5px solid", transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
                   background: facFiltro === f ? (FAC_COLOR[f] || B) : "transparent", 
-                  color: facFiltro === f ? "#fff" : (FAC_COLOR[f] || "#666"), 
-                  borderColor: facFiltro === f ? (FAC_COLOR[f] || B) : (FAC_BG[f] || "#e2eaf5") 
+                  color: facFiltro === f ? "#fff" : (FAC_COLOR[f] || "var(--text-muted)"), 
+                  borderColor: facFiltro === f ? (FAC_COLOR[f] || B) : (FAC_BG[f] || "var(--border-color)") 
                 }}>
                 {f === "Todas" ? "Todas" : `${FAC_EMOJI[f] || ""} ${f}`}
               </button>
             ))}
           </div>
           <div style={{ marginLeft: "auto", flexShrink: 0 }}>
-            <select className="input" style={{ width: "auto", padding: "8px 14px", fontSize: 13, fontWeight: 600, color: "var(--text-dark)", cursor: "pointer", appearance: "none", background: "#f7f9fc" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <select className="input" style={{ width: "auto", padding: "8px 14px", fontSize: 13, fontWeight: 600, color: "var(--text-dark)", cursor: "pointer" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
               <option value="rating">⭐ Mejor calificados</option>
               <option value="resenas">💬 Más reseñas</option>
             </select>
@@ -100,7 +100,7 @@ export const Home = ({
 
         {/* Lista */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {loading && [1, 2, 3].map(i => <div key={i} className="shimmer" style={{ height: 90 }} />)}
+          {loading && <SkeletonCard count={4} />}
           {!loading && filtered.length === 0 && (
             <div className="card" style={{ padding: 64, textAlign: "center" }}>
               <div style={{ fontSize: 52, marginBottom: 16 }}>🔍</div>
@@ -113,13 +113,13 @@ export const Home = ({
           )}
           {filtered.map((p, i) => (
             <div key={p.id} className="card card-hover fade-in" onClick={() => navigate("perfil", p)}
-              style={{ padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, borderLeft: `5px solid ${FAC_COLOR[p.facultad] || B}`, animationDelay: `${i * .04}s` }}>
+              style={{ padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, borderLeft: `5px solid ${FAC_COLOR[p.facultad] || B}`, animationDelay: `${i * .04}s`, cursor: "pointer" }}>
               <Avatar name={p.nombre} fac={p.facultad} size={56} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text-dark)", marginBottom: 6 }}>{p.nombre}</div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   <span className="pill" style={{ background: FAC_BG[p.facultad] || BL, color: FAC_COLOR[p.facultad] || BD }}>{FAC_EMOJI[p.facultad] || ""} {p.facultad}</span>
-                  {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80" }}>📚 {c}</span>)}
+                  {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
                 </div>
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
