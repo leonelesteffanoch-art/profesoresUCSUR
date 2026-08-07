@@ -26,6 +26,7 @@ export const Perfil = ({
   formRef
 }) => {
   const routerNav = useRouterNav();
+  const [showReviewForm, setShowReviewForm] = useState(false);
   if (!selProf) return null;
 
   return (
@@ -73,21 +74,25 @@ export const Perfil = ({
       </div>
 
       {/* CTA Banner: dejar reseña */}
-      <div style={{ background: `linear-gradient(135deg, ${OR}, #f09040)`, borderRadius: 20, padding: "20px 24px", marginBottom: 20, display: "flex", alignItems: "center", gap: 18, boxShadow: "0 8px 32px rgba(232,119,34,.35)", cursor: "pointer", transition: "transform .2s" }}
+      <div style={{ background: `linear-gradient(135deg, ${OR}, #f09040)`, borderRadius: 20, padding: "20px 24px", marginBottom: 20, display: "flex", alignItems: "center", gap: 18, boxShadow: "0 8px 32px rgba(232,119,34,.35)", cursor: "pointer", transition: "transform .2s", flexWrap: "wrap" }}
         onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-        onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}>
+        onClick={() => {
+          setShowReviewForm(prev => !prev);
+          setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+        }}>
         <div style={{ fontSize: 32 }}>✍️</div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 200 }}>
           <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 4 }}>¿Tuviste a {selProf.nombre.split(" ")[0]}?</div>
           <div style={{ color: "rgba(255,255,255,.85)", fontSize: 13, fontWeight: 500 }}>Deja tu reseña anónima y ayuda a otros estudiantes.</div>
         </div>
-        <div style={{ background: "rgba(255,255,255,.25)", borderRadius: 12, padding: "10px 18px", color: "#fff", fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
-          Calificar ↓
+        <div style={{ background: "rgba(255,255,255,.25)", borderRadius: 12, padding: "10px 18px", color: "#fff", fontWeight: 800, fontSize: 14, flexShrink: 0, width: "100%", textAlign: "center", maxWidth: 120 }}>
+          {showReviewForm ? "Cerrar ✕" : "Calificar ↓"}
         </div>
       </div>
 
       {/* Formulario de reseña */}
-      <div ref={formRef} className="card" style={{ padding: 28, marginBottom: 20, border: `2px solid ${OR}40`, boxShadow: `0 8px 32px ${OR}15` }}>
+      {showReviewForm && (
+      <div ref={formRef} className="card fade-in" style={{ padding: 28, marginBottom: 20, border: `2px solid ${OR}40`, boxShadow: `0 8px 32px ${OR}15` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
           <div style={{ background: `${OR}18`, borderRadius: 12, padding: "8px 12px", fontSize: 20 }}>✍️</div>
           <div>
@@ -98,7 +103,7 @@ export const Perfil = ({
 
         {/* Criterios */}
         <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>CALIFICA ESTOS CRITERIOS <span style={{ color: OR }}>*</span></div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 }}>
           {CRIT.map(c => (
             <div key={c} className={`crit-box${form[c] > 0 ? " active" : ""}`}>
               <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 8, fontWeight: 700 }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}</div>
@@ -110,7 +115,7 @@ export const Perfil = ({
 
         {/* Facultad y Carrera libres */}
         <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>TU INFORMACIÓN <span style={{ fontWeight: 500 }}>(opcional)</span></div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 18 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 18 }}>
           <div>
             <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🏫 Tu facultad</label>
             <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={form.facultadAlumno}
@@ -181,6 +186,7 @@ export const Perfil = ({
           🔒 Publicar reseña anónima
         </button>
       </div>
+      )}
 
       {/* Reseñas */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>

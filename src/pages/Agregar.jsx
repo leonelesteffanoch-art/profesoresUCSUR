@@ -9,6 +9,7 @@ export const Agregar = ({
   addProf, setAddProf,
   addProfSel, setAddProfSel,
   addCurso, setAddCurso,
+  addCursoSede, setAddCursoSede,
   submitAddProf,
   submitAgregarCurso,
   carreras
@@ -275,9 +276,14 @@ export const Agregar = ({
               <div>
                 <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Nuevo curso a agregar</label>
                 <input className="input" value={addCurso} onChange={e => setAddCurso(e.target.value)} placeholder="Ej. Cálculo III" autoComplete="off" />
-                <div style={{ fontSize: 11, color: "var(--text-light)", marginTop: 6, fontWeight: 500, lineHeight: 1.4 }}>
+                <div style={{ fontSize: 11, color: "var(--text-light)", marginTop: 6, fontWeight: 500, lineHeight: 1.4, marginBottom: 12 }}>
                   <span style={{ color: OR, fontWeight: 800 }}>Nota:</span> Por favor ingresar cursos 1 por 1 si no se encuentran asignados al docente y con buena ortografía.
                 </div>
+                <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Actualizar Sede (Opcional)</label>
+                <select className="input" style={{ cursor: "pointer", appearance: "none" }} value={addCursoSede} onChange={e => setAddCursoSede(e.target.value)}>
+                  <option value="">Mantener sede actual ({addProfSel.sede || "No especificada"})</option>
+                  {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
               <button className="btn btn-orange" onClick={submitAgregarCurso} style={{ width: "100%", padding: "14px", fontSize: 15, marginTop: 8 }}>
                 Agregar curso a {addProfSel.nombre.split(" ")[0]}

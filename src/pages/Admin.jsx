@@ -2,7 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../services/firebase.js";
-import { B, BD, OR, CRIT } from "../constants.js";
+import { B, BD, OR, CRIT, SEDES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { formatFecha, avg, ratingColor } from "../utils/helpers.js";
@@ -37,6 +37,14 @@ export const Admin = ({
   const [editProfDetailsId, setEditProfDetailsId] = useState(null);
   const [editProfDetailsNombre, setEditProfDetailsNombre] = useState("");
   const [editProfDetailsBio, setEditProfDetailsBio] = useState("");
+  const [editProfDetailsSede, setEditProfDetailsSede] = useState("");
+
+  const [busquedaAdmin, setBusquedaAdmin] = useState("");
+  const [facFiltroAdmin, setFacFiltroAdmin] = useState("Todas");
+
+  const filteredProfesores = profesores
+    .filter(p => p.nombre?.toLowerCase().includes(busquedaAdmin.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busquedaAdmin.toLowerCase())))
+    .filter(p => facFiltroAdmin === "Todas" || p.facultad === facFiltroAdmin);
 
   const handleCrearNoticia = async () => {
     if (!notiTitulo.trim() || !notiContenido.trim()) {
@@ -195,9 +203,17 @@ export const Admin = ({
         </div>
       </>}
 
-      <h3 style={{ fontSize: 18, fontWeight: 800, color: BD, marginBottom: 16 }}>👨‍🏫 Administrar profesores</h3>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 800, color: BD }}>👨‍🏫 Administrar profesores</h3>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input className="input" value={busquedaAdmin} onChange={e => setBusquedaAdmin(e.target.value)} placeholder="Buscar profesor o curso..." style={{ padding: "8px 14px", fontSize: 13 }} />
+          <select className="input" style={{ width: "auto", padding: "8px 14px", fontSize: 13, cursor: "pointer" }} value={facFiltroAdmin} onChange={e => setFacFiltroAdmin(e.target.value)}>
+            {FACULTADES.map(f => <option key={f} value={f}>{f}</option>)}
+          </select>
+        </div>
+      </div>
       <div className="card" style={{ padding: "8px 0", marginBottom: 32 }}>
-        {profesores.map((p, i) => (
+        {filteredProfesores.map((p, i) => (
           <div key={p.id} style={{ borderTop: i > 0 ? "1px solid var(--border-color)" : "none" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 22px", flexWrap: "wrap" }}>
               <Avatar name={p.nombre} fac={p.facultad} size={48} />
@@ -207,9 +223,15 @@ export const Admin = ({
                     <input className="input" value={editProfDetailsNombre} onChange={e => setEditProfDetailsNombre(e.target.value)} placeholder="Nombre del profesor" style={{ fontSize: 15, fontWeight: 800, padding: "8px 12px" }} />
                     <textarea className="textarea" value={editProfDetailsBio} onChange={e => setEditProfDetailsBio(e.target.value)} placeholder="Biografía / Descripción" style={{ fontSize: 13, padding: "8px 12px", minHeight: 60 }} />
                     <div style={{ display: "flex", gap: 8 }}>
+                      <select className="input" style={{ fontSize: 13, padding: "8px 12px", width: "100%" }} value={editProfDetailsSede} onChange={e => setEditProfDetailsSede(e.target.value)}>
+                        <option value="">Sin Sede</option>
+                        {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
                       <button className="btn btn-green" style={{ fontSize: 12, padding: "6px 12px" }} onClick={async () => {
                         if (!editProfDetailsNombre.trim()) { showToast("⚠️ Escribe un nombre."); return; }
-                        await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio);
+                        await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio, editProfDetailsSede);
                         setEditProfDetailsId(null);
                       }}>Guardar</button>
                       <button className="btn btn-ghost" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => setEditProfDetailsId(null)}>Cancelar</button>
@@ -223,6 +245,7 @@ export const Admin = ({
                         setEditProfDetailsId(p.id);
                         setEditProfDetailsNombre(p.nombre);
                         setEditProfDetailsBio(p.bio || "");
+                        setEditProfDetailsSede(p.sede || "");
                       }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14 }} title="Editar nombre y bio">✏️</button>
                     </div>
                     {p.bio && <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 4 }}>{p.bio}</div>}

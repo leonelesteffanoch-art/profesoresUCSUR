@@ -86,7 +86,10 @@ export const Home = ({
                       {isNew && <span style={{ background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 800, padding: "2px 6px", borderRadius: 10, letterSpacing: 0.5, flexShrink: 0 }}>NUEVO</span>}
                     </div>
                     <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 10, fontWeight: 500 }}>🗓️ {formatFechaExacta(n.createdAt)}</div>
-                    <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{n.contenido}</p>
+                    <p className="custom-scrollbar" style={{ 
+                      fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, 
+                      whiteSpace: "pre-wrap", maxHeight: 120, overflowY: "auto", paddingRight: 4 
+                    }}>{n.contenido}</p>
                   </div>
                 </div>
               );
@@ -137,10 +140,10 @@ export const Home = ({
         </div>
 
         {/* Lista */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
           {loading && <SkeletonCard count={4} />}
           {!loading && filtered.length === 0 && (
-            <div className="card" style={{ padding: 64, textAlign: "center" }}>
+            <div className="card" style={{ padding: 64, textAlign: "center", gridColumn: "1 / -1" }}>
               <div style={{ fontSize: 52, marginBottom: 16 }}>🔍</div>
               <div style={{ color: "var(--text-muted)", fontSize: 15, marginBottom: 24, fontWeight: 500 }}>No se encontraron profesores con esos filtros.</div>
               <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>

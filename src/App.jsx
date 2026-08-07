@@ -135,6 +135,7 @@ export default function App() {
   const [addMode, setAddMode] = useState("nuevo");
   const [addProfSel, setAddProfSel] = useState(null);
   const [addCurso, setAddCurso] = useState("");
+  const [addCursoSede, setAddCursoSede] = useState("");
   const [toast, setToast] = useState(null);
   const [rankTab, setRankTab] = useState("top");
   const [loading, setLoading] = useState(true);
@@ -328,20 +329,23 @@ export default function App() {
     }
   };
 
-  const submitAgregarCurso = async () => {
+  const submitAgregarCurso = async (nuevaSede) => {
     if (!addProfSel) return;
     if (!addCurso.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
     if ((addProfSel.cursos || []).map(c => c.toLowerCase()).includes(addCurso.trim().toLowerCase())) { showToast("⚠️ Ese curso ya está registrado."); return; }
     try {
-      await updateDoc(doc(db, "profesores", addProfSel.id), { cursos: [...(addProfSel.cursos || []), addCurso.trim()] });
+      const updates = { cursos: [...(addProfSel.cursos || []), addCurso.trim()] };
+      if (nuevaSede && nuevaSede !== addProfSel.sede) updates.sede = nuevaSede;
+      
+      await updateDoc(doc(db, "profesores", addProfSel.id), updates);
       showToast(`✅ Curso "${addCurso.trim()}" agregado a ${addProfSel.nombre}`);
       setTimeout(() => nav("/"), 1200);
     } catch (e) { showToast("❌ Error al agregar el curso."); }
   };
 
-  const editarProfesor = async (id, nombre, bio) => {
+  const editarProfesor = async (id, nombre, bio, sede) => {
     try {
-      await updateDoc(doc(db, "profesores", id), { nombre: nombre.trim(), bio: bio.trim() });
+      await updateDoc(doc(db, "profesores", id), { nombre: nombre.trim(), bio: bio.trim(), sede });
       showToast("✅ Profesor actualizado.");
     } catch (e) {
       showToast("❌ Error al editar el profesor.");
@@ -466,8 +470,9 @@ export default function App() {
                 addProf={addProf} setAddProf={setAddProf}
                 addProfSel={addProfSel} setAddProfSel={setAddProfSel}
                 addCurso={addCurso} setAddCurso={setAddCurso}
+                addCursoSede={addCursoSede} setAddCursoSede={setAddCursoSede}
                 submitAddProf={submitAddProf}
-                submitAgregarCurso={submitAgregarCurso}
+                submitAgregarCurso={() => submitAgregarCurso(addCursoSede)}
                 carreras={carreras}
               />
             </div>
