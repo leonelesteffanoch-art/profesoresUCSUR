@@ -131,7 +131,7 @@ export default function App() {
   const [carreras, setCarreras] = useState({});
   const [busqueda, setBusqueda] = useState("");
   const [facFiltro, setFacFiltro] = useState("Todas");
-  const [sedeFiltro, setSedeFiltro] = useState("Todas");
+  const [sedeFiltro, setSedeFiltro] = useState([]);
   const [sortBy, setSortBy] = useState("aleatorio");
   const [addProf, setAddProf] = useState(ADD_EMPTY);
   const [addMode, setAddMode] = useState("nuevo");

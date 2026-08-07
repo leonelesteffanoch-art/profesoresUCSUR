@@ -507,6 +507,8 @@ export const Admin = ({
                 });
               });
 
+              const uppercaseProfs = profesores.filter(p => p.nombre && p.nombre.trim().length > 0 && p.nombre.toUpperCase() === p.nombre && /[A-Z]/.test(p.nombre));
+
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
                   <div>
@@ -545,6 +547,29 @@ export const Admin = ({
                             </div>
                             <button className="btn btn-red" onClick={() => eliminarCurso(d.prof, d.courses[1])} style={{ padding: "6px 12px", fontSize: 12 }}>
                               Borrar "{d.courses[1]}"
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>🔠 Nombres en Mayúsculas ({uppercaseProfs.length})</h5>
+                    {uppercaseProfs.length === 0 ? (
+                      <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No se encontraron profesores con nombres en mayúsculas.</div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {uppercaseProfs.map((p, i) => (
+                          <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <div>
+                              <div style={{ fontSize: 14, fontWeight: 800 }}>{p.nombre}</div>
+                            </div>
+                            <button className="btn btn-blue" onClick={() => {
+                              const capitalized = p.nombre.toLowerCase().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+                              editarProfesor(p.id, capitalized, p.bio || "", p.sede || "", p.alerta || "");
+                            }} style={{ padding: "6px 12px", fontSize: 12 }}>
+                              Corregir a Título
                             </button>
                           </div>
                         ))}

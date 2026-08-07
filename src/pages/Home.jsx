@@ -28,7 +28,7 @@ export const Home = ({
   const filtered = profesores
     .filter(p => normalizeText(p.nombre).includes(normalizeText(busqueda)) || p.cursos?.some(c => normalizeText(c).includes(normalizeText(busqueda))))
     .filter(p => facFiltro === "Todas" || p.facultad === facFiltro)
-    .filter(p => sedeFiltro === "Todas" || p.sede === sedeFiltro)
+    .filter(p => sedeFiltro.length === 0 || (p.sede && sedeFiltro.includes(p.sede)))
     .sort((a, b) => {
       if (sortBy === "alfabetico") return a.nombre.localeCompare(b.nombre);
       if (sortBy === "aleatorio") return (b._randomOrder || 0) - (a._randomOrder || 0);
@@ -81,14 +81,9 @@ export const Home = ({
       }}>
         <div style={{ maxWidth: 780, margin: "0 auto", padding: "0 16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div className="search-bar-row">
               <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar profe o curso..." aria-label="Buscar" style={{ flex: 1, minWidth: 200, fontSize: 15, padding: "12px 18px", borderRadius: 16 }} />
               
-              <select className="input" style={{ width: "auto", padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer", flexShrink: 0 }} value={sedeFiltro} onChange={e => setSedeFiltro(e.target.value)}>
-                <option value="Todas">📍 Todas las Sedes</option>
-                {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-
               <select className="input" style={{ width: "auto", padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer", flexShrink: 0 }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
                 <option value="populares">🔥 Populares</option>
                 <option value="rating">⭐ Mejor rating</option>
@@ -111,6 +106,32 @@ export const Home = ({
                   {f === "Todas" ? "Todas" : `${FAC_EMOJI[f] || ""} ${f}`}
                 </button>
               ))}
+            </div>
+
+            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }}>
+              {SEDES.map(s => {
+                const isSelected = sedeFiltro.includes(s);
+                return (
+                  <button key={s} onClick={() => {
+                      if (isSelected) setSedeFiltro(sedeFiltro.filter(x => x !== s));
+                      else setSedeFiltro([...sedeFiltro, s]);
+                    }}
+                    aria-pressed={isSelected}
+                    style={{ 
+                      padding: "6px 14px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontWeight: 700, 
+                      border: "1.5px solid", transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
+                      background: isSelected ? B : "transparent", 
+                      color: isSelected ? "#fff" : "var(--text-muted)", 
+                      borderColor: isSelected ? B : "var(--border-color)" 
+                    }}>
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ fontSize: 12, color: "var(--text-light)", fontStyle: "italic", marginTop: -4 }}>
+              *Nota: No todos los profesores tienen una sede registrada.
             </div>
           </div>
         </div>

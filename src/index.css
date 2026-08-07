@@ -635,6 +635,26 @@ body {
   .hamburger-btn { display: flex; }
   .desktop-nav { display: none; }
 }
+
+.search-bar-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+@media (max-width: 640px) {
+  .search-bar-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .search-bar-row > input {
+    width: 100%;
+    min-width: unset !important;
+  }
+  .search-bar-row > select {
+    flex: 1;
+    width: 100% !important;
+  }
+}
 .mobile-nav-link {
   display: flex;
   align-items: center;
