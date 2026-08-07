@@ -685,6 +685,32 @@ body {
   color: var(--primary-blue);
   background: var(--light-blue);
 }
+
+.feedback-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-direction: row-reverse;
+}
+.feedback-answers {
+  flex: 1;
+  min-width: 300px;
+}
+.feedback-form {
+  flex: 1;
+  max-width: 450px;
+  min-width: 300px;
+}
+
+@media (max-width: 768px) {
+  .feedback-layout {
+    flex-direction: column;
+  }
+  .feedback-form {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 640px) {
   .mobile-bottom-nav { display: flex; }
   body { padding-bottom: 70px; }

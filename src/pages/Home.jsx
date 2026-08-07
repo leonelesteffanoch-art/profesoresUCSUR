@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
@@ -20,6 +21,8 @@ export const Home = ({
   noticias,
   feedbacks
 }) => {
+  const [currentNewsIdx, setCurrentNewsIdx] = useState(0);
+
   const filtered = profesores
     .filter(p => p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busqueda.toLowerCase())))
     .filter(p => facFiltro === "Todas" || p.facultad === facFiltro)
@@ -65,36 +68,63 @@ export const Home = ({
         </div>
       </div>
 
-      {/* Feed de Noticias */}
+      {/* Feed de Noticias (Slider) */}
       {noticias && noticias.length > 0 && (
         <div style={{ maxWidth: 780, margin: "24px auto 0", padding: "0 16px" }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-            <span>📢</span> Novedades de la plataforma
-          </h3>
-          <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16, scrollSnapType: "x mandatory", scrollBehavior: "smooth" }} className="hide-scrollbar">
-            {noticias.map(n => {
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 8, margin: 0 }}>
+              <span>📢</span> Novedades de la plataforma
+            </h3>
+            
+            {noticias.length > 1 && (
+              <div style={{ display: "flex", gap: 8 }}>
+                <button 
+                  className="btn btn-ghost" 
+                  style={{ padding: "4px 10px", fontSize: 14, background: "var(--border-color)", border: "none" }}
+                  onClick={() => setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1))}
+                >
+                  ←
+                </button>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "flex", alignItems: "center", width: 40, justifyContent: "center" }}>
+                  {currentNewsIdx + 1} / {noticias.length}
+                </div>
+                <button 
+                  className="btn btn-ghost" 
+                  style={{ padding: "4px 10px", fontSize: 14, background: "var(--border-color)", border: "none" }}
+                  onClick={() => setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1))}
+                >
+                  →
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <div style={{ position: "relative" }}>
+            {(() => {
+              const n = noticias[currentNewsIdx];
+              if (!n) return null;
               const isNew = n.createdAt && (new Date() - n.createdAt.toDate()) < 3 * 24 * 60 * 60 * 1000;
               return (
-                <div key={n.id} className="card fade-in" style={{ borderLeft: `4px solid ${B}`, overflow: "hidden", minWidth: 300, maxWidth: 350, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column" }}>
+                <div key={n.id} className="card fade-in" style={{ borderLeft: `4px solid ${B}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                   {n.imagenUrl && (
-                    <div style={{ width: "100%", height: 160, overflow: "hidden", flexShrink: 0 }}>
+                    <div style={{ width: "100%", height: 180, overflow: "hidden", flexShrink: 0 }}>
                       <img src={n.imagenUrl} alt={n.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
                   )}
-                  <div style={{ padding: "16px 20px", flex: 1, display: "flex", flexDirection: "column" }}>
+                  <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)", flex: 1 }}>{n.titulo}</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", flex: 1 }}>{n.titulo}</div>
                       {isNew && <span style={{ background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 800, padding: "2px 6px", borderRadius: 10, letterSpacing: 0.5, flexShrink: 0 }}>NUEVO</span>}
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 10, fontWeight: 500 }}>🗓️ {formatFechaExacta(n.createdAt)}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 12, fontWeight: 500 }}>🗓️ {formatFechaExacta(n.createdAt)}</div>
                     <p className="custom-scrollbar" style={{ 
                       fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, 
-                      whiteSpace: "pre-wrap", maxHeight: 120, overflowY: "auto", paddingRight: 4 
+                      whiteSpace: "pre-wrap", maxHeight: 150, overflowY: "auto", paddingRight: 4 
                     }}>{n.contenido}</p>
                   </div>
                 </div>
               );
-            })}
+            })()}
           </div>
         </div>
       )}
