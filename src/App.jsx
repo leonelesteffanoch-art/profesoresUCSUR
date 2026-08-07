@@ -100,6 +100,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
   return (
     <div className="page-transition">
       <Perfil
+        profesores={profesores}
         selProf={selProf}
         navigate={(p, prof) => {
           if (p === "home") nav("/");
@@ -431,6 +432,13 @@ export default function App() {
     } catch (e) { showToast("❌ Error."); }
   };
 
+  const responderFeedback = async (id, respuesta) => {
+    try {
+      await updateDoc(doc(db, "feedbacks", id), { respuesta, esPublico: true, respondidoAt: serverTimestamp() });
+      showToast("💬 Respuesta publicada en el inicio.");
+    } catch (e) { showToast("❌ Error al publicar."); }
+  };
+
   return (
     <div style={{ fontFamily: "Plus Jakarta Sans, sans-serif", minHeight: "100vh", background: "var(--bg-main)", display: "flex", flexDirection: "column" }}>
       <Header page={currentPage} navigate={navigate} darkMode={darkMode} setDarkMode={setDarkMode} />
@@ -448,6 +456,7 @@ export default function App() {
                 loading={loading}
                 navigate={navigate}
                 noticias={noticias}
+                feedbacks={feedbacks}
               />
             </div>
           } />
@@ -520,6 +529,7 @@ export default function App() {
                 crearNoticia={crearNoticia}
                 eliminarNoticia={eliminarNoticia}
                 eliminarFeedback={eliminarFeedback}
+                responderFeedback={responderFeedback}
                 editarProfesor={editarProfesor}
                 editCursoProf={editCursoProf} setEditCursoProf={setEditCursoProf}
                 editCursoVal={editCursoVal} setEditCursoVal={setEditCursoVal}

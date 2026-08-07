@@ -109,6 +109,16 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["agregar", "➕", "Agregar"]].map(([p, icon, label]) => (
+          <div key={p} className={`bottom-nav-item${page === p ? " active" : ""}`} onClick={() => navigate(p === "home" ? "/" : `/${p}`)}>
+            <span style={{ fontSize: 20, marginBottom: 2 }}>{icon}</span>
+            <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>
+          </div>
+        ))}
+      </nav>
     </>
   );
 };

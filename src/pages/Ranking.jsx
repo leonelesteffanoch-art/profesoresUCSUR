@@ -1,22 +1,43 @@
+import { useState, useMemo } from "react";
 import { B, BD, OR } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 
 export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
-  const withR = profesores.filter(p => p.totalReseñas > 0);
+  const [cursoFiltro, setCursoFiltro] = useState("");
+
+  const todosLosCursos = useMemo(() => {
+    const cursos = new Set();
+    profesores.forEach(p => p.cursos?.forEach(c => cursos.add(c)));
+    return Array.from(cursos).sort();
+  }, [profesores]);
+
+  const profesoresFiltrados = useMemo(() => {
+    if (!cursoFiltro) return profesores;
+    return profesores.filter(p => p.cursos?.includes(cursoFiltro));
+  }, [profesores, cursoFiltro]);
+
+  const withR = profesoresFiltrados.filter(p => p.totalReseñas > 0);
   const top = [...withR].sort((a, b) => b.rating - a.rating);
   const worst = [...withR].sort((a, b) => a.rating - b.rating);
-  const popular = [...profesores].sort((a, b) => (b.totalReseñas || 0) - (a.totalReseñas || 0));
-  const maxR = Math.max(...profesores.map(p => p.totalReseñas || 0), 1);
+  const popular = [...profesoresFiltrados].sort((a, b) => (b.totalReseñas || 0) - (a.totalReseñas || 0));
+  const maxR = Math.max(...profesoresFiltrados.map(p => p.totalReseñas || 0), 1);
   const podio = top.slice(0, 3);
   const ord = [1, 0, 2], heights = ["70px", "90px", "50px"], medals = ["🥇", "🥈", "🥉"];
 
   return (
     <div style={{ maxWidth: 780, margin: "0 auto", padding: "28px 16px 64px" }}>
       <h2 style={{ fontSize: 28, fontWeight: 800, color: BD, marginBottom: 6 }}>🏆 Ranking de profesores</h2>
-      <p style={{ fontSize: 14, color: "var(--text-light)", marginBottom: 28, fontWeight: 500 }}>Basado en calificaciones reales de estudiantes.</p>
+      <p style={{ fontSize: 14, color: "var(--text-light)", marginBottom: 20, fontWeight: 500 }}>Basado en calificaciones reales de estudiantes.</p>
       
-      <div style={{ display: "flex", gap: 6, background: "var(--border-color)", borderRadius: 14, padding: 6, width: "fit-content", marginBottom: 28 }}>
+      <div style={{ marginBottom: 28 }}>
+        <select className="input" style={{ width: "100%", maxWidth: 300, padding: "12px 16px", fontSize: 14, cursor: "pointer", fontWeight: 600 }} value={cursoFiltro} onChange={e => setCursoFiltro(e.target.value)}>
+          <option value="">🏫 Todos los cursos</option>
+          {todosLosCursos.map(c => <option key={c} value={c}>📚 {c}</option>)}
+        </select>
+      </div>
+
+      <div style={{ display: "flex", gap: 6, background: "var(--border-color)", borderRadius: 14, padding: 6, width: "fit-content", marginBottom: 28, overflowX: "auto", maxWidth: "100%" }}>
         {[["top", "⭐ Top rated"], ["worst", "💔 Peor rated"], ["popular", "🔥 Populares"]].map(([k, l]) => (
           <button key={k} className="tab" onClick={() => setRankTab(k)} 
             style={{ 
@@ -73,6 +94,12 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
           ))}
         </div>
       </>}
+
+      {rankTab === "top" && podio.length === 0 && (
+        <div style={{ textAlign: "center", padding: "64px 20px", color: "var(--text-light)", fontSize: 15, fontWeight: 600 }}>
+          No hay suficientes profesores con reseñas en este curso.
+        </div>
+      )}
 
       {rankTab === "worst" && <div className="card" style={{ padding: "8px 0" }}>
         {worst.map((p, i) => (

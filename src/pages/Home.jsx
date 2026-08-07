@@ -17,7 +17,8 @@ export const Home = ({
   setSortBy,
   loading,
   navigate,
-  noticias
+  noticias,
+  feedbacks
 }) => {
   const filtered = profesores
     .filter(p => p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busqueda.toLowerCase())))
@@ -94,6 +95,30 @@ export const Home = ({
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Sugerencias respondidas de la comunidad */}
+      {(feedbacks || []).filter(f => f.respuesta && f.esPublico).length > 0 && (
+        <div style={{ maxWidth: 780, margin: "24px auto 0", padding: "0 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <span style={{ fontSize: 24, background: "#fef08a", borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>💡</span>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-dark)", letterSpacing: -0.5 }}>Respuestas a la comunidad</h2>
+          </div>
+          
+          <div className="custom-scrollbar" style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 12, snapType: "x mandatory" }}>
+            {(feedbacks || []).filter(f => f.respuesta && f.esPublico).sort((a, b) => (b.respondidoAt?.seconds || 0) - (a.respondidoAt?.seconds || 0)).map(f => (
+              <div key={f.id} className="card" style={{ minWidth: 280, maxWidth: 320, padding: 20, borderLeft: "4px solid #eab308", flexShrink: 0, scrollSnapAlign: "start" }}>
+                <div style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 8, fontStyle: "italic" }}>
+                  "{f.mensaje.length > 80 ? f.mensaje.substring(0, 80) + "..." : f.mensaje}"
+                </div>
+                <div style={{ background: "#fef8c4", padding: 12, borderRadius: 8, borderLeft: "2px solid #ca8a04" }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: "#a16207", marginBottom: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>Respuesta Oficial</div>
+                  <div style={{ fontSize: 14, color: "#713f12", lineHeight: 1.5, maxHeight: 100, overflowY: "auto" }} className="custom-scrollbar">{f.respuesta}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

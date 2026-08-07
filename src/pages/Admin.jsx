@@ -26,6 +26,7 @@ export const Admin = ({
   crearNoticia,
   eliminarNoticia,
   eliminarFeedback,
+  responderFeedback,
   editarProfesor,
   editCursoProf, setEditCursoProf,
   editCursoVal, setEditCursoVal
@@ -33,6 +34,9 @@ export const Admin = ({
   const [notiTitulo, setNotiTitulo] = useState("");
   const [notiContenido, setNotiContenido] = useState("");
   const [notiImagen, setNotiImagen] = useState("");
+
+  const [replyFeedbackId, setReplyFeedbackId] = useState(null);
+  const [replyFeedbackText, setReplyFeedbackText] = useState("");
 
   const [editProfDetailsId, setEditProfDetailsId] = useState(null);
   const [editProfDetailsNombre, setEditProfDetailsNombre] = useState("");
@@ -195,9 +199,32 @@ export const Admin = ({
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: 15, color: "#2d3a50", lineHeight: 1.6, marginBottom: 8, whiteSpace: "pre-wrap" }}>{f.mensaje}</p>
                 {f.contacto && <div style={{ fontSize: 13, color: "var(--text-dark)", fontWeight: 600, marginBottom: 4 }}>Contacto: {f.contacto}</div>}
-                <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500 }}>🕐 {formatFecha(f.createdAt)}</div>
+                <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500, marginBottom: f.respuesta ? 8 : 0 }}>🕐 {formatFecha(f.createdAt)}</div>
+                {f.respuesta && (
+                  <div style={{ background: "#fef8c4", padding: 12, borderRadius: 8, marginTop: 8, borderLeft: "3px solid #eab308" }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: "#a16207", marginBottom: 4 }}>Tu respuesta (Pública):</div>
+                    <div style={{ fontSize: 14, color: "#713f12" }}>{f.respuesta}</div>
+                  </div>
+                )}
+                
+                {replyFeedbackId === f.id && !f.respuesta && (
+                  <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                    <textarea className="textarea" placeholder="Escribe tu respuesta pública..." value={replyFeedbackText} onChange={e => setReplyFeedbackText(e.target.value)} style={{ fontSize: 13, padding: 12, minHeight: 60 }} />
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button className="btn btn-green" style={{ fontSize: 12, padding: "6px 12px" }} onClick={async () => {
+                        if (!replyFeedbackText.trim()) return;
+                        await responderFeedback(f.id, replyFeedbackText);
+                        setReplyFeedbackId(null);
+                      }}>Publicar</button>
+                      <button className="btn btn-ghost" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => setReplyFeedbackId(null)}>Cancelar</button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => eliminarFeedback(f.id)}>🗑️ Descartar</button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {!f.respuesta && replyFeedbackId !== f.id && <button className="btn btn-blue" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => { setReplyFeedbackId(f.id); setReplyFeedbackText(""); }}>💬 Responder</button>}
+                <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => eliminarFeedback(f.id)}>🗑️ {f.respuesta ? "Eliminar" : "Descartar"}</button>
+              </div>
             </div>
           ))}
         </div>

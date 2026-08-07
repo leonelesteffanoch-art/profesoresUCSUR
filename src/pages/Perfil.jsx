@@ -10,6 +10,7 @@ import { Divider } from "../components/UI/Divider.jsx";
 import { formatFecha, avg, ratingColor, ratingLabel } from "../utils/helpers.js";
 
 export const Perfil = ({
+  profesores,
   selProf,
   navigate,
   allR,
@@ -29,6 +30,14 @@ export const Perfil = ({
   const routerNav = useRouterNav();
   const [showReviewForm, setShowReviewForm] = useState(false);
   if (!selProf) return null;
+
+  const getCourseRank = (curso) => {
+    if (!profesores || (selProf.totalReseñas || 0) === 0) return null;
+    const teaching = profesores.filter(p => (p.cursos || []).includes(curso) && (p.totalReseñas || 0) > 0);
+    teaching.sort((a, b) => b.rating - a.rating);
+    const idx = teaching.findIndex(p => p.id === selProf.id);
+    return (idx !== -1 && idx < 5) ? idx + 1 : null;
+  };
 
   return (
     <div style={{ maxWidth: 780, margin: "0 auto", padding: "24px 16px 64px" }}>
@@ -57,7 +66,15 @@ export const Perfil = ({
                   {FAC_EMOJI[selProf.facultad] || ""} {selProf.facultad}
                 </span>
                 {selProf.sede && <span className="pill" style={{ background: "#f3f4f6", color: "#374151", fontSize: 13, padding: "6px 14px" }}>📍 Sede {selProf.sede}</span>}
-                {(selProf.cursos || []).map(c => <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80", fontSize: 13, padding: "6px 14px" }}>📚 {c}</span>)}
+                {(selProf.cursos || []).map(c => {
+                  const rank = getCourseRank(c);
+                  return (
+                    <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80", fontSize: 13, padding: "6px 14px" }}>
+                      📚 {c} 
+                      {rank && <span style={{ color: rank === 1 ? "#d97706" : rank === 2 ? "#64748b" : rank === 3 ? "#92400e" : B, fontWeight: 800, marginLeft: 4 }} title={`Top #${rank} en ${c}`}>#{rank}</span>}
+                    </span>
+                  );
+                })}
               </div>
               {selProf.bio && <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{selProf.bio}</p>}
             </div>
