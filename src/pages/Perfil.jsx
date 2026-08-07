@@ -54,6 +54,19 @@ export const Perfil = ({
         </button>
       </div>
 
+      {/* Alerta de moderación */}
+      {selProf.alerta && (
+        <div className="card fade-in" style={{ marginBottom: 20, padding: 16, borderLeft: "5px solid #DC2626", background: "#fef2f2" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <span style={{ fontSize: 28 }}>⚠️</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#DC2626", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 }}>Alerta de Moderación</div>
+              <div style={{ fontSize: 14, color: "#991b1b", lineHeight: 1.5, fontWeight: 500 }}>{selProf.alerta}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Card del profe */}
       <div className="card" style={{ marginBottom: 20, overflow: "hidden", border: `1.5px solid ${FAC_COLOR[selProf.facultad] || B}30` }}>
         <div style={{ background: `linear-gradient(135deg, ${FAC_COLOR[selProf.facultad] || BD}15, ${OR}08)`, padding: "28px 28px 20px" }}>

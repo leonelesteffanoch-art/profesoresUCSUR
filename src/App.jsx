@@ -344,9 +344,9 @@ export default function App() {
     } catch (e) { showToast("❌ Error al agregar el curso."); }
   };
 
-  const editarProfesor = async (id, nombre, bio, sede) => {
+  const editarProfesor = async (id, nombre, bio, sede, alerta = "") => {
     try {
-      await updateDoc(doc(db, "profesores", id), { nombre: nombre.trim(), bio: bio.trim(), sede });
+      await updateDoc(doc(db, "profesores", id), { nombre: nombre.trim(), bio: bio.trim(), sede, alerta: alerta.trim() });
       showToast("✅ Profesor actualizado.");
     } catch (e) {
       showToast("❌ Error al editar el profesor.");

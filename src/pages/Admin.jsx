@@ -44,6 +44,7 @@ export const Admin = ({
   const [editProfDetailsNombre, setEditProfDetailsNombre] = useState("");
   const [editProfDetailsBio, setEditProfDetailsBio] = useState("");
   const [editProfDetailsSede, setEditProfDetailsSede] = useState("");
+  const [editProfDetailsAlerta, setEditProfDetailsAlerta] = useState("");
 
   // Filtros Profesores
   const [busquedaAdmin, setBusquedaAdmin] = useState("");
@@ -238,6 +239,7 @@ export const Admin = ({
                       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8 }}>
                         <input className="input" value={editProfDetailsNombre} onChange={e => setEditProfDetailsNombre(e.target.value)} placeholder="Nombre del profesor" style={{ fontSize: 15, fontWeight: 800, padding: "8px 12px" }} />
                         <textarea className="textarea" value={editProfDetailsBio} onChange={e => setEditProfDetailsBio(e.target.value)} placeholder="Biografía / Descripción" style={{ fontSize: 13, padding: "8px 12px", minHeight: 60 }} />
+                        <input className="input" value={editProfDetailsAlerta} onChange={e => setEditProfDetailsAlerta(e.target.value)} placeholder="⚠️ Alerta (Ej: Bajo investigación por reseñas falsas)" style={{ fontSize: 13, padding: "8px 12px", border: "1px solid #fecaca", background: "#fef2f2" }} />
                         <div style={{ display: "flex", gap: 8 }}>
                           <select className="input" style={{ fontSize: 13, padding: "8px 12px", width: "100%" }} value={editProfDetailsSede} onChange={e => setEditProfDetailsSede(e.target.value)}>
                             <option value="">Sin Sede</option>
@@ -247,7 +249,7 @@ export const Admin = ({
                         <div style={{ display: "flex", gap: 8 }}>
                           <button className="btn btn-green" style={{ fontSize: 12, padding: "6px 12px" }} onClick={async () => {
                             if (!editProfDetailsNombre.trim()) { showToast("⚠️ Escribe un nombre."); return; }
-                            await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio, editProfDetailsSede);
+                            await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio, editProfDetailsSede, editProfDetailsAlerta);
                             setEditProfDetailsId(null);
                           }}>Guardar</button>
                           <button className="btn btn-ghost" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => setEditProfDetailsId(null)}>Cancelar</button>
@@ -262,8 +264,10 @@ export const Admin = ({
                             setEditProfDetailsNombre(p.nombre);
                             setEditProfDetailsBio(p.bio || "");
                             setEditProfDetailsSede(p.sede || "");
-                          }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14 }} title="Editar nombre y bio">✏️</button>
+                            setEditProfDetailsAlerta(p.alerta || "");
+                          }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14 }} title="Editar profe">✏️</button>
                         </div>
+                        {p.alerta && <div style={{ fontSize: 12, fontWeight: 700, color: "#DC2626", background: "#fef2f2", padding: "4px 8px", borderRadius: 6, marginBottom: 4, display: "inline-block" }}>⚠️ {p.alerta}</div>}
                         {p.bio && <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 4 }}>{p.bio}</div>}
                         <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>{p.facultad} {p.sede && `· Sede ${p.sede}`} · {p.totalReseñas || 0} reseñas</div>
                       </>
