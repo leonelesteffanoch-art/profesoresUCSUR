@@ -82,9 +82,9 @@ export const Home = ({
         <div style={{ maxWidth: 780, margin: "0 auto", padding: "0 16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div className="search-bar-row">
-              <input className="input custom-search-input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar profe o curso..." aria-label="Buscar" style={{ flex: 1, minWidth: 200, fontSize: 16, padding: "14px 18px", borderRadius: 16, fontWeight: 600, border: "2px solid var(--primary-blue)" }} />
+              <input className="input search-input custom-search-input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar profe o curso..." aria-label="Buscar" style={{ fontSize: 16, padding: "14px 18px", borderRadius: 16, fontWeight: 600, border: "2px solid var(--primary-blue)" }} />
               
-              <select className="input" style={{ width: "auto", padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer", flexShrink: 0 }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+              <select className="input search-select" style={{ padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
                 <option value="populares">🔥 Populares</option>
                 <option value="rating">⭐ Mejor rating</option>
                 <option value="alfabetico">🔤 Alfabético</option>

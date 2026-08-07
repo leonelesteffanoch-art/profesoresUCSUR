@@ -84,13 +84,13 @@ export const Agregar = ({
             </div>
             <div>
               <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Facultad del profesor</label>
-              <select className="input" style={{ cursor: "pointer", appearance: "none" }} value={addProf.facultad} onChange={e => setAddProf(p => ({ ...p, facultad: e.target.value }))}>
+              <select className="input" style={{ cursor: "pointer" }} value={addProf.facultad} onChange={e => setAddProf(p => ({ ...p, facultad: e.target.value }))}>
                 {FACULTADES.filter(f => f !== "Todas").map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
             <div>
               <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Sede</label>
-              <select className="input" style={{ cursor: "pointer", appearance: "none" }} value={addProf.sede} onChange={e => setAddProf(p => ({ ...p, sede: e.target.value }))}>
+              <select className="input" style={{ cursor: "pointer" }} value={addProf.sede} onChange={e => setAddProf(p => ({ ...p, sede: e.target.value }))}>
                 {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
@@ -168,7 +168,7 @@ export const Agregar = ({
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-muted)", display: "block", marginBottom: 4, fontWeight: 700 }}>🏫 Tu facultad</label>
-                <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer", appearance: "none" }} value={addProf.facultadAlumno}
+                <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.facultadAlumno}
                   onChange={e => setAddProf(prev => ({ ...prev, facultadAlumno: e.target.value, carrera: "" }))}>
                   <option value="">Facultad...</option>
                   {FACULTADES_FORM.map(f => <option key={f} value={f}>{f}</option>)}
@@ -176,7 +176,7 @@ export const Agregar = ({
               </div>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-muted)", display: "block", marginBottom: 4, fontWeight: 700 }}>🎓 Tu carrera</label>
-                <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer", appearance: "none" }} value={addProf.carrera}
+                <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.carrera}
                   onChange={e => {
                     const val = e.target.value;
                     const matchFac = Object.keys(carreras || {}).find(fac => carreras[fac].includes(val));
@@ -195,7 +195,7 @@ export const Agregar = ({
             <div style={{ marginBottom: 16, display: "flex", gap: 10 }}>
               <div style={{ flex: 1 }}>
                 <label style={{ fontSize: 12, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>📅 Ciclo cursado con docente</label>
-                <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer", appearance: "none" }} value={addProf.ciclo || ""}
+                <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.ciclo || ""}
                   onChange={e => setAddProf(prev => ({ ...prev, ciclo: e.target.value }))}>
                   <option value="">No especificar</option>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => <option key={n} value={String(n)}>Ciclo {n}</option>)}
@@ -203,7 +203,7 @@ export const Agregar = ({
               </div>
               <div style={{ flex: 1 }}>
                 <label style={{ fontSize: 12, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🗓️ Semestre</label>
-                <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer", appearance: "none" }} value={addProf.semestre || ""}
+                <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.semestre || ""}
                   onChange={e => setAddProf(prev => ({ ...prev, semestre: e.target.value }))}>
                   <option value="">No especificar</option>
                   {SEMESTRES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -280,7 +280,7 @@ export const Agregar = ({
                   <span style={{ color: OR, fontWeight: 800 }}>Nota:</span> Por favor ingresar cursos 1 por 1 si no se encuentran asignados al docente y con buena ortografía.
                 </div>
                 <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Actualizar Sede (Opcional)</label>
-                <select className="input" style={{ cursor: "pointer", appearance: "none" }} value={addCursoSede} onChange={e => setAddCursoSede(e.target.value)}>
+                <select className="input" style={{ cursor: "pointer" }} value={addCursoSede} onChange={e => setAddCursoSede(e.target.value)}>
                   <option value="">Mantener sede actual ({addProfSel.sede || "No especificada"})</option>
                   {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>

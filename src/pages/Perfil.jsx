@@ -149,7 +149,7 @@ export const Perfil = ({
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 18 }}>
           <div>
             <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🏫 Tu facultad</label>
-            <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={form.facultadAlumno}
+            <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer" }} value={form.facultadAlumno}
               onChange={e => setForm(prev => ({ ...prev, facultadAlumno: e.target.value, carrera: "" }))}>
               <option value="">Selecciona tu facultad</option>
               {FACULTADES_FORM.map(f => <option key={f} value={f}>{f}</option>)}
@@ -157,7 +157,7 @@ export const Perfil = ({
           </div>
           <div>
             <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🎓 Tu carrera</label>
-            <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={form.carrera}
+            <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer" }} value={form.carrera}
               onChange={e => {
                 const val = e.target.value;
                 const matchFac = Object.keys(carreras || {}).find(fac => carreras[fac].includes(val));
@@ -174,7 +174,7 @@ export const Perfil = ({
           </div>
         </div>
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 8, fontWeight: 700 }}>📅 Tu ciclo actual</label>
+          <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 8, fontWeight: 700 }}>📅 Ciclo en el que llevaste el curso</label>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
               <button key={n} onClick={() => setForm(prev => ({ ...prev, ciclo: prev.ciclo === String(n) ? "" : String(n) }))}
@@ -250,7 +250,7 @@ export const Perfil = ({
                   <div style={{ fontSize: 12, color: "var(--text-light)", display: "flex", gap: 8, flexWrap: "wrap", marginTop: 2, fontWeight: 500 }}>
                     <span>🕐 {formatFecha(r.createdAt)}</span>
                     {r.carrera && <span>· 🎓 {r.carrera}</span>}
-                    {r.ciclo && <span>· 📅 Ciclo {r.ciclo}</span>}
+                    {r.ciclo && <span>· 📅 Llevado en el ciclo {r.ciclo}</span>}
                     {r.semestre && <span>· 🗓️ {r.semestre}</span>}
                   </div>
                 </div>
