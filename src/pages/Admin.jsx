@@ -157,7 +157,7 @@ export const Admin = ({
       </div>
 
       {/* TABS NAVEGACIÓN */}
-      <div style={{ display: "flex", gap: 10, overflowX: "auto", marginBottom: 32, paddingBottom: 8 }} className="hide-scrollbar">
+      <div style={{ display: "flex", gap: 10, overflowX: "auto", marginBottom: 32, paddingBottom: 12 }}>
         {[
           { id: "dashboard", label: "📊 Resumen" },
           { id: "profesores", label: "👨‍🏫 Profesores" },

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL } from "../constants.js";
+import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL, SEDES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
@@ -14,6 +14,8 @@ export const Home = ({
   profesores,
   facFiltro,
   setFacFiltro,
+  sedeFiltro,
+  setSedeFiltro,
   sortBy,
   setSortBy,
   loading,
@@ -26,7 +28,9 @@ export const Home = ({
   const filtered = profesores
     .filter(p => normalizeText(p.nombre).includes(normalizeText(busqueda)) || p.cursos?.some(c => normalizeText(c).includes(normalizeText(busqueda))))
     .filter(p => facFiltro === "Todas" || p.facultad === facFiltro)
+    .filter(p => sedeFiltro === "Todas" || p.sede === sedeFiltro)
     .sort((a, b) => {
+      if (sortBy === "alfabetico") return a.nombre.localeCompare(b.nombre);
       if (sortBy === "aleatorio") return (b._randomOrder || 0) - (a._randomOrder || 0);
       if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
       return (b.totalReseñas || 0) - (a.totalReseñas || 0);
@@ -77,11 +81,18 @@ export const Home = ({
       }}>
         <div style={{ maxWidth: 780, margin: "0 auto", padding: "0 16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "flex", gap: 10 }}>
-              <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar profe o curso..." aria-label="Buscar" style={{ flex: 1, fontSize: 15, padding: "12px 18px", borderRadius: 16 }} />
-              <select className="input" style={{ width: "auto", padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar profe o curso..." aria-label="Buscar" style={{ flex: 1, minWidth: 200, fontSize: 15, padding: "12px 18px", borderRadius: 16 }} />
+              
+              <select className="input" style={{ width: "auto", padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer", flexShrink: 0 }} value={sedeFiltro} onChange={e => setSedeFiltro(e.target.value)}>
+                <option value="Todas">📍 Todas las Sedes</option>
+                {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+
+              <select className="input" style={{ width: "auto", padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer", flexShrink: 0 }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
                 <option value="populares">🔥 Populares</option>
                 <option value="rating">⭐ Mejor rating</option>
+                <option value="alfabetico">🔤 Alfabético</option>
                 <option value="aleatorio">🎲 Aleatorio</option>
               </select>
             </div>
