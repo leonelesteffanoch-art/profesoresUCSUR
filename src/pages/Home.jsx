@@ -4,7 +4,7 @@ import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
 import { AnimatedCounter } from "../components/UI/AnimatedCounter.jsx";
 import { SkeletonCard } from "../components/UI/SkeletonCard.jsx";
-import { formatFecha } from "../utils/helpers.js";
+import { formatFechaExacta } from "../utils/helpers.js";
 
 export const Home = ({
   fraseInicio,
@@ -66,23 +66,23 @@ export const Home = ({
           <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
             <span>📢</span> Novedades de la plataforma
           </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16, scrollSnapType: "x mandatory", scrollBehavior: "smooth" }} className="hide-scrollbar">
             {noticias.map(n => {
               const isNew = n.createdAt && (new Date() - n.createdAt.toDate()) < 3 * 24 * 60 * 60 * 1000;
               return (
-                <div key={n.id} className="card fade-in" style={{ borderLeft: `4px solid ${B}`, overflow: "hidden" }}>
+                <div key={n.id} className="card fade-in" style={{ borderLeft: `4px solid ${B}`, overflow: "hidden", minWidth: 300, maxWidth: 350, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column" }}>
                   {n.imagenUrl && (
-                    <div style={{ width: "100%", height: 180, overflow: "hidden" }}>
+                    <div style={{ width: "100%", height: 160, overflow: "hidden", flexShrink: 0 }}>
                       <img src={n.imagenUrl} alt={n.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
                   )}
-                  <div style={{ padding: "16px 20px" }}>
+                  <div style={{ padding: "16px 20px", flex: 1, display: "flex", flexDirection: "column" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)" }}>{n.titulo}</div>
-                      {isNew && <span style={{ background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 800, padding: "2px 6px", borderRadius: 10, letterSpacing: 0.5 }}>NUEVO</span>}
+                      <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)", flex: 1 }}>{n.titulo}</div>
+                      {isNew && <span style={{ background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 800, padding: "2px 6px", borderRadius: 10, letterSpacing: 0.5, flexShrink: 0 }}>NUEVO</span>}
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>🗓️ {formatFecha(n.createdAt)}</div>
-                    <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{n.contenido}</p>
+                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 10, fontWeight: 500 }}>🗓️ {formatFechaExacta(n.createdAt)}</div>
+                    <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{n.contenido}</p>
                   </div>
                 </div>
               );

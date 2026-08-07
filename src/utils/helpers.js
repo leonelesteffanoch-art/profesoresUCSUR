@@ -32,3 +32,10 @@ export const formatFecha = d => {
   return date.toLocaleDateString("es-PE", { day: "numeric", month: "short", year: "numeric" }) +
     " · " + date.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 };
+
+export const formatFechaExacta = d => {
+  if (!d) return "";
+  const date = d?.toDate ? d.toDate() : new Date(d);
+  return date.toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric" }) +
+    " a las " + date.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: true });
+};
