@@ -7,6 +7,11 @@ export const capitalizeName = name => {
   return name.toLowerCase().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 };
 
+export const normalizeText = text => {
+  if (!text) return "";
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+};
+
 export const initials = n => {
   if (!n) return "";
   return n.split(" ").map(x => x[0]).slice(0, 2).join("");
@@ -19,7 +24,7 @@ export const ratingLabel = r => r >= 4.5 ? "Excelente" : r >= 3.5 ? "Bueno" : r 
 export const calcRating = rs => rs.length ? parseFloat(avg(rs.map(x => avg(CRIT.map(c => x.criterios[c])))).toFixed(1)) : 0;
 
 export const similarity = (a, b) => {
-  a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
+  a = normalizeText(a); b = normalizeText(b);
   if (a === b) return 1;
   if (a.includes(b) || b.includes(a)) return 0.9;
   const wa = a.split(" "), wb = b.split(" ");

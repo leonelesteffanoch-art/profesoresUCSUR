@@ -4,7 +4,7 @@ import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, que
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { db, auth, COL_RESENAS } from "./services/firebase.js";
 import { FORM_EMPTY, ADD_EMPTY, FRASES_INICIO, CRIT } from "./constants.js";
-import { calcRating, similarity, capitalizeName } from "./utils/helpers.js";
+import { calcRating, similarity, capitalizeName, normalizeText } from "./utils/helpers.js";
 
 import "./index.css";
 import { Header } from "./components/Header.jsx";
@@ -334,7 +334,7 @@ export default function App() {
     if (!addProfSel) return;
     const newCurso = capitalizeName(addCurso.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if ((addProfSel.cursos || []).map(c => c.toLowerCase()).includes(newCurso.toLowerCase())) { showToast("⚠️ Ese curso ya está registrado."); return; }
+    if ((addProfSel.cursos || []).map(c => normalizeText(c)).includes(normalizeText(newCurso))) { showToast("⚠️ Ese curso ya está registrado."); return; }
     try {
       const updates = { cursos: [...(addProfSel.cursos || []), newCurso] };
       if (nuevaSede && nuevaSede !== addProfSel.sede) updates.sede = nuevaSede;
@@ -365,7 +365,7 @@ export default function App() {
   const adminAgregarCurso = async (prof) => {
     const newCurso = capitalizeName(editCursoVal.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if ((prof.cursos || []).map(c => c.toLowerCase()).includes(newCurso.toLowerCase())) { showToast("⚠️ Ese curso ya existe."); return; }
+    if ((prof.cursos || []).map(c => normalizeText(c)).includes(normalizeText(newCurso))) { showToast("⚠️ Ese curso ya existe."); return; }
     try {
       await updateDoc(doc(db, "profesores", prof.id), { cursos: [...(prof.cursos || []), newCurso] });
       setEditCursoProf(null); setEditCursoVal("");

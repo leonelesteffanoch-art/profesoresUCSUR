@@ -5,7 +5,7 @@ import { db, auth } from "../services/firebase.js";
 import { B, BD, OR, CRIT, SEDES, FACULTADES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
-import { formatFecha, avg, ratingColor } from "../utils/helpers.js";
+import { formatFecha, avg, ratingColor, normalizeText } from "../utils/helpers.js";
 
 export const Admin = ({
   adminUser,
@@ -164,7 +164,8 @@ export const Admin = ({
           { id: "resenas", label: "💬 Reseñas" },
           { id: "reportes", label: `🚨 Reportes (${reportes.length})`, alert: reportes.length > 0 },
           { id: "feedbacks", label: `💡 Sugerencias (${feedbacks?.length || 0})`, alert: (feedbacks || []).some(f => !f.respuesta) },
-          { id: "noticias", label: "📰 Noticias" }
+          { id: "noticias", label: "📰 Noticias" },
+          { id: "mantenimiento", label: "🛠️ Mantenimiento" }
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} className="tab" style={{ 
             background: activeTab === t.id ? B : "transparent",
@@ -469,6 +470,90 @@ export const Admin = ({
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* MANTENIMIENTO TAB */}
+      {activeTab === "mantenimiento" && (
+        <div className="fade-in">
+          <div className="card" style={{ padding: 24, marginBottom: 32 }}>
+            <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>🛠️ Análisis de Base de Datos</h4>
+            <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 24 }}>Aquí puedes detectar si hay profesores duplicados por diferencias de tildes o mayúsculas, y cursos duplicados en un mismo profesor.</p>
+            
+            {(() => {
+              const profDuplicates = [];
+              const normProfs = profesores.map(p => ({ ...p, normName: normalizeText(p.nombre) }));
+              for (let i = 0; i < normProfs.length; i++) {
+                for (let j = i + 1; j < normProfs.length; j++) {
+                  if (normProfs[i].normName === normProfs[j].normName) {
+                    profDuplicates.push({ p1: normProfs[i], p2: normProfs[j] });
+                  }
+                }
+              }
+
+              const courseDuplicates = [];
+              profesores.forEach(p => {
+                const cMap = {};
+                (p.cursos || []).forEach(c => {
+                  const nc = normalizeText(c);
+                  if (!cMap[nc]) cMap[nc] = [];
+                  cMap[nc].push(c);
+                });
+                Object.values(cMap).forEach(arr => {
+                  if (arr.length > 1) {
+                    courseDuplicates.push({ prof: p, courses: arr });
+                  }
+                });
+              });
+
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                  <div>
+                    <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>👨‍🏫 Profesores duplicados ({profDuplicates.length})</h5>
+                    {profDuplicates.length === 0 ? (
+                      <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No se encontraron profesores duplicados.</div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {profDuplicates.map((d, i) => (
+                          <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <div>
+                              <div style={{ fontSize: 14, fontWeight: 600 }}>1. {d.p1.nombre} <span style={{ color: "var(--text-light)", fontWeight: 400, fontSize: 12 }}>({d.p1.totalReseñas || 0} reseñas)</span></div>
+                              <div style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>2. {d.p2.nombre} <span style={{ color: "var(--text-light)", fontWeight: 400, fontSize: 12 }}>({d.p2.totalReseñas || 0} reseñas)</span></div>
+                            </div>
+                            <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
+                              <button className="btn btn-red" onClick={() => eliminarProfesor(d.p1)} style={{ padding: "6px 12px", fontSize: 12 }}>Borrar el 1</button>
+                              <button className="btn btn-red" onClick={() => eliminarProfesor(d.p2)} style={{ padding: "6px 12px", fontSize: 12 }}>Borrar el 2</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>📚 Cursos duplicados ({courseDuplicates.length})</h5>
+                    {courseDuplicates.length === 0 ? (
+                      <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No se encontraron cursos duplicados en los profesores.</div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {courseDuplicates.map((d, i) => (
+                          <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <div>
+                              <div style={{ fontSize: 14, fontWeight: 800 }}>{d.prof.nombre}</div>
+                              <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>Duplicados: {d.courses.join(" / ")}</div>
+                            </div>
+                            <button className="btn btn-red" onClick={() => eliminarCurso(d.prof, d.courses[1])} style={{ padding: "6px 12px", fontSize: 12 }}>
+                              Borrar "{d.courses[1]}"
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

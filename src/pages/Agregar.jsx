@@ -194,7 +194,7 @@ export const Agregar = ({
             </div>
             <div style={{ marginBottom: 16, display: "flex", gap: 10 }}>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 12, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>📅 Ciclo actual</label>
+                <label style={{ fontSize: 12, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>📅 Ciclo cursado con docente</label>
                 <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer", appearance: "none" }} value={addProf.ciclo || ""}
                   onChange={e => setAddProf(prev => ({ ...prev, ciclo: e.target.value }))}>
                   <option value="">No especificar</option>

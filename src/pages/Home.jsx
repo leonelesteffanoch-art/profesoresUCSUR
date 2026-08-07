@@ -5,7 +5,7 @@ import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
 import { AnimatedCounter } from "../components/UI/AnimatedCounter.jsx";
 import { SkeletonCard } from "../components/UI/SkeletonCard.jsx";
-import { formatFechaExacta } from "../utils/helpers.js";
+import { formatFechaExacta, normalizeText } from "../utils/helpers.js";
 
 export const Home = ({
   fraseInicio,
@@ -24,7 +24,7 @@ export const Home = ({
   const [currentNewsIdx, setCurrentNewsIdx] = useState(0);
 
   const filtered = profesores
-    .filter(p => p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busqueda.toLowerCase())))
+    .filter(p => normalizeText(p.nombre).includes(normalizeText(busqueda)) || p.cursos?.some(c => normalizeText(c).includes(normalizeText(busqueda))))
     .filter(p => facFiltro === "Todas" || p.facultad === facFiltro)
     .sort((a, b) => {
       if (sortBy === "aleatorio") return (b._randomOrder || 0) - (a._randomOrder || 0);
@@ -86,7 +86,7 @@ export const Home = ({
               </select>
             </div>
             
-            <div className="hide-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
+            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }}>
               {FACULTADES.map(f => (
                 <button key={f} onClick={() => setFacFiltro(f)}
                   aria-pressed={facFiltro === f}
