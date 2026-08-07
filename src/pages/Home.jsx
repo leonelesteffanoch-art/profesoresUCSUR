@@ -72,7 +72,7 @@ export const Home = ({
 
       {/* 🔍 BARRA DE BÚSQUEDA FLOTANTE (STICKY) */}
       <div style={{ 
-        position: "sticky", top: 0, zIndex: 100, 
+        position: "sticky", top: 64, zIndex: 90, 
         background: "var(--bg-main)", 
         borderBottom: "1px solid var(--border-color)", 
         padding: "16px 0",
@@ -82,7 +82,7 @@ export const Home = ({
         <div style={{ maxWidth: 780, margin: "0 auto", padding: "0 16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div className="search-bar-row">
-              <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar profe o curso..." aria-label="Buscar" style={{ flex: 1, minWidth: 200, fontSize: 15, padding: "12px 18px", borderRadius: 16 }} />
+              <input className="input custom-search-input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar profe o curso..." aria-label="Buscar" style={{ flex: 1, minWidth: 200, fontSize: 16, padding: "14px 18px", borderRadius: 16, fontWeight: 600, border: "2px solid var(--primary-blue)" }} />
               
               <select className="input" style={{ width: "auto", padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer", flexShrink: 0 }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
                 <option value="populares">🔥 Populares</option>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, deleteDoc } from "firebase/firestore";
+import { doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../services/firebase.js";
 import { B, BD, OR, CRIT, SEDES, FACULTADES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
@@ -26,6 +26,7 @@ export const Admin = ({
   crearNoticia,
   eliminarNoticia,
   eliminarFeedback,
+  destruirFeedback,
   responderFeedback,
   editarProfesor,
   editCursoProf, setEditCursoProf,
@@ -56,6 +57,10 @@ export const Admin = ({
   const [busquedaResena, setBusquedaResena] = useState("");
   const [facFiltroResena, setFacFiltroResena] = useState("Todas");
   const [ordenResena, setOrdenResena] = useState("recientes");
+  const pendingReportes = reportes.filter(r => r.estado === "pendiente");
+  const archivedReportes = reportes.filter(r => r.estado !== "pendiente");
+  const pendingFeedbacks = feedbacks?.filter(f => f.estado !== "archivado") || [];
+  const archivedFeedbacks = feedbacks?.filter(f => f.estado === "archivado") || [];
 
   const filteredProfesores = profesores
     .filter(p => p.nombre?.toLowerCase().includes(busquedaAdmin.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busquedaAdmin.toLowerCase())))
@@ -109,8 +114,8 @@ export const Admin = ({
   const handleEliminarReporte = async (rep, resena, prof) => {
     try {
       if (resena && prof) await eliminarResena(prof, resena);
-      await deleteDoc(doc(db, "reportes", rep.id));
-      showToast("🗑️ Reseña eliminada.");
+      await updateDoc(doc(db, "reportes", rep.id), { estado: "borrada" });
+      showToast("🗑️ Reseña eliminada (Reporte archivado).");
     } catch (e) {
       showToast("❌ Error al eliminar.");
     }
@@ -118,11 +123,18 @@ export const Admin = ({
 
   const handleIgnorarReporte = async (rep) => {
     try {
-      await deleteDoc(doc(db, "reportes", rep.id));
-      showToast("✅ Reporte descartado.");
+      await updateDoc(doc(db, "reportes", rep.id), { estado: "ignorada" });
+      showToast("✅ Reporte descartado (Archivado).");
     } catch (e) {
       showToast("❌ Error al descartar.");
     }
+  };
+
+  const destruirReporte = async (id) => {
+    try {
+      await deleteDoc(doc(db, "reportes", id));
+      showToast("🗑️ Reporte eliminado permanentemente.");
+    } catch (e) { showToast("❌ Error al eliminar."); }
   };
 
   if (!adminUser) {
@@ -162,10 +174,11 @@ export const Admin = ({
           { id: "dashboard", label: "📊 Resumen" },
           { id: "profesores", label: "👨‍🏫 Profesores" },
           { id: "resenas", label: "💬 Reseñas" },
-          { id: "reportes", label: `🚨 Reportes (${reportes.length})`, alert: reportes.length > 0 },
-          { id: "feedbacks", label: `💡 Sugerencias (${feedbacks?.length || 0})`, alert: (feedbacks || []).some(f => !f.respuesta) },
+          { id: "reportes", label: `🚨 Reportes (${pendingReportes.length})`, alert: pendingReportes.length > 0 },
+          { id: "feedbacks", label: `💡 Sugerencias (${pendingFeedbacks.length})`, alert: pendingFeedbacks.some(f => !f.respuesta) },
           { id: "noticias", label: "📰 Noticias" },
-          { id: "mantenimiento", label: "🛠️ Mantenimiento" }
+          { id: "mantenimiento", label: "🛠️ Mantenimiento" },
+          { id: "archivo", label: "🗃️ Historial" }
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} className="tab" style={{ 
             background: activeTab === t.id ? B : "transparent",
@@ -364,14 +377,14 @@ export const Admin = ({
       {/* REPORTES TAB */}
       {activeTab === "reportes" && (
         <div className="fade-in">
-          {reportes.length === 0 ? (
+          {pendingReportes.length === 0 ? (
             <div className="card" style={{ padding: 40, textAlign: "center", color: "var(--text-light)" }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
               <div style={{ fontSize: 16, fontWeight: 700 }}>No hay reseñas reportadas.</div>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
-              {reportes.map(rep => {
+              {pendingReportes.map(rep => {
                 const prof = profesores.find(p => p.id === rep.profId);
                 const resena = (todasResenas || []).find(r => r.id === rep.resId);
                 return (
@@ -398,14 +411,14 @@ export const Admin = ({
       {/* FEEDBACKS TAB */}
       {activeTab === "feedbacks" && (
         <div className="fade-in">
-          {(!feedbacks || feedbacks.length === 0) ? (
+          {(!pendingFeedbacks || pendingFeedbacks.length === 0) ? (
              <div className="card" style={{ padding: 40, textAlign: "center", color: "var(--text-light)" }}>
                <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
                <div style={{ fontSize: 16, fontWeight: 700 }}>El buzón de sugerencias está vacío.</div>
              </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
-              {feedbacks.map(f => (
+              {pendingFeedbacks.map(f => (
                 <div key={f.id} className="card" style={{ padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, borderLeft: f.respuesta ? "4px solid #cbd5e1" : "4px solid #fef08a", opacity: f.respuesta ? 0.7 : 1 }}>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: 15, color: "#2d3a50", lineHeight: 1.6, marginBottom: 8, whiteSpace: "pre-wrap" }}>{f.mensaje}</p>
@@ -579,6 +592,65 @@ export const Admin = ({
                 </div>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* HISTORIAL / ARCHIVO TAB */}
+      {activeTab === "archivo" && (
+        <div className="fade-in">
+          <div style={{ marginBottom: 32 }}>
+            <h5 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>🚨 Reportes Archivados ({archivedReportes.length})</h5>
+            {archivedReportes.length === 0 ? (
+              <div className="card" style={{ padding: 24, textAlign: "center", color: "var(--text-light)" }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>📭</div>
+                <div style={{ fontSize: 14 }}>No hay reportes en el historial.</div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {archivedReportes.map(rep => {
+                  return (
+                    <div key={rep.id} className="card" style={{ padding: "16px 20px", border: "1.5px solid var(--border-color)", background: "var(--ghost-bg)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: rep.estado === "borrada" ? "#DC2626" : "var(--text-muted)", marginBottom: 6, textTransform: "uppercase" }}>
+                            {rep.estado === "borrada" ? "🗑️ Reseña Borrada" : "✅ Reporte Ignorado"}
+                          </div>
+                          <p style={{ fontSize: 14, color: "var(--text-dark)", lineHeight: 1.5 }}>{rep.texto}</p>
+                          {rep.fecha && <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 6 }}>Archivado el {formatFecha(rep.fecha)}</div>}
+                        </div>
+                        <button className="btn btn-red" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => destruirReporte(rep.id)}>Destruir Permanente</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h5 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>💡 Sugerencias Archivadas ({archivedFeedbacks.length})</h5>
+            {archivedFeedbacks.length === 0 ? (
+              <div className="card" style={{ padding: 24, textAlign: "center", color: "var(--text-light)" }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>📭</div>
+                <div style={{ fontSize: 14 }}>No hay sugerencias en el historial.</div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {archivedFeedbacks.map(f => (
+                  <div key={f.id} className="card" style={{ padding: "16px 20px", border: "1.5px solid var(--border-color)", background: "var(--ghost-bg)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 14, color: "var(--text-dark)", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{f.mensaje}</p>
+                        {f.contacto && <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>Contacto: {f.contacto}</div>}
+                        <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 4 }}>Archivado el {formatFecha(f.createdAt)}</div>
+                      </div>
+                      <button className="btn btn-red" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => destruirFeedback(f.id)}>Destruir Permanente</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -430,8 +430,15 @@ export default function App() {
 
   const eliminarFeedback = async (id) => {
     try {
+      await updateDoc(doc(db, "feedbacks", id), { estado: "archivado" });
+      showToast("📦 Sugerencia archivada.");
+    } catch (e) { showToast("❌ Error."); }
+  };
+
+  const destruirFeedback = async (id) => {
+    try {
       await deleteDoc(doc(db, "feedbacks", id));
-      showToast("🗑️ Sugerencia eliminada.");
+      showToast("🗑️ Sugerencia eliminada permanentemente.");
     } catch (e) { showToast("❌ Error."); }
   };
 
@@ -531,10 +538,8 @@ export default function App() {
                 eliminarProfesor={eliminarProfesor}
                 eliminarCurso={eliminarCurso}
                 adminAgregarCurso={adminAgregarCurso}
-                crearNoticia={crearNoticia}
-                eliminarNoticia={eliminarNoticia}
-                eliminarFeedback={eliminarFeedback}
-                responderFeedback={responderFeedback}
+                crearNoticia={crearNoticia} eliminarNoticia={eliminarNoticia}
+                eliminarFeedback={eliminarFeedback} destruirFeedback={destruirFeedback} responderFeedback={responderFeedback}
                 editarProfesor={editarProfesor}
                 editCursoProf={editCursoProf} setEditCursoProf={setEditCursoProf}
                 editCursoVal={editCursoVal} setEditCursoVal={setEditCursoVal}
