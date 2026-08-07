@@ -108,9 +108,25 @@ export const Home = ({
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", paddingBottom: 8, marginTop: 4 }}>
+              {/* Botón Todas */}
+              <button onClick={() => setSedeFiltro([])}
+                aria-pressed={sedeFiltro.length === 0}
+                style={{ 
+                  padding: "6px 14px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontWeight: 700, 
+                  border: "1.5px solid", transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
+                  background: sedeFiltro.length === 0 ? "var(--text-dark)" : "transparent", 
+                  color: sedeFiltro.length === 0 ? "var(--bg-main)" : "var(--text-dark)", 
+                  borderColor: sedeFiltro.length === 0 ? "var(--text-dark)" : "var(--border-color)" 
+                }}>
+                🌍 Todas las Sedes
+              </button>
+
               {SEDES.map(s => {
                 const isSelected = sedeFiltro.includes(s);
+                const sedeColors = { "Villa": "#2563EB", "Norte": "#059669", "Aramburú": "#D97706", "Ate": "#7C3AED" };
+                const c = sedeColors[s] || B;
+                
                 return (
                   <button key={s} onClick={() => {
                       if (isSelected) setSedeFiltro(sedeFiltro.filter(x => x !== s));
@@ -120,11 +136,11 @@ export const Home = ({
                     style={{ 
                       padding: "6px 14px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontWeight: 700, 
                       border: "1.5px solid", transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
-                      background: isSelected ? B : "transparent", 
+                      background: isSelected ? c : "transparent", 
                       color: isSelected ? "#fff" : "var(--text-muted)", 
-                      borderColor: isSelected ? B : "var(--border-color)" 
+                      borderColor: isSelected ? c : "var(--border-color)" 
                     }}>
-                    {s}
+                    📍 {s}
                   </button>
                 );
               })}
