@@ -121,11 +121,11 @@ export const Perfil = ({
 
         {/* Criterios */}
         <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>CALIFICA ESTOS CRITERIOS <span style={{ color: OR }}>*</span></div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 12, marginBottom: 24 }}>
           {CRIT.map(c => (
             <div key={c} className={`crit-box${form[c] > 0 ? " active" : ""}`}>
               <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 8, fontWeight: 700 }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}</div>
-              <Stars value={form[c]} onChange={v => setForm(prev => ({ ...prev, [c]: v }))} size={28} gap={4} />
+              <Stars value={form[c]} onChange={v => setForm(prev => ({ ...prev, [c]: v }))} size={24} gap={4} />
               {form[c] > 0 && <div style={{ fontSize: 12, color: ratingColor(form[c]), fontWeight: 800, marginTop: 6 }}>{ratingLabel(form[c])}</div>}
             </div>
           ))}

@@ -61,6 +61,7 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
                 <Avatar name={p.nombre} fac={p.facultad} size={idx === 0 ? 72 : 56} />
                 <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text-dark)", marginTop: 10, textAlign: "center" }}>{p.nombre.split(" ")[0]}</div>
                 <div style={{ marginTop: 6 }}><RatingChip r={p.rating} /></div>
+                <div style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 700, marginTop: 6 }}>{p.totalReseñas || 0} reseñas</div>
                 <div style={{ 
                   background: idx === 0 ? `linear-gradient(180deg, ${OR}, #d96518)` : idx === 1 ? "linear-gradient(180deg, #a8b8cc, #8a99b0)" : "linear-gradient(180deg, #d4a373, #bc8f5f)", 
                   height: heights[i], 
@@ -89,7 +90,10 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
                 <div style={{ fontSize: 14, fontWeight: 700 }}>{p.nombre}</div>
                 <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2 }}>{p.facultad}</div>
               </div>
-              <RatingChip r={p.rating} />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                <RatingChip r={p.rating} />
+                <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 600 }}>{p.totalReseñas || 0} reseñas</span>
+              </div>
             </div>
           ))}
         </div>
@@ -112,7 +116,10 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
               <div style={{ fontSize: 14, fontWeight: 700 }}>{p.nombre}</div>
               <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2 }}>{p.facultad}</div>
             </div>
-            <RatingChip r={p.rating} />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+              <RatingChip r={p.rating} />
+              <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 600 }}>{p.totalReseñas || 0} reseñas</span>
+            </div>
           </div>
         ))}
       </div>}

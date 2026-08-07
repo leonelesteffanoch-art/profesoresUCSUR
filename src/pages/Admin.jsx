@@ -222,7 +222,7 @@ export const Admin = ({
                 )}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {!f.respuesta && replyFeedbackId !== f.id && <button className="btn btn-blue" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => { setReplyFeedbackId(f.id); setReplyFeedbackText(""); }}>💬 Responder</button>}
+                {!f.respuesta && replyFeedbackId !== f.id && <button className="btn btn-blue" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => { setReplyFeedbackId(f.id); setReplyFeedbackText(`> "${f.mensaje}"\n\n`); }}>💬 Responder</button>}
                 <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => eliminarFeedback(f.id)}>🗑️ {f.respuesta ? "Eliminar" : "Descartar"}</button>
               </div>
             </div>

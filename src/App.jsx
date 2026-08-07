@@ -492,6 +492,7 @@ export default function App() {
               <Feedback 
                 navigate={navigate}
                 crearFeedback={crearFeedback}
+                feedbacks={feedbacks}
               />
             </div>
           } />
