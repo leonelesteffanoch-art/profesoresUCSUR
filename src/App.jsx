@@ -141,6 +141,7 @@ export default function App() {
   const [adminPass, setAdminPass] = useState("");
   const [adminLoading, setAdminLoading] = useState(false);
   const [reportes, setReportes] = useState([]);
+  const [noticias, setNoticias] = useState([]);
   const [fraseInicio, setFraseInicio] = useState(FRASES_INICIO[0]);
   const [editCursoProf, setEditCursoProf] = useState(null);
   const [editCursoVal, setEditCursoVal] = useState("");
@@ -203,6 +204,14 @@ export default function App() {
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "reportes"), snap => {
       setReportes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, "noticias"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, snap => {
+      setNoticias(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
     return () => unsub();
   }, []);
@@ -334,6 +343,25 @@ export default function App() {
     } catch (e) { showToast("❌ Error al eliminar."); }
   };
 
+  const crearNoticia = async (titulo, contenido) => {
+    try {
+      await addDoc(collection(db, "noticias"), { titulo, contenido, createdAt: serverTimestamp() });
+      showToast("✅ Noticia publicada.");
+    } catch (e) {
+      showToast("❌ Error al publicar noticia.");
+    }
+  };
+
+  const eliminarNoticia = async (id) => {
+    if (!window.confirm("¿Seguro que deseas eliminar esta noticia?")) return;
+    try {
+      await deleteDoc(doc(db, "noticias", id));
+      showToast("🗑️ Noticia eliminada.");
+    } catch (e) {
+      showToast("❌ Error al eliminar noticia.");
+    }
+  };
+
   return (
     <div style={{ fontFamily: "Plus Jakarta Sans, sans-serif", minHeight: "100vh", background: "var(--bg-main)", display: "flex", flexDirection: "column" }}>
       <Header page={currentPage} navigate={navigate} darkMode={darkMode} setDarkMode={setDarkMode} />
@@ -350,6 +378,7 @@ export default function App() {
                 sortBy={sortBy} setSortBy={setSortBy}
                 loading={loading}
                 navigate={navigate}
+                noticias={noticias}
               />
             </div>
           } />
@@ -400,12 +429,15 @@ export default function App() {
                 profesores={profesores}
                 todasResenas={todasResenas}
                 reportes={reportes}
+                noticias={noticias}
                 navigate={navigate}
                 showToast={showToast}
                 eliminarResena={eliminarResena}
                 eliminarProfesor={eliminarProfesor}
                 eliminarCurso={eliminarCurso}
                 adminAgregarCurso={adminAgregarCurso}
+                crearNoticia={crearNoticia}
+                eliminarNoticia={eliminarNoticia}
                 editCursoProf={editCursoProf} setEditCursoProf={setEditCursoProf}
                 editCursoVal={editCursoVal} setEditCursoVal={setEditCursoVal}
               />

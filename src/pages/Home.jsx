@@ -4,6 +4,7 @@ import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
 import { AnimatedCounter } from "../components/UI/AnimatedCounter.jsx";
 import { SkeletonCard } from "../components/UI/SkeletonCard.jsx";
+import { formatFecha } from "../utils/helpers.js";
 
 export const Home = ({
   fraseInicio,
@@ -15,7 +16,8 @@ export const Home = ({
   sortBy,
   setSortBy,
   loading,
-  navigate
+  navigate,
+  noticias
 }) => {
   const filtered = profesores
     .filter(p => p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busqueda.toLowerCase())))
@@ -57,6 +59,24 @@ export const Home = ({
           </div>
         </div>
       </div>
+
+      {/* Feed de Noticias */}
+      {noticias && noticias.length > 0 && (
+        <div style={{ maxWidth: 780, margin: "24px auto 0", padding: "0 16px" }}>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+            <span>📢</span> Novedades de la plataforma
+          </h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {noticias.map(n => (
+              <div key={n.id} className="card fade-in" style={{ padding: "16px 20px", borderLeft: `4px solid ${B}` }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)", marginBottom: 4 }}>{n.titulo}</div>
+                <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>🗓️ {formatFecha(n.createdAt)}</div>
+                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{n.contenido}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* BANNER de "¿No encuentras a tu profe?" */}
       <div style={{ maxWidth: 780, margin: "16px auto 0", padding: "0 16px" }}>

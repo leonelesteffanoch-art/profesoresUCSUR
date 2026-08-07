@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../services/firebase.js";
@@ -14,15 +15,30 @@ export const Admin = ({
   profesores,
   todasResenas,
   reportes,
+  noticias,
   navigate,
   showToast,
   eliminarResena,
   eliminarProfesor,
   eliminarCurso,
   adminAgregarCurso,
+  crearNoticia,
+  eliminarNoticia,
   editCursoProf, setEditCursoProf,
   editCursoVal, setEditCursoVal
 }) => {
+  const [notiTitulo, setNotiTitulo] = useState("");
+  const [notiContenido, setNotiContenido] = useState("");
+
+  const handleCrearNoticia = async () => {
+    if (!notiTitulo.trim() || !notiContenido.trim()) {
+      showToast("⚠️ Completa el título y el contenido.");
+      return;
+    }
+    await crearNoticia(notiTitulo, notiContenido);
+    setNotiTitulo("");
+    setNotiContenido("");
+  };
   const handleLogin = async () => {
     setAdminLoading(true);
     try {
@@ -86,10 +102,11 @@ export const Admin = ({
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 32 }}>
         {[
           { label: "Profesores", n: profesores.length, icon: "👨‍🏫", color: B }, 
           { label: "Reseñas totales", n: todasResenas.length, icon: "💬", color: OR }, 
+          { label: "Noticias", n: noticias?.length || 0, icon: "📰", color: "#059669" },
           { label: "Reportes", n: reportes.length, icon: "🚨", color: "#DC2626" }
         ].map(s => (
           <div key={s.label} className="card" style={{ padding: "20px 24px", borderLeft: `5px solid ${s.color}` }}>
@@ -98,6 +115,32 @@ export const Admin = ({
             <div style={{ fontSize: 13, color: "var(--text-light)", fontWeight: 600, marginTop: 4 }}>{s.label}</div>
           </div>
         ))}
+      </div>
+
+      <h3 style={{ fontSize: 18, fontWeight: 800, color: BD, marginBottom: 16 }}>📰 Gestión de Noticias</h3>
+      <div className="card" style={{ padding: 24, marginBottom: 32 }}>
+        <h4 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>Publicar nueva noticia</h4>
+        <input className="input" placeholder="Título de la noticia" value={notiTitulo} onChange={e => setNotiTitulo(e.target.value)} style={{ marginBottom: 12, padding: "12px 16px" }} />
+        <textarea className="textarea" placeholder="Contenido de la noticia (puedes escribir varios párrafos)..." value={notiContenido} onChange={e => setNotiContenido(e.target.value)} style={{ padding: "12px 16px", minHeight: 100, marginBottom: 12 }} />
+        <button className="btn btn-blue" onClick={handleCrearNoticia} style={{ padding: "10px 20px" }}>📢 Publicar Noticia</button>
+        
+        {noticias?.length > 0 && (
+          <div style={{ marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--border-color)" }}>
+            <h4 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>Noticias publicadas ({noticias.length})</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {noticias.map(n => (
+                <div key={n.id} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)", marginBottom: 4 }}>{n.titulo}</div>
+                    <div style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 6 }}>{formatFecha(n.createdAt)}</div>
+                    <div style={{ fontSize: 14, color: "var(--text-muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{n.contenido}</div>
+                  </div>
+                  <button className="btn btn-red" onClick={() => eliminarNoticia(n.id)} style={{ padding: "6px 12px", fontSize: 13, flexShrink: 0 }}>🗑️ Eliminar</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {reportes.length > 0 && <>
