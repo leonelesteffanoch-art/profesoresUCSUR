@@ -2,7 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../services/firebase.js";
-import { B, BD, OR, CRIT, SEDES } from "../constants.js";
+import { B, BD, OR, CRIT, SEDES, FACULTADES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { formatFecha, avg, ratingColor } from "../utils/helpers.js";

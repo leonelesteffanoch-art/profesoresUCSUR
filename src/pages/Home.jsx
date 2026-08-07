@@ -140,7 +140,7 @@ export const Home = ({
         </div>
 
         {/* Lista */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16, alignItems: "flex-start" }}>
           {loading && <SkeletonCard count={4} />}
           {!loading && filtered.length === 0 && (
             <div className="card" style={{ padding: 64, textAlign: "center", gridColumn: "1 / -1" }}>
