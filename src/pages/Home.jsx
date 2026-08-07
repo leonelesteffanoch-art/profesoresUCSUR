@@ -67,13 +67,26 @@ export const Home = ({
             <span>📢</span> Novedades de la plataforma
           </h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {noticias.map(n => (
-              <div key={n.id} className="card fade-in" style={{ padding: "16px 20px", borderLeft: `4px solid ${B}` }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)", marginBottom: 4 }}>{n.titulo}</div>
-                <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>🗓️ {formatFecha(n.createdAt)}</div>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{n.contenido}</p>
-              </div>
-            ))}
+            {noticias.map(n => {
+              const isNew = n.createdAt && (new Date() - n.createdAt.toDate()) < 3 * 24 * 60 * 60 * 1000;
+              return (
+                <div key={n.id} className="card fade-in" style={{ borderLeft: `4px solid ${B}`, overflow: "hidden" }}>
+                  {n.imagenUrl && (
+                    <div style={{ width: "100%", height: 180, overflow: "hidden" }}>
+                      <img src={n.imagenUrl} alt={n.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  )}
+                  <div style={{ padding: "16px 20px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)" }}>{n.titulo}</div>
+                      {isNew && <span style={{ background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 800, padding: "2px 6px", borderRadius: 10, letterSpacing: 0.5 }}>NUEVO</span>}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>🗓️ {formatFecha(n.createdAt)}</div>
+                    <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{n.contenido}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

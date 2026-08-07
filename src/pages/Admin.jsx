@@ -16,6 +16,7 @@ export const Admin = ({
   todasResenas,
   reportes,
   noticias,
+  feedbacks,
   navigate,
   showToast,
   eliminarResena,
@@ -24,20 +25,23 @@ export const Admin = ({
   adminAgregarCurso,
   crearNoticia,
   eliminarNoticia,
+  eliminarFeedback,
   editCursoProf, setEditCursoProf,
   editCursoVal, setEditCursoVal
 }) => {
   const [notiTitulo, setNotiTitulo] = useState("");
   const [notiContenido, setNotiContenido] = useState("");
+  const [notiImagen, setNotiImagen] = useState("");
 
   const handleCrearNoticia = async () => {
     if (!notiTitulo.trim() || !notiContenido.trim()) {
       showToast("⚠️ Completa el título y el contenido.");
       return;
     }
-    await crearNoticia(notiTitulo, notiContenido);
+    await crearNoticia(notiTitulo, notiContenido, notiImagen);
     setNotiTitulo("");
     setNotiContenido("");
+    setNotiImagen("");
   };
   const handleLogin = async () => {
     setAdminLoading(true);
@@ -107,6 +111,7 @@ export const Admin = ({
           { label: "Profesores", n: profesores.length, icon: "👨‍🏫", color: B }, 
           { label: "Reseñas totales", n: todasResenas.length, icon: "💬", color: OR }, 
           { label: "Noticias", n: noticias?.length || 0, icon: "📰", color: "#059669" },
+          { label: "Feedbacks", n: feedbacks?.length || 0, icon: "💡", color: "#EAB308" },
           { label: "Reportes", n: reportes.length, icon: "🚨", color: "#DC2626" }
         ].map(s => (
           <div key={s.label} className="card" style={{ padding: "20px 24px", borderLeft: `5px solid ${s.color}` }}>
@@ -122,6 +127,7 @@ export const Admin = ({
         <h4 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>Publicar nueva noticia</h4>
         <input className="input" placeholder="Título de la noticia" value={notiTitulo} onChange={e => setNotiTitulo(e.target.value)} style={{ marginBottom: 12, padding: "12px 16px" }} />
         <textarea className="textarea" placeholder="Contenido de la noticia (puedes escribir varios párrafos)..." value={notiContenido} onChange={e => setNotiContenido(e.target.value)} style={{ padding: "12px 16px", minHeight: 100, marginBottom: 12 }} />
+        <input className="input" placeholder="URL de la imagen (Opcional)" value={notiImagen} onChange={e => setNotiImagen(e.target.value)} style={{ marginBottom: 12, padding: "12px 16px" }} />
         <button className="btn btn-blue" onClick={handleCrearNoticia} style={{ padding: "10px 20px" }}>📢 Publicar Noticia</button>
         
         {noticias?.length > 0 && (
@@ -168,7 +174,23 @@ export const Admin = ({
         </div>
       </>}
 
-      <h3 style={{ fontSize: 18, fontWeight: 800, color: BD, marginBottom: 16 }}>Profesores registrados</h3>
+      {feedbacks?.length > 0 && <>
+        <h3 style={{ fontSize: 18, fontWeight: 800, color: "#EAB308", marginBottom: 16 }}>💡 Buzón de Sugerencias ({feedbacks.length})</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
+          {feedbacks.map(f => (
+            <div key={f.id} className="card" style={{ padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, borderLeft: "4px solid #fef08a" }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 15, color: "#2d3a50", lineHeight: 1.6, marginBottom: 8, whiteSpace: "pre-wrap" }}>{f.mensaje}</p>
+                {f.contacto && <div style={{ fontSize: 13, color: "var(--text-dark)", fontWeight: 600, marginBottom: 4 }}>Contacto: {f.contacto}</div>}
+                <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500 }}>🕐 {formatFecha(f.createdAt)}</div>
+              </div>
+              <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => eliminarFeedback(f.id)}>🗑️ Descartar</button>
+            </div>
+          ))}
+        </div>
+      </>}
+
+      <h3 style={{ fontSize: 18, fontWeight: 800, color: BD, marginBottom: 16 }}>👨‍🏫 Administrar profesores</h3>
       <div className="card" style={{ padding: "8px 0", marginBottom: 32 }}>
         {profesores.map((p, i) => (
           <div key={p.id} style={{ borderTop: i > 0 ? "1px solid var(--border-color)" : "none" }}>

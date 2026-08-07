@@ -9,6 +9,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
     ["home", "🏠", "Inicio"], 
     ["ranking", "🏆", "Ranking"], 
     ["agregar", "➕", "Agregar profe"], 
+    ["feedback", "💡", "Sugerencias"],
     ["admin", "⚙️", "Admin"]
   ];
 

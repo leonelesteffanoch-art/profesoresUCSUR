@@ -15,6 +15,7 @@ import { Ranking } from "./pages/Ranking.jsx";
 import { Agregar } from "./pages/Agregar.jsx";
 import { Perfil } from "./pages/Perfil.jsx";
 import { Admin } from "./pages/Admin.jsx";
+import { Feedback } from "./pages/Feedback.jsx";
 
 // Wrapper that resolves profesor from URL param
 function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, votados, setVotados, formRef }) {
@@ -142,6 +143,7 @@ export default function App() {
   const [adminLoading, setAdminLoading] = useState(false);
   const [reportes, setReportes] = useState([]);
   const [noticias, setNoticias] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [fraseInicio, setFraseInicio] = useState(FRASES_INICIO[0]);
   const [editCursoProf, setEditCursoProf] = useState(null);
   const [editCursoVal, setEditCursoVal] = useState("");
@@ -217,6 +219,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, snap => {
+      if (adminUser) {
+        setFeedbacks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      }
+    });
+    return () => unsub();
+  }, [adminUser]);
+
+  useEffect(() => {
     const unsub = onAuthStateChanged(auth, user => {
       if (user) {
         if (!user.isAnonymous) setAdminUser(user);
@@ -246,6 +258,7 @@ export default function App() {
     else if (p === "perfil" && prof) nav(`/profesor/${prof.id}`);
     else if (p === "ranking") nav("/ranking");
     else if (p === "agregar") nav("/agregar");
+    else if (p === "feedback") nav("/feedback");
     else if (p === "admin") nav("/admin");
     else nav(`/${p}`);
   }, [nav]);
@@ -256,6 +269,7 @@ export default function App() {
     if (p === "/") return "home";
     if (p.startsWith("/ranking")) return "ranking";
     if (p.startsWith("/agregar")) return "agregar";
+    if (p.startsWith("/feedback")) return "feedback";
     if (p.startsWith("/profesor")) return "perfil";
     if (p.startsWith("/admin")) return "admin";
     return "home";
@@ -285,7 +299,13 @@ export default function App() {
       });
       showToast("✅ ¡Profesor agregado!");
       setTimeout(() => nav("/"), 1200);
-    } catch (e) { showToast("❌ Error al agregar. Verifica tu conexión."); }
+    } catch (e) { 
+      if (e.message.includes("permission-denied")) {
+        showToast("❌ No tienes permiso. (Falta activar Auth Anónima en Firebase)");
+      } else {
+        showToast("❌ Error al agregar. Verifica tu conexión."); 
+      }
+    }
   };
 
   const submitAgregarCurso = async () => {
@@ -343,9 +363,9 @@ export default function App() {
     } catch (e) { showToast("❌ Error al eliminar."); }
   };
 
-  const crearNoticia = async (titulo, contenido) => {
+  const crearNoticia = async (titulo, contenido, imagenUrl) => {
     try {
-      await addDoc(collection(db, "noticias"), { titulo, contenido, createdAt: serverTimestamp() });
+      await addDoc(collection(db, "noticias"), { titulo, contenido, imagenUrl: imagenUrl || "", createdAt: serverTimestamp() });
       showToast("✅ Noticia publicada.");
     } catch (e) {
       showToast("❌ Error al publicar noticia.");
@@ -360,6 +380,22 @@ export default function App() {
     } catch (e) {
       showToast("❌ Error al eliminar noticia.");
     }
+  };
+
+  const crearFeedback = async (formFeedback) => {
+    try {
+      await addDoc(collection(db, "feedbacks"), { ...formFeedback, createdAt: serverTimestamp() });
+      showToast("✅ ¡Gracias por tu sugerencia!");
+    } catch (e) {
+      showToast("❌ Error al enviar. Verifica tu conexión.");
+    }
+  };
+
+  const eliminarFeedback = async (id) => {
+    try {
+      await deleteDoc(doc(db, "feedbacks", id));
+      showToast("🗑️ Sugerencia eliminada.");
+    } catch (e) { showToast("❌ Error."); }
   };
 
   return (
@@ -407,6 +443,15 @@ export default function App() {
             </div>
           } />
 
+          <Route path="/feedback" element={
+            <div className="page-transition">
+              <Feedback 
+                navigate={navigate}
+                crearFeedback={crearFeedback}
+              />
+            </div>
+          } />
+
           <Route path="/profesor/:profId" element={
             <PerfilRoute 
               profesores={profesores}
@@ -430,6 +475,7 @@ export default function App() {
                 todasResenas={todasResenas}
                 reportes={reportes}
                 noticias={noticias}
+                feedbacks={feedbacks}
                 navigate={navigate}
                 showToast={showToast}
                 eliminarResena={eliminarResena}
@@ -438,6 +484,7 @@ export default function App() {
                 adminAgregarCurso={adminAgregarCurso}
                 crearNoticia={crearNoticia}
                 eliminarNoticia={eliminarNoticia}
+                eliminarFeedback={eliminarFeedback}
                 editCursoProf={editCursoProf} setEditCursoProf={setEditCursoProf}
                 editCursoVal={editCursoVal} setEditCursoVal={setEditCursoVal}
               />
