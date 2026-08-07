@@ -18,6 +18,7 @@ export const Perfil = ({
   formErr,
   submitResena,
   carrerasForm,
+  carreras,
   votados,
   toggleUtil,
   reportes,
@@ -120,9 +121,17 @@ export const Perfil = ({
           <div>
             <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🎓 Tu carrera</label>
             <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={form.carrera}
-              onChange={e => setForm(prev => ({ ...prev, carrera: e.target.value }))}
-              disabled={!form.facultadAlumno || carrerasForm.length === 0}>
-              <option value="">{form.facultadAlumno ? "Selecciona tu carrera" : "Primero elige tu facultad"}</option>
+              onChange={e => {
+                const val = e.target.value;
+                const matchFac = Object.keys(carreras || {}).find(fac => carreras[fac].includes(val));
+                setForm(prev => ({ 
+                  ...prev, 
+                  carrera: val, 
+                  ...(matchFac && !prev.facultadAlumno ? { facultadAlumno: matchFac } : {})
+                }));
+              }}
+              disabled={carrerasForm.length === 0}>
+              <option value="">Selecciona tu carrera</option>
               {carrerasForm.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>

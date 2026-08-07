@@ -39,7 +39,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
   const allR = resenas[profId] || [];
   const critAvg = CRIT.reduce((acc, c) => ({ ...acc, [c]: allR.length ? (allR.reduce((a, b) => a + b.criterios[c], 0) / allR.length) : 0 }), {});
   const globalRating = calcRating(allR);
-  const carrerasForm = form.facultadAlumno ? (carreras[form.facultadAlumno] || []) : [];
+  const carrerasForm = form.facultadAlumno ? (carreras[form.facultadAlumno] || []) : [...new Set(Object.values(carreras).flat())].sort();
 
   const submitResena = async () => {
     if (!form.texto.trim() || CRIT.some(c => form[c] === 0)) {
@@ -113,6 +113,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
         formErr={formErr}
         submitResena={submitResena}
         carrerasForm={carrerasForm}
+        carreras={carreras}
         votados={votados} toggleUtil={toggleUtil}
         reportes={reportes} reportarResena={reportarResena}
         formRef={formRef}
@@ -278,6 +279,10 @@ export default function App() {
   const submitAddProf = async () => {
     if (!addProf.nombre.trim()) { showToast("⚠️ Escribe el nombre del profesor."); return; }
     if (!addProf.curso.trim()) { showToast("⚠️ Escribe al menos un curso."); return; }
+    if (!addProf.texto.trim() || CRIT.some(c => addProf[c] === 0)) {
+      showToast("⚠️ Completa todos los criterios y escribe un comentario de reseña.");
+      return;
+    }
     
     const similar = profesores.find(p => similarity(p.nombre, addProf.nombre) > 0.85);
     if (similar) { 
@@ -288,16 +293,30 @@ export default function App() {
       return; 
     }
     try {
-      await addDoc(collection(db, "profesores"), { 
+      const avgReview = (addProf.claridad + addProf.puntualidad + addProf.trato + addProf.examenes) / 4;
+      const initialRating = parseFloat(avgReview.toFixed(1));
+
+      const profRef = await addDoc(collection(db, "profesores"), { 
         nombre: addProf.nombre.trim(), 
         facultad: addProf.facultad, 
         cursos: [addProf.curso.trim()], 
-        bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
-        rating: 0, 
-        totalReseñas: 0, 
+        bio: "Profesor de la Universidad Científica del Sur.", 
+        rating: initialRating, 
+        totalReseñas: 1, 
         createdAt: serverTimestamp() 
       });
-      showToast("✅ ¡Profesor agregado!");
+
+      await addDoc(collection(db, "profesores", profRef.id, COL_RESENAS), {
+        texto: addProf.texto,
+        criterios: { claridad: addProf.claridad, puntualidad: addProf.puntualidad, trato: addProf.trato, examenes: addProf.examenes },
+        facultadAlumno: addProf.facultadAlumno || "",
+        carrera: addProf.carrera || "",
+        ciclo: addProf.ciclo || "",
+        semestre: addProf.semestre || "",
+        util: 0, noUtil: 0, createdAt: serverTimestamp()
+      });
+
+      showToast("✅ ¡Profesor agregado con tu primera reseña!");
       setTimeout(() => nav("/"), 1200);
     } catch (e) { 
       if (e.message.includes("permission-denied")) {
@@ -317,6 +336,15 @@ export default function App() {
       showToast(`✅ Curso "${addCurso.trim()}" agregado a ${addProfSel.nombre}`);
       setTimeout(() => nav("/"), 1200);
     } catch (e) { showToast("❌ Error al agregar el curso."); }
+  };
+
+  const editarProfesor = async (id, nombre, bio) => {
+    try {
+      await updateDoc(doc(db, "profesores", id), { nombre: nombre.trim(), bio: bio.trim() });
+      showToast("✅ Profesor actualizado.");
+    } catch (e) {
+      showToast("❌ Error al editar el profesor.");
+    }
   };
 
   const eliminarCurso = async (prof, curso) => {
@@ -439,6 +467,7 @@ export default function App() {
                 addCurso={addCurso} setAddCurso={setAddCurso}
                 submitAddProf={submitAddProf}
                 submitAgregarCurso={submitAgregarCurso}
+                carreras={carreras}
               />
             </div>
           } />
@@ -485,6 +514,7 @@ export default function App() {
                 crearNoticia={crearNoticia}
                 eliminarNoticia={eliminarNoticia}
                 eliminarFeedback={eliminarFeedback}
+                editarProfesor={editarProfesor}
                 editCursoProf={editCursoProf} setEditCursoProf={setEditCursoProf}
                 editCursoVal={editCursoVal} setEditCursoVal={setEditCursoVal}
               />

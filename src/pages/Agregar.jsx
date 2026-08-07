@@ -1,6 +1,7 @@
-import { FACULTADES, FAC_COLOR, FAC_BG, B, BD, BL, OR } from "../constants.js";
+import { FACULTADES, FAC_COLOR, FAC_BG, B, BD, BL, OR, CRIT, CRIT_LABEL, CRIT_ICON, FACULTADES_FORM, SEMESTRES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
-import { similarity } from "../utils/helpers.js";
+import { Stars } from "../components/UI/Stars.jsx";
+import { similarity, ratingColor, ratingLabel } from "../utils/helpers.js";
 
 export const Agregar = ({
   profesores,
@@ -9,12 +10,14 @@ export const Agregar = ({
   addProfSel, setAddProfSel,
   addCurso, setAddCurso,
   submitAddProf,
-  submitAgregarCurso
+  submitAgregarCurso,
+  carreras
 }) => {
   const sugerencias = addProf.nombre.length >= 2
     ? profesores.filter(p => similarity(p.nombre, addProf.nombre) > 0.4).sort((a, b) => similarity(b.nombre, addProf.nombre) - similarity(a.nombre, addProf.nombre)).slice(0, 5)
     : [];
   const cursosExistentes = [...new Set(profesores.filter(p => p.facultad === addProf.facultad).flatMap(p => p.cursos || []))];
+  const carrerasForm = addProf.facultadAlumno ? (carreras[addProf.facultadAlumno] || []) : [...new Set(Object.values(carreras || {}).flat())].sort();
 
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "32px 16px 64px" }}>
@@ -104,9 +107,89 @@ export const Agregar = ({
               </div>
             )}
           </div>
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Descripción <span style={{ fontWeight: 500, color: "var(--text-light)" }}>(opcional)</span></label>
-            <input className="input" value={addProf.bio} onChange={e => setAddProf(p => ({ ...p, bio: e.target.value }))} placeholder="Ej. Doctor con 10 años de experiencia." />
+          <div style={{ borderTop: "2px dashed var(--border-color)", margin: "8px 0", paddingTop: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+              <div style={{ background: `${OR}18`, borderRadius: 12, padding: "8px 12px", fontSize: 20 }}>✍️</div>
+              <div>
+                <div style={{ fontWeight: 800, color: BD, fontSize: 18 }}>Tu primera reseña</div>
+                <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500, marginTop: 2 }}>Obligatorio para agregar al profesor</div>
+              </div>
+            </div>
+
+            {/* Criterios */}
+            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>CALIFICA ESTOS CRITERIOS <span style={{ color: OR }}>*</span></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+              {CRIT.map(c => (
+                <div key={c} className={`crit-box${addProf[c] > 0 ? " active" : ""}`}>
+                  <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 8, fontWeight: 700 }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}</div>
+                  <Stars value={addProf[c]} onChange={v => setAddProf(prev => ({ ...prev, [c]: v }))} size={28} gap={4} />
+                  {addProf[c] > 0 && <div style={{ fontSize: 12, color: ratingColor(addProf[c]), fontWeight: 800, marginTop: 6 }}>{ratingLabel(addProf[c])}</div>}
+                </div>
+              ))}
+            </div>
+
+            {/* Facultad y Carrera libres */}
+            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>TU INFORMACIÓN <span style={{ fontWeight: 500 }}>(opcional)</span></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 18 }}>
+              <div>
+                <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🏫 Tu facultad</label>
+                <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={addProf.facultadAlumno}
+                  onChange={e => setAddProf(prev => ({ ...prev, facultadAlumno: e.target.value, carrera: "" }))}>
+                  <option value="">Selecciona tu facultad</option>
+                  {FACULTADES_FORM.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🎓 Tu carrera</label>
+                <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={addProf.carrera}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const matchFac = Object.keys(carreras || {}).find(fac => carreras[fac].includes(val));
+                    setAddProf(prev => ({ 
+                      ...prev, 
+                      carrera: val, 
+                      ...(matchFac && !prev.facultadAlumno ? { facultadAlumno: matchFac } : {})
+                    }));
+                  }}
+                  disabled={carrerasForm.length === 0}>
+                  <option value="">Selecciona tu carrera</option>
+                  {carrerasForm.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 8, fontWeight: 700 }}>📅 Tu ciclo actual</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                  <button key={n} onClick={() => setAddProf(prev => ({ ...prev, ciclo: prev.ciclo === String(n) ? "" : String(n) }))}
+                    style={{ 
+                      padding: "8px 16px", borderRadius: 20, border: `1.5px solid`, fontSize: 13, fontWeight: 800, cursor: "pointer", 
+                      transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", fontFamily: "inherit", 
+                      background: addProf.ciclo === String(n) ? B : "transparent", 
+                      color: addProf.ciclo === String(n) ? "#fff" : "var(--text-light)", 
+                      borderColor: addProf.ciclo === String(n) ? B : "var(--border-color)" 
+                    }}>
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🗓️ Semestre cursado</label>
+              <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={addProf.semestre || ""}
+                onChange={e => setAddProf(prev => ({ ...prev, semestre: e.target.value }))}>
+                <option value="">No especificar</option>
+                {SEMESTRES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+
+            {/* Comentario */}
+            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>TU OPINIÓN <span style={{ color: OR }}>*</span></div>
+            <textarea className="textarea" style={{ fontSize: 14, padding: 16 }} value={addProf.texto} onChange={e => { if (e.target.value.length <= 500) setAddProf(prev => ({ ...prev, texto: e.target.value })); }} placeholder="Cuéntales a otros alumnos cómo es este profesor: sus clases, su trato, los exámenes..." maxLength={500} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+              <span style={{ fontSize: 12, color: addProf.texto.length >= 450 ? "#DC2626" : "var(--text-light)", fontWeight: 600, transition: "color .2s" }}>{addProf.texto.length} / 500</span>
+              {addProf.texto.length < 20 && addProf.texto.length > 0 && <span style={{ fontSize: 12, color: OR, fontWeight: 600 }}>Mínimo 20 caracteres</span>}
+            </div>
           </div>
           {addProf.nombre && (
             <div style={{ background: "#f7f9fc", borderRadius: 14, padding: "16px 18px", border: "1px dashed #c8d5e8", marginTop: 8 }}>

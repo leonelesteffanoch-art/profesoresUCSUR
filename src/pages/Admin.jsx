@@ -26,12 +26,17 @@ export const Admin = ({
   crearNoticia,
   eliminarNoticia,
   eliminarFeedback,
+  editarProfesor,
   editCursoProf, setEditCursoProf,
   editCursoVal, setEditCursoVal
 }) => {
   const [notiTitulo, setNotiTitulo] = useState("");
   const [notiContenido, setNotiContenido] = useState("");
   const [notiImagen, setNotiImagen] = useState("");
+
+  const [editProfDetailsId, setEditProfDetailsId] = useState(null);
+  const [editProfDetailsNombre, setEditProfDetailsNombre] = useState("");
+  const [editProfDetailsBio, setEditProfDetailsBio] = useState("");
 
   const handleCrearNoticia = async () => {
     if (!notiTitulo.trim() || !notiContenido.trim()) {
@@ -197,8 +202,33 @@ export const Admin = ({
             <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 22px", flexWrap: "wrap" }}>
               <Avatar name={p.nombre} fac={p.facultad} size={48} />
               <div style={{ flex: 1, minWidth: 200 }}>
-                <div style={{ fontSize: 15, fontWeight: 800 }}>{p.nombre}</div>
-                <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>{p.facultad} · {p.totalReseñas || 0} reseñas</div>
+                {editProfDetailsId === p.id ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8 }}>
+                    <input className="input" value={editProfDetailsNombre} onChange={e => setEditProfDetailsNombre(e.target.value)} placeholder="Nombre del profesor" style={{ fontSize: 15, fontWeight: 800, padding: "8px 12px" }} />
+                    <textarea className="textarea" value={editProfDetailsBio} onChange={e => setEditProfDetailsBio(e.target.value)} placeholder="Biografía / Descripción" style={{ fontSize: 13, padding: "8px 12px", minHeight: 60 }} />
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button className="btn btn-green" style={{ fontSize: 12, padding: "6px 12px" }} onClick={async () => {
+                        if (!editProfDetailsNombre.trim()) { showToast("⚠️ Escribe un nombre."); return; }
+                        await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio);
+                        setEditProfDetailsId(null);
+                      }}>Guardar</button>
+                      <button className="btn btn-ghost" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => setEditProfDetailsId(null)}>Cancelar</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ fontSize: 15, fontWeight: 800 }}>{p.nombre}</div>
+                      <button onClick={() => {
+                        setEditProfDetailsId(p.id);
+                        setEditProfDetailsNombre(p.nombre);
+                        setEditProfDetailsBio(p.bio || "");
+                      }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14 }} title="Editar nombre y bio">✏️</button>
+                    </div>
+                    {p.bio && <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 4 }}>{p.bio}</div>}
+                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>{p.facultad} · {p.totalReseñas || 0} reseñas</div>
+                  </>
+                )}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {(p.cursos || []).map(c => (
                     <span key={c} style={{ background: "#f3f6fb", padding: "4px 10px", borderRadius: 20, fontSize: 12, color: "#5a6a80", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
