@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate as useRouterNav } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { FACULTADES_FORM, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, OR, BL, CRIT, CRIT_LABEL, CRIT_ICON, SEMESTRES } from "../constants.js";
