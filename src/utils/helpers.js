@@ -2,6 +2,11 @@ import { CRIT } from "../constants.js";
 
 export const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
+export const capitalizeName = name => {
+  if (!name) return "";
+  return name.toLowerCase().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+};
+
 export const initials = n => {
   if (!n) return "";
   return n.split(" ").map(x => x[0]).slice(0, 2).join("");

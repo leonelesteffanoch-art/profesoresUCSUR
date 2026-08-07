@@ -46,9 +46,7 @@ export const Home = ({
           </div>
           <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, marginBottom: 10, lineHeight: 1.25, letterSpacing: "-.5px" }}>¿Qué profesor te tocó este ciclo?</h1>
           <p style={{ color: "rgba(255,255,255,.7)", fontSize: 15, marginBottom: 26, fontWeight: 500 }}>{fraseInicio}</p>
-          <div style={{ display: "flex", gap: 10, background: "rgba(255,255,255,.15)", borderRadius: 16, padding: 8, border: "1px solid rgba(255,255,255,.15)", boxShadow: "0 8px 32px rgba(0,0,0,0.1)" }}>
-            <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar por nombre o curso..." aria-label="Buscar por nombre o curso" style={{ flex: 1, border: "none", background: "rgba(255,255,255,.98)", fontSize: 15, padding: "14px 18px" }} />
-          </div>
+          {/* El buscador se movió abajo a la barra flotante */}
           {/* Animated Stats bar */}
           <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
             {[
@@ -64,6 +62,45 @@ export const Home = ({
                 <span style={{ color: "rgba(255,255,255,.65)", fontSize: 13, fontWeight: 500 }}>{s.l}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 🔍 BARRA DE BÚSQUEDA FLOTANTE (STICKY) */}
+      <div style={{ 
+        position: "sticky", top: 0, zIndex: 100, 
+        background: "var(--bg-main)", 
+        borderBottom: "1px solid var(--border-color)", 
+        padding: "16px 0",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+        transition: "background-color 0.3s ease"
+      }}>
+        <div style={{ maxWidth: 780, margin: "0 auto", padding: "0 16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ display: "flex", gap: 10 }}>
+              <input className="input" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="🔍 Buscar profe o curso..." aria-label="Buscar" style={{ flex: 1, fontSize: 15, padding: "12px 18px", borderRadius: 16 }} />
+              <select className="input" style={{ width: "auto", padding: "12px 16px", borderRadius: 16, fontWeight: 700, cursor: "pointer" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                <option value="populares">🔥 Populares</option>
+                <option value="rating">⭐ Mejor rating</option>
+                <option value="aleatorio">🎲 Aleatorio</option>
+              </select>
+            </div>
+            
+            <div className="hide-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
+              {FACULTADES.map(f => (
+                <button key={f} onClick={() => setFacFiltro(f)}
+                  aria-pressed={facFiltro === f}
+                  style={{ 
+                    padding: "6px 14px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontWeight: 700, 
+                    border: "1.5px solid", transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
+                    background: facFiltro === f ? (FAC_COLOR[f] || B) : "transparent", 
+                    color: facFiltro === f ? "#fff" : (FAC_COLOR[f] || "var(--text-muted)"), 
+                    borderColor: facFiltro === f ? (FAC_COLOR[f] || B) : (FAC_BG[f] || "var(--border-color)") 
+                  }}>
+                  {f === "Todas" ? "Todas" : `${FAC_EMOJI[f] || ""} ${f}`}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -144,32 +181,6 @@ export const Home = ({
       </div>
 
       <div style={{ maxWidth: 780, margin: "20px auto 0", padding: "0 16px 64px" }}>
-        {/* Filtros */}
-        <div className="card" style={{ padding: "14px 18px", marginBottom: 18, display: "flex", gap: 12, alignItems: "center", overflowX: "auto" }}>
-          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-            {FACULTADES.map(f => (
-              <button key={f} onClick={() => setFacFiltro(f)}
-                aria-pressed={facFiltro === f}
-                style={{ 
-                  padding: "6px 14px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontWeight: 700, 
-                  border: "1.5px solid", transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
-                  background: facFiltro === f ? (FAC_COLOR[f] || B) : "transparent", 
-                  color: facFiltro === f ? "#fff" : (FAC_COLOR[f] || "var(--text-muted)"), 
-                  borderColor: facFiltro === f ? (FAC_COLOR[f] || B) : (FAC_BG[f] || "var(--border-color)") 
-                }}>
-                {f === "Todas" ? "Todas" : `${FAC_EMOJI[f] || ""} ${f}`}
-              </button>
-            ))}
-          </div>
-          <div style={{ marginLeft: "auto", flexShrink: 0 }}>
-            <select className="input" style={{ width: "auto", padding: "8px 14px", fontSize: 13, fontWeight: 600, color: "var(--text-dark)", cursor: "pointer" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-              <option value="aleatorio">🎲 Aleatorio</option>
-              <option value="rating">⭐ Mejor calificados</option>
-              <option value="resenas">💬 Más reseñas</option>
-            </select>
-          </div>
-        </div>
-
         {/* Lista */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16, alignItems: "flex-start" }}>
           {loading && <SkeletonCard count={4} />}

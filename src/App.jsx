@@ -4,7 +4,7 @@ import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, que
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { db, auth, COL_RESENAS } from "./services/firebase.js";
 import { FORM_EMPTY, ADD_EMPTY, FRASES_INICIO, CRIT } from "./constants.js";
-import { calcRating, similarity } from "./utils/helpers.js";
+import { calcRating, similarity, capitalizeName } from "./utils/helpers.js";
 
 import "./index.css";
 import { Header } from "./components/Header.jsx";
@@ -299,9 +299,9 @@ export default function App() {
       const initialRating = parseFloat(avgReview.toFixed(1));
 
       const profRef = await addDoc(collection(db, "profesores"), { 
-        nombre: addProf.nombre.trim(), 
+        nombre: capitalizeName(addProf.nombre.trim()), 
         facultad: addProf.facultad, 
-        cursos: [addProf.curso.trim()], 
+        cursos: [capitalizeName(addProf.curso.trim())], 
         sede: addProf.sede,
         bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
         rating: initialRating, 
@@ -332,21 +332,22 @@ export default function App() {
 
   const submitAgregarCurso = async (nuevaSede) => {
     if (!addProfSel) return;
-    if (!addCurso.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if ((addProfSel.cursos || []).map(c => c.toLowerCase()).includes(addCurso.trim().toLowerCase())) { showToast("⚠️ Ese curso ya está registrado."); return; }
+    const newCurso = capitalizeName(addCurso.trim());
+    if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
+    if ((addProfSel.cursos || []).map(c => c.toLowerCase()).includes(newCurso.toLowerCase())) { showToast("⚠️ Ese curso ya está registrado."); return; }
     try {
-      const updates = { cursos: [...(addProfSel.cursos || []), addCurso.trim()] };
+      const updates = { cursos: [...(addProfSel.cursos || []), newCurso] };
       if (nuevaSede && nuevaSede !== addProfSel.sede) updates.sede = nuevaSede;
       
       await updateDoc(doc(db, "profesores", addProfSel.id), updates);
-      showToast(`✅ Curso "${addCurso.trim()}" agregado a ${addProfSel.nombre}`);
+      showToast(`✅ Curso "${newCurso}" agregado a ${addProfSel.nombre}`);
       setTimeout(() => nav("/"), 1200);
     } catch (e) { showToast("❌ Error al agregar el curso."); }
   };
 
   const editarProfesor = async (id, nombre, bio, sede, alerta = "") => {
     try {
-      await updateDoc(doc(db, "profesores", id), { nombre: nombre.trim(), bio: bio.trim(), sede, alerta: alerta.trim() });
+      await updateDoc(doc(db, "profesores", id), { nombre: capitalizeName(nombre.trim()), bio: bio.trim(), sede, alerta: alerta.trim() });
       showToast("✅ Profesor actualizado.");
     } catch (e) {
       showToast("❌ Error al editar el profesor.");
@@ -362,10 +363,11 @@ export default function App() {
   };
 
   const adminAgregarCurso = async (prof) => {
-    if (!editCursoVal.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if ((prof.cursos || []).map(c => c.toLowerCase()).includes(editCursoVal.trim().toLowerCase())) { showToast("⚠️ Ese curso ya existe."); return; }
+    const newCurso = capitalizeName(editCursoVal.trim());
+    if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
+    if ((prof.cursos || []).map(c => c.toLowerCase()).includes(newCurso.toLowerCase())) { showToast("⚠️ Ese curso ya existe."); return; }
     try {
-      await updateDoc(doc(db, "profesores", prof.id), { cursos: [...(prof.cursos || []), editCursoVal.trim()] });
+      await updateDoc(doc(db, "profesores", prof.id), { cursos: [...(prof.cursos || []), newCurso] });
       setEditCursoProf(null); setEditCursoVal("");
       showToast("✅ Curso agregado.");
     } catch (e) { showToast("❌ Error al agregar el curso."); }
