@@ -31,7 +31,7 @@ export const CRIT_LABEL = { claridad: "Claridad", puntualidad: "Puntualidad", tr
 export const CRIT_ICON = { claridad: "💡", puntualidad: "⏰", trato: "🤝", examenes: "📝" };
 
 export const FORM_EMPTY = { texto: "", claridad: 0, puntualidad: 0, trato: 0, examenes: 0, facultadAlumno: "", carrera: "", ciclo: "", semestre: "" };
-export const ADD_EMPTY = { nombre: "", facultad: "Ciencias de la Ingenieria", curso: "", ...FORM_EMPTY };
+export const ADD_EMPTY = { nombre: "", facultad: "Ciencias de la Ingenieria", curso: "", bio: "", ...FORM_EMPTY };
 
 export const FRASES_INICIO = [
   "Opiniones reales de estudiantes de la Científica del Sur.",

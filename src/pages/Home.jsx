@@ -22,7 +22,11 @@ export const Home = ({
   const filtered = profesores
     .filter(p => p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busqueda.toLowerCase())))
     .filter(p => facFiltro === "Todas" || p.facultad === facFiltro)
-    .sort((a, b) => sortBy === "rating" ? (b.rating || 0) - (a.rating || 0) : (b.totalReseñas || 0) - (a.totalReseñas || 0));
+    .sort((a, b) => {
+      if (sortBy === "aleatorio") return (b._randomOrder || 0) - (a._randomOrder || 0);
+      if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
+      return (b.totalReseñas || 0) - (a.totalReseñas || 0);
+    });
 
   const totalResenas = profesores.reduce((t, p) => t + (p.totalReseñas || 0), 0);
 
@@ -82,7 +86,7 @@ export const Home = ({
                       {isNew && <span style={{ background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 800, padding: "2px 6px", borderRadius: 10, letterSpacing: 0.5, flexShrink: 0 }}>NUEVO</span>}
                     </div>
                     <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 10, fontWeight: 500 }}>🗓️ {formatFechaExacta(n.createdAt)}</div>
-                    <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{n.contenido}</p>
+                    <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{n.contenido}</p>
                   </div>
                 </div>
               );
@@ -125,6 +129,7 @@ export const Home = ({
           </div>
           <div style={{ marginLeft: "auto", flexShrink: 0 }}>
             <select className="input" style={{ width: "auto", padding: "8px 14px", fontSize: 13, fontWeight: 600, color: "var(--text-dark)", cursor: "pointer" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+              <option value="aleatorio">🎲 Aleatorio</option>
               <option value="rating">⭐ Mejor calificados</option>
               <option value="resenas">💬 Más reseñas</option>
             </select>

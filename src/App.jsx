@@ -130,7 +130,7 @@ export default function App() {
   const [carreras, setCarreras] = useState({});
   const [busqueda, setBusqueda] = useState("");
   const [facFiltro, setFacFiltro] = useState("Todas");
-  const [sortBy, setSortBy] = useState("rating");
+  const [sortBy, setSortBy] = useState("aleatorio");
   const [addProf, setAddProf] = useState(ADD_EMPTY);
   const [addMode, setAddMode] = useState("nuevo");
   const [addProfSel, setAddProfSel] = useState(null);
@@ -171,7 +171,7 @@ export default function App() {
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "profesores"), snap => {
-      setProfesores(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setProfesores(snap.docs.map(d => ({ id: d.id, _randomOrder: Math.random(), ...d.data() })));
       setLoading(false);
     });
     return () => unsub();
@@ -300,7 +300,7 @@ export default function App() {
         nombre: addProf.nombre.trim(), 
         facultad: addProf.facultad, 
         cursos: [addProf.curso.trim()], 
-        bio: "Profesor de la Universidad Científica del Sur.", 
+        bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
         rating: initialRating, 
         totalReseñas: 1, 
         createdAt: serverTimestamp() 
