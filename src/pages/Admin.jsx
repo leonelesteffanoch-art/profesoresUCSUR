@@ -226,7 +226,7 @@ export const Admin = ({
                       }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14 }} title="Editar nombre y bio">✏️</button>
                     </div>
                     {p.bio && <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 4 }}>{p.bio}</div>}
-                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>{p.facultad} · {p.totalReseñas || 0} reseñas</div>
+                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>{p.facultad} {p.sede && `· Sede ${p.sede}`} · {p.totalReseñas || 0} reseñas</div>
                   </>
                 )}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>

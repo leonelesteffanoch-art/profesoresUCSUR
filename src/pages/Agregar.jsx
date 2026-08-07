@@ -1,4 +1,4 @@
-import { FACULTADES, FAC_COLOR, FAC_BG, B, BD, BL, OR, CRIT, CRIT_LABEL, CRIT_ICON, FACULTADES_FORM, SEMESTRES } from "../constants.js";
+import { FACULTADES, FAC_COLOR, FAC_BG, B, BD, BL, OR, CRIT, CRIT_LABEL, CRIT_ICON, FACULTADES_FORM, SEMESTRES, SEDES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
 import { similarity, ratingColor, ratingLabel } from "../utils/helpers.js";
@@ -16,7 +16,10 @@ export const Agregar = ({
   const sugerencias = addProf.nombre.length >= 2
     ? profesores.filter(p => similarity(p.nombre, addProf.nombre) > 0.4).sort((a, b) => similarity(b.nombre, addProf.nombre) - similarity(a.nombre, addProf.nombre)).slice(0, 5)
     : [];
-  const cursosExistentes = [...new Set(profesores.filter(p => p.facultad === addProf.facultad).flatMap(p => p.cursos || []))];
+  const cursosGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))].sort((a, b) => a.localeCompare(b));
+  const cursosExistentes = addProf.curso.trim() 
+    ? cursosGlobal.filter(c => c.toLowerCase().includes(addProf.curso.toLowerCase())).slice(0, 25)
+    : cursosGlobal.slice(0, 25);
   const carrerasForm = addProf.facultadAlumno ? (carreras[addProf.facultadAlumno] || []) : [...new Set(Object.values(carreras || {}).flat())].sort();
 
   return (
@@ -85,6 +88,12 @@ export const Agregar = ({
               </select>
             </div>
             <div>
+              <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Sede</label>
+              <select className="input" style={{ cursor: "pointer", appearance: "none" }} value={addProf.sede} onChange={e => setAddProf(p => ({ ...p, sede: e.target.value }))}>
+                {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
               <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Curso que enseña</label>
               <input className="input" value={addProf.curso} onChange={e => setAddProf(p => ({ ...p, curso: e.target.value }))} placeholder="Ej. Cálculo III" autoComplete="off" />
               <div style={{ fontSize: 11, color: "var(--text-light)", marginTop: 6, fontWeight: 500, lineHeight: 1.4 }}>
@@ -92,7 +101,7 @@ export const Agregar = ({
               </div>
               {cursosExistentes.length > 0 && (
                 <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 11, color: "var(--text-light)", marginBottom: 8, fontWeight: 700, letterSpacing: 0.5 }}>CURSOS YA REGISTRADOS EN ESTA FACULTAD</div>
+                  <div style={{ fontSize: 11, color: "var(--text-light)", marginBottom: 8, fontWeight: 700, letterSpacing: 0.5 }}>CURSOS SUGERIDOS (TODAS LAS FACULTADES)</div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {cursosExistentes.map(c => (
                       <span key={c} onClick={() => setAddProf(p => ({ ...p, curso: c }))}

@@ -157,6 +157,7 @@ export const Home = ({
                 <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text-dark)", marginBottom: 6 }}>{p.nombre}</div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   <span className="pill" style={{ background: FAC_BG[p.facultad] || BL, color: FAC_COLOR[p.facultad] || BD }}>{FAC_EMOJI[p.facultad] || ""} {p.facultad}</span>
+                  {p.sede && <span className="pill" style={{ background: "#f3f4f6", color: "#374151" }}>📍 Sede {p.sede}</span>}
                   {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
                 </div>
               </div>

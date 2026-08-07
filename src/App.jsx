@@ -300,6 +300,7 @@ export default function App() {
         nombre: addProf.nombre.trim(), 
         facultad: addProf.facultad, 
         cursos: [addProf.curso.trim()], 
+        sede: addProf.sede,
         bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
         rating: initialRating, 
         totalReseñas: 1, 

@@ -54,6 +54,7 @@ export const Perfil = ({
                 <span className="pill" style={{ background: FAC_BG[selProf.facultad] || BL, color: FAC_COLOR[selProf.facultad] || BD, fontSize: 13, padding: "6px 14px" }}>
                   {FAC_EMOJI[selProf.facultad] || ""} {selProf.facultad}
                 </span>
+                {selProf.sede && <span className="pill" style={{ background: "#f3f4f6", color: "#374151", fontSize: 13, padding: "6px 14px" }}>📍 Sede {selProf.sede}</span>}
                 {(selProf.cursos || []).map(c => <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80", fontSize: 13, padding: "6px 14px" }}>📚 {c}</span>)}
               </div>
               {selProf.bio && <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{selProf.bio}</p>}
