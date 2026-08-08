@@ -291,8 +291,22 @@ export const Admin = ({
                 <option value="nombre_asc">🔤 Orden alfabético (A-Z)</option>
               </select>
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 600, marginTop: 4 }}>
-              Mostrando {filteredProfesores.length} profesores
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 600 }}>
+                Mostrando {filteredProfesores.length} profesores
+              </div>
+              {(busquedaAdmin || facFiltroAdmin.length > 0 || sedeFiltroAdmin.length > 0 || cursoFiltroAdmin.length > 0 || ordenProfAdmin !== "rating_desc") && (
+                <button className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 8px" }} onClick={() => {
+                  setBusquedaAdmin("");
+                  setFacFiltroAdmin([]);
+                  setSedeFiltroAdmin([]);
+                  setCursoFiltroAdmin([]);
+                  setOrdenProfAdmin("rating_desc");
+                }}>
+                  Limpiar filtros
+                </button>
+              )}
             </div>
           </div>
 
@@ -410,8 +424,20 @@ export const Admin = ({
                 <option value="rating_asc">📉 Peores calificaciones (1★)</option>
               </select>
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 600, marginTop: 4 }}>
-              Mostrando {filteredResenas.length} reseñas
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 600 }}>
+                Mostrando {filteredResenas.length} reseñas
+              </div>
+              {(busquedaResena || facFiltroResena !== "Todas" || ordenResena !== "recientes") && (
+                <button className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 8px" }} onClick={() => {
+                  setBusquedaResena("");
+                  setFacFiltroResena("Todas");
+                  setOrdenResena("recientes");
+                }}>
+                  Limpiar filtros
+                </button>
+              )}
             </div>
           </div>
 
