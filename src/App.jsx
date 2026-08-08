@@ -307,7 +307,7 @@ export default function App() {
   const submitAddProf = async () => {
     if (!addProf.nombre.trim()) { showToast("⚠️ Escribe el nombre del profesor."); return; }
     if (!addProf.curso.trim()) { showToast("⚠️ Escribe al menos un curso."); return; }
-    if (!addProf.texto.trim() || CRIT.some(c => addProf[c] === 0)) {
+    if (addProf.incluirResena && (CRIT.some(c => addProf[c] === 0) || !addProf.texto.trim())) {
       showToast("⚠️ Completa todos los criterios y escribe un comentario de reseña.");
       return;
     }
@@ -321,8 +321,9 @@ export default function App() {
       return; 
     }
     try {
-      const avgReview = (addProf.claridad + addProf.puntualidad + addProf.trato + addProf.examenes) / 4;
-      const initialRating = parseFloat(avgReview.toFixed(1));
+      const hasReview = addProf.incluirResena;
+      const avgReview = hasReview ? (addProf.claridad + addProf.puntualidad + addProf.trato + addProf.examenes) / 4 : 0;
+      const initialRating = hasReview ? parseFloat(avgReview.toFixed(1)) : 0;
 
       const profRef = await addDoc(collection(db, "profesores"), { 
         nombre: capitalizeName(addProf.nombre.trim()), 
@@ -332,21 +333,23 @@ export default function App() {
         sedes: addProf.sedes ? addProf.sedes : [addProf.sede].filter(Boolean),
         bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
         rating: initialRating, 
-        totalReseñas: 1, 
+        totalReseñas: hasReview ? 1 : 0, 
         createdAt: serverTimestamp() 
       });
 
-      await addDoc(collection(db, "profesores", profRef.id, COL_RESENAS), {
-        texto: addProf.texto,
-        criterios: { claridad: addProf.claridad, puntualidad: addProf.puntualidad, trato: addProf.trato, examenes: addProf.examenes },
-        facultadAlumno: addProf.facultadAlumno || "",
-        carrera: addProf.carrera || "",
-        ciclo: addProf.ciclo || "",
-        semestre: addProf.semestre || "",
-        util: 0, noUtil: 0, createdAt: serverTimestamp()
-      });
+      if (hasReview) {
+        await addDoc(collection(db, "profesores", profRef.id, COL_RESENAS), {
+          texto: addProf.texto,
+          criterios: { claridad: addProf.claridad, puntualidad: addProf.puntualidad, trato: addProf.trato, examenes: addProf.examenes },
+          facultadAlumno: addProf.facultadAlumno || "",
+          carrera: addProf.carrera || "",
+          ciclo: addProf.ciclo || "",
+          semestre: addProf.semestre || "",
+          util: 0, noUtil: 0, createdAt: serverTimestamp()
+        });
+      }
 
-      showToast("✅ ¡Profesor agregado con tu primera reseña!");
+      showToast(hasReview ? "✅ ¡Profesor agregado con tu primera reseña!" : "✅ ¡Profesor registrado exitosamente!");
       setTimeout(() => nav("/"), 1200);
     } catch (e) { 
       if (e.message.includes("permission-denied")) {

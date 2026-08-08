@@ -25,6 +25,16 @@ export const Home = ({
   feedbacks
 }) => {
   const [currentNewsIdx, setCurrentNewsIdx] = useState(0);
+  const [newsHovered, setNewsHovered] = useState(false);
+
+  // Autoplay para noticias
+  React.useEffect(() => {
+    if (!noticias || noticias.length <= 1 || newsHovered) return;
+    const interval = setInterval(() => {
+      setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [noticias, newsHovered]);
 
   const filtered = profesores
     .filter(p => normalizeText(p.nombre).includes(normalizeText(busqueda)) || p.cursos?.some(c => normalizeText(c).includes(normalizeText(busqueda))))
@@ -38,6 +48,9 @@ export const Home = ({
     });
 
   const totalResenas = profesores.reduce((t, p) => t + (p.totalReseñas || 0), 0);
+  
+  const profesoresNuevos = profesores.filter(p => (p.totalReseñas || 0) === 0);
+  const isSearchEmpty = !busqueda && facFiltro === "Todas" && sedeFiltro.length === 0;
 
   return (
     <>
@@ -154,38 +167,45 @@ export const Home = ({
         </div>
       </div>
 
-      {/* Feed de Noticias (Slider) */}
+      {/* Feed de Noticias (Slider Automático) */}
       {noticias && noticias.length > 0 && (
-        <div style={{ maxWidth: 780, margin: "24px auto 0", padding: "0 16px" }}>
+        <div style={{ maxWidth: 780, margin: "24px auto 0", padding: "0 16px" }}
+             onMouseEnter={() => setNewsHovered(true)}
+             onMouseLeave={() => setNewsHovered(false)}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 8, margin: 0 }}>
               <span>📢</span> Novedades de la plataforma
             </h3>
             
             {noticias.length > 1 && (
-              <div style={{ display: "flex", gap: 8 }}>
-                <button 
-                  className="btn btn-ghost" 
-                  style={{ padding: "4px 10px", fontSize: 14, background: "var(--border-color)", border: "none" }}
-                  onClick={() => setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1))}
-                >
-                  ←
-                </button>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "flex", alignItems: "center", width: 40, justifyContent: "center" }}>
-                  {currentNewsIdx + 1} / {noticias.length}
-                </div>
-                <button 
-                  className="btn btn-ghost" 
-                  style={{ padding: "4px 10px", fontSize: 14, background: "var(--border-color)", border: "none" }}
-                  onClick={() => setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1))}
-                >
-                  →
-                </button>
+              <div style={{ display: "flex", gap: 4 }}>
+                {noticias.map((_, idx) => (
+                  <div key={idx} onClick={() => setCurrentNewsIdx(idx)} style={{
+                    width: currentNewsIdx === idx ? 16 : 8,
+                    height: 8,
+                    borderRadius: 4,
+                    background: currentNewsIdx === idx ? "var(--primary-blue)" : "var(--border-color)",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease"
+                  }} />
+                ))}
               </div>
             )}
           </div>
           
           <div style={{ position: "relative" }}>
+            {noticias.length > 1 && (
+              <>
+                <button className="btn btn-ghost" onClick={() => setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1))}
+                  style={{ position: "absolute", left: -16, top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "var(--card-bg)", border: "1px solid var(--border-color)", width: 40, height: 40, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                  ←
+                </button>
+                <button className="btn btn-ghost" onClick={() => setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1))}
+                  style={{ position: "absolute", right: -16, top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "var(--card-bg)", border: "1px solid var(--border-color)", width: 40, height: 40, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                  →
+                </button>
+              </>
+            )}
             {(() => {
               const n = noticias[currentNewsIdx];
               if (!n) return null;
@@ -230,7 +250,38 @@ export const Home = ({
       </div>
 
       <div style={{ maxWidth: 780, margin: "20px auto 0", padding: "0 16px 64px" }}>
-        {/* Lista */}
+        
+        {/* Carrusel de Nuevos Profesores */}
+        {isSearchEmpty && profesoresNuevos.length > 0 && (
+          <div style={{ marginBottom: 32 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 8, margin: "0 0 16px 0" }}>
+              <span>✨</span> Nuevos Profesores <span style={{ color: "var(--text-light)", fontSize: 13, fontWeight: 500 }}>(¡Sé el primero en opinar!)</span>
+            </h3>
+            <div className="custom-scrollbar" style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16, snapType: "x mandatory" }}>
+              {profesoresNuevos.map(p => (
+                <Link key={p.id} to={`/profesor/${p.id}`} className="card card-hover fade-in" 
+                  style={{ width: 280, flexShrink: 0, padding: "16px", display: "flex", flexDirection: "column", gap: 12, borderTop: `4px solid ${FAC_COLOR[p.facultad] || B}`, textDecoration: "none", scrollSnapAlign: "start" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <Avatar name={p.nombre} fac={p.facultad} size={48} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: 15, color: "var(--text-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nombre}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{p.facultad}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {(p.cursos || []).slice(0, 2).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)", fontSize: 11, padding: "4px 8px" }}>📚 {c}</span>)}
+                    {(p.cursos || []).length > 2 && <span className="pill" style={{ background: "transparent", color: "var(--text-light)", fontSize: 11, padding: "4px 8px", border: "1px solid var(--border-color)" }}>+{p.cursos.length - 2}</span>}
+                  </div>
+                  <div style={{ marginTop: "auto", paddingTop: 8, borderTop: "1px dashed var(--border-color)", textAlign: "center" }}>
+                    <span style={{ color: "var(--primary-blue)", fontSize: 13, fontWeight: 700 }}>Escribir primera reseña →</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Lista Principal */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16, alignItems: "flex-start" }}>
           {loading && <SkeletonCard count={4} />}
           {!loading && filtered.length === 0 && (
@@ -253,9 +304,9 @@ export const Home = ({
                   {p.facultades?.map(f => (
                     <span key={f} className="pill" style={{ background: FAC_BG[f] || BL, color: FAC_COLOR[f] || BD }}>{FAC_EMOJI[f] || ""} {f}</span>
                   ))}
+                  {(p.sedes || [p.sede].filter(Boolean)).map(s => <span key={s} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📍 Sede {s}</span>)}
+                  {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
                 </div>
-                {(p.sedes || [p.sede].filter(Boolean)).map(s => <span key={s} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📍 Sede {s}</span>)}
-                {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
                 <RatingChip r={p.rating} />

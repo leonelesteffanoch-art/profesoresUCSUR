@@ -196,13 +196,20 @@ export const Agregar = ({
           <div style={{ flex: "1 1 350px", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
               <div style={{ background: `${OR}18`, borderRadius: 12, padding: "8px 12px", fontSize: 20 }}>✍️</div>
-              <div>
+              <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 800, color: BD, fontSize: 18 }}>Tu primera reseña</div>
-                <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500, marginTop: 2 }}>Obligatorio para agregar al profesor</div>
+                <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500, marginTop: 2 }}>{addProf.incluirResena ? "Ayuda a otros alumnos con tu opinión" : "El profesor se guardará sin reseñas"}</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => setAddProf(p => ({ ...p, incluirResena: !p.incluirResena }))}>
+                <div style={{ width: 44, height: 24, background: addProf.incluirResena ? "var(--primary-blue)" : "var(--border-color)", borderRadius: 12, position: "relative", transition: "background 0.3s" }}>
+                  <div style={{ width: 18, height: 18, background: "#fff", borderRadius: "50%", position: "absolute", top: 3, left: addProf.incluirResena ? 23 : 3, transition: "left 0.3s", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }} />
+                </div>
               </div>
             </div>
 
-            {/* Criterios */}
+            {addProf.incluirResena ? (
+              <>
+                {/* Criterios */}
             <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 10, letterSpacing: 0.5 }}>CALIFICA ESTOS CRITERIOS <span style={{ color: OR }}>*</span></div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
               {CRIT.map(c => (
@@ -269,10 +276,20 @@ export const Agregar = ({
               <span style={{ fontSize: 11, color: addProf.texto.length >= 450 ? "#DC2626" : "var(--text-light)", fontWeight: 600, transition: "color .2s" }}>{addProf.texto.length} / 500</span>
               {addProf.texto.length < 20 && addProf.texto.length > 0 && <span style={{ fontSize: 11, color: OR, fontWeight: 600 }}>Mínimo 20 caracteres</span>}
             </div>
+              </>
+            ) : (
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: "var(--text-light)" }}>
+                <div style={{ fontSize: 48, opacity: 0.5 }}>👻</div>
+                <div style={{ textAlign: "center", fontSize: 14, fontWeight: 500 }}>
+                  Estás registrando al profesor sin dejarle una reseña.<br/>
+                  Aparecerá en la sección "Nuevos Profesores".
+                </div>
+              </div>
+            )}
             
             <div style={{ marginTop: "auto", paddingTop: 20 }}>
               <button className="btn btn-blue" onClick={submitAddProf} style={{ width: "100%", padding: "16px", fontSize: 16 }}>
-                Agregar profesor y publicar reseña
+                {addProf.incluirResena ? "Agregar profesor y publicar reseña" : "Registrar Profesor (Sin reseña)"}
               </button>
             </div>
           </div>
