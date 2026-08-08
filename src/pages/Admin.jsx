@@ -5,7 +5,7 @@ import { db, auth } from "../services/firebase.js";
 import { B, BD, OR, CRIT, SEDES, FACULTADES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
-import { formatFecha, avg, ratingColor, normalizeText } from "../utils/helpers.js";
+import { formatFecha, avg, ratingColor, normalizeText, capitalizeName } from "../utils/helpers.js";
 
 export const Admin = ({
   adminUser,
