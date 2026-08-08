@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
@@ -14,6 +14,10 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 export const db = getFirestore(firebaseApp);
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code === 'failed-precondition') console.warn('Persistence failed: Multiple tabs open');
+  else if (err.code === 'unimplemented') console.warn('Persistence not supported by browser');
+});
 export const auth = getAuth(firebaseApp);
 
 // Initialize App Check if SITE_KEY is configured
