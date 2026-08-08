@@ -382,6 +382,15 @@ export const Admin = ({
                         <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>
                           {(p.facultades || [p.facultad]).join(", ")} {p.sede && `· Sede ${p.sede}`} · {p.totalReseñas || 0} reseñas
                         </div>
+                        {p.recomendacionesFacultad && Object.keys(p.recomendacionesFacultad).length > 0 && (
+                          <div style={{ marginTop: 4, marginBottom: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                            {Object.entries(p.recomendacionesFacultad).map(([fac, votos]) => (
+                              <span key={fac} style={{ background: "#fef3c7", border: "1px solid #f59e0b", color: "#b45309", padding: "4px 10px", borderRadius: 12, fontSize: 12, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                                ⚠️ Sugerido para: {fac} <span style={{ background: "#f59e0b", color: "#fff", padding: "2px 6px", borderRadius: 10, fontSize: 10 }}>{votos}</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </>
                     )}
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -520,14 +529,22 @@ export const Admin = ({
       {/* FEEDBACKS TAB */}
       {activeTab === "feedbacks" && (
         <div className="fade-in">
-          {(!pendingFeedbacks || pendingFeedbacks.length === 0) ? (
+          <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+            <button className="btn" onClick={() => setBusquedaAdmin("pending")} style={{ background: busquedaAdmin !== "archived" ? B : "var(--card-bg)", color: busquedaAdmin !== "archived" ? "#fff" : "var(--text-dark)", border: "1px solid", borderColor: busquedaAdmin !== "archived" ? B : "var(--border-color)", padding: "8px 16px", fontSize: 13, borderRadius: 20 }}>
+              Nuevas ({pendingFeedbacks.length})
+            </button>
+            <button className="btn" onClick={() => setBusquedaAdmin("archived")} style={{ background: busquedaAdmin === "archived" ? B : "var(--card-bg)", color: busquedaAdmin === "archived" ? "#fff" : "var(--text-dark)", border: "1px solid", borderColor: busquedaAdmin === "archived" ? B : "var(--border-color)", padding: "8px 16px", fontSize: 13, borderRadius: 20 }}>
+              Historial ({archivedFeedbacks.length})
+            </button>
+          </div>
+          {((busquedaAdmin === "archived" ? archivedFeedbacks : pendingFeedbacks) || []).length === 0 ? (
              <div className="card" style={{ padding: 40, textAlign: "center", color: "var(--text-light)" }}>
                <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
-               <div style={{ fontSize: 16, fontWeight: 700 }}>El buzón de sugerencias está vacío.</div>
+               <div style={{ fontSize: 16, fontWeight: 700 }}>El buzón está vacío en esta sección.</div>
              </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
-              {pendingFeedbacks.map(f => (
+              {(busquedaAdmin === "archived" ? archivedFeedbacks : pendingFeedbacks).map(f => (
                 <div key={f.id} className="card" style={{ padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, borderLeft: f.respuesta ? "4px solid #cbd5e1" : "4px solid #fef08a", opacity: f.respuesta ? 0.7 : 1, flexWrap: "wrap" }}>
                   <div style={{ flex: "1 1 250px", minWidth: 0 }}>
                     <p style={{ fontSize: 15, color: "#2d3a50", lineHeight: 1.6, marginBottom: 8, whiteSpace: "pre-wrap", background: "#f8fafc", padding: "12px 16px", borderRadius: 12, border: "1px solid #e2e8f0" }}>{f.mensaje}</p>
@@ -556,7 +573,11 @@ export const Admin = ({
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignSelf: "flex-end" }}>
                     {!f.respuesta && replyFeedbackId !== f.id && <button className="btn btn-blue" style={{ fontSize: 13, padding: "6px 12px" }} onClick={() => { setReplyFeedbackId(f.id); setReplyFeedbackText(`> "${f.mensaje}"\n\n`); }}>💬 Responder</button>}
-                    <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px" }} onClick={() => eliminarFeedback(f.id)}>🗑️ {f.respuesta ? "Eliminar" : "Descartar"}</button>
+                    {busquedaAdmin !== "archived" ? (
+                      <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px" }} onClick={() => eliminarFeedback(f.id)}>📦 Archivar</button>
+                    ) : (
+                      <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px" }} onClick={() => destruirFeedback(f.id)}>🗑️ Destruir</button>
+                    )}
                   </div>
                 </div>
               ))}

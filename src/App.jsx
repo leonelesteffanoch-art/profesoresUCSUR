@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
-import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, increment } from "firebase/firestore";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { db, auth, COL_RESENAS } from "./services/firebase.js";
 import { FORM_EMPTY, ADD_EMPTY, FRASES_INICIO, CRIT } from "./constants.js";
@@ -400,6 +400,18 @@ export default function App() {
     }
   };
 
+  const recomendarFacultad = async (id, facultad) => {
+    try {
+      await updateDoc(doc(db, "profesores", id), {
+        [`recomendacionesFacultad.${facultad}`]: increment(1)
+      });
+      localStorage.setItem(`rec_fac_${id}`, "true");
+      showToast(`✅ Sugerencia para ${facultad} enviada.`);
+    } catch (e) {
+      showToast("❌ Error al enviar la sugerencia.");
+    }
+  };
+
   const eliminarCurso = async (prof, curso) => {
     if (!window.confirm(`¿Eliminar el curso "${curso}" de ${prof.nombre}?`)) return;
     try {
@@ -561,7 +573,7 @@ export default function App() {
               showToast={showToast}
               reportes={reportes}
               votados={votados} setVotados={setVotados}
-              formRef={formRef}
+              formRef={formRef} recomendarFacultad={recomendarFacultad}
             />
           } />
 

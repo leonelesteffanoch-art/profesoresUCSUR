@@ -5,6 +5,7 @@ export const FAC_COLOR = {
   "Ciencias de la Comunicación y Creatividad": "#9333EA", "Ciencias Empresariales": "#0891B2",
   "Ciencias de la Ingenieria": "#1560AA", "Ciencias de la Salud": "#E87722",
   "Ciencias Políticas y Derecho": "#7C3AED", "Ciencias de la Educación": "#DB2777",
+  "Cursos Básicos y Generales": "#4F46E5",
 };
 
 export const FAC_BG = {
@@ -12,6 +13,7 @@ export const FAC_BG = {
   "Ciencias de la Comunicación y Creatividad": "#f3e8ff", "Ciencias Empresariales": "#e0f2fe",
   "Ciencias de la Ingenieria": "#deeaf8", "Ciencias de la Salud": "#fff3e0",
   "Ciencias Políticas y Derecho": "#ede9fe", "Ciencias de la Educación": "#fce7f3",
+  "Cursos Básicos y Generales": "#e0e7ff",
 };
 
 export const FAC_EMOJI = {
@@ -19,9 +21,10 @@ export const FAC_EMOJI = {
   "Ciencias de la Comunicación y Creatividad": "🎨", "Ciencias Empresariales": "📊",
   "Ciencias de la Ingenieria": "⚙️", "Ciencias de la Salud": "🩺",
   "Ciencias Políticas y Derecho": "⚖️", "Ciencias de la Educación": "📚",
+  "Cursos Básicos y Generales": "💡",
 };
 
-export const FACULTADES = ["Todas", "Ciencias de la Arquitectura", "Ciencias Biológicas", "Ciencias de la Comunicación y Creatividad", "Ciencias Empresariales", "Ciencias de la Ingenieria", "Ciencias de la Salud", "Ciencias Políticas y Derecho", "Ciencias de la Educación"];
+export const FACULTADES = ["Todas", "Ciencias de la Arquitectura", "Ciencias Biológicas", "Ciencias de la Comunicación y Creatividad", "Ciencias Empresariales", "Ciencias de la Ingenieria", "Ciencias de la Salud", "Ciencias Políticas y Derecho", "Ciencias de la Educación", "Cursos Básicos y Generales"];
 export const FACULTADES_FORM = FACULTADES.filter(f => f !== "Todas");
 
 export const SEMESTRES = ["2026-1", "2025-2", "2025-1", "2024-2", "2024-1", "2023-2", "2023-1", "2022-2", "2022-1", "Anterior"];

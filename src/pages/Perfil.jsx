@@ -25,11 +25,16 @@ export const Perfil = ({
   toggleUtil,
   reportes,
   reportarResena,
-  formRef
+  formRef,
+  recomendarFacultad
 }) => {
   const routerNav = useRouterNav();
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showRecommend, setShowRecommend] = useState(false);
+  const [recFacultad, setRecFacultad] = useState("");
   if (!selProf) return null;
+
+  const hasRecommended = localStorage.getItem(`rec_fac_${selProf.id}`) === "true";
 
   const getCourseRank = (curso) => {
     if (!profesores || (selProf.totalReseñas || 0) === 0) return null;
@@ -94,6 +99,30 @@ export const Perfil = ({
                 })}
               </div>
               {selProf.bio && <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{selProf.bio}</p>}
+              
+              {!hasRecommended && (
+                <div style={{ marginTop: 12 }}>
+                  {!showRecommend ? (
+                    <button className="btn btn-ghost" onClick={() => setShowRecommend(true)} style={{ fontSize: 13, padding: "6px 12px", border: "1px dashed var(--border-color)", color: "var(--text-light)" }}>
+                      💡 Sugerir para otra facultad
+                    </button>
+                  ) : (
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", background: "var(--card-bg)", padding: 8, borderRadius: 12, border: "1px solid var(--border-color)" }}>
+                      <select className="input" style={{ padding: "8px 12px", fontSize: 13, flex: 1, minWidth: 150 }} value={recFacultad} onChange={e => setRecFacultad(e.target.value)}>
+                        <option value="">Seleccionar facultad...</option>
+                        {FACULTADES_FORM.filter(f => !(selProf.facultades || [selProf.facultad]).includes(f)).map(f => (
+                          <option key={f} value={f}>{f}</option>
+                        ))}
+                      </select>
+                      <button className="btn btn-blue" disabled={!recFacultad} style={{ padding: "8px 16px", fontSize: 13 }} onClick={() => {
+                        recomendarFacultad(selProf.id, recFacultad);
+                        setShowRecommend(false);
+                      }}>Enviar</button>
+                      <button className="btn btn-ghost" style={{ padding: "8px 16px", fontSize: 13 }} onClick={() => setShowRecommend(false)}>✕</button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div style={{ textAlign: "center", background: "#fff", borderRadius: 20, padding: "20px 28px", border: "1px solid var(--border-color)", boxShadow: "0 8px 24px rgba(0,0,0,.06)" }}>
               <RatingChip r={globalRating} large />
