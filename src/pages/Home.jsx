@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL, SEDES } from "../constants.js";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/UI/Avatar.jsx";
@@ -337,7 +338,7 @@ export const Home = ({
       </div>
       
       {/* Modal Manual para Agrandar Noticia */}
-      {expandedNews && (
+      {expandedNews && createPortal(
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div className="card fade-in" style={{ maxWidth: 550, width: "100%", maxHeight: "90vh", position: "relative", overflowY: "auto", background: "var(--card-bg)" }}>
             
@@ -361,7 +362,8 @@ export const Home = ({
               <button className="btn btn-ghost" onClick={() => setExpandedNews(null)} style={{ width: "100%", padding: "12px", background: "var(--border-color)", fontWeight: "bold" }}>Cerrar</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
