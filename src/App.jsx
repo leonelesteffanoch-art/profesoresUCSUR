@@ -141,8 +141,8 @@ export default function App() {
   const [addCursoSede, setAddCursoSede] = useState([]);
   const [addCursoFac, setAddCursoFac] = useState([]);
   const [toast, setToast] = useState(null);
-  const [rankTab, setRankTab] = useState("top");
-  const [rankCursoFiltro, setRankCursoFiltro] = useState("");
+  const [rankTab, setRankTab] = useState(() => sessionStorage.getItem("rankTab") || "top");
+  const [rankCursoFiltro, setRankCursoFiltro] = useState(() => sessionStorage.getItem("rankCurso") || "");
   const [loading, setLoading] = useState(true);
   const [adminUser, setAdminUser] = useState(null);
   const [adminEmail, setAdminEmail] = useState("");
@@ -280,6 +280,12 @@ export default function App() {
     }
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  // Persist ranking filters
+  useEffect(() => {
+    sessionStorage.setItem("rankTab", rankTab);
+    sessionStorage.setItem("rankCurso", rankCursoFiltro);
+  }, [rankTab, rankCursoFiltro]);
 
   const showToast = useCallback(msg => setToast(msg), []);
 
