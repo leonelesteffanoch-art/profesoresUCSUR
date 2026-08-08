@@ -251,7 +251,7 @@ export const Home = ({
                     }}>{n.contenido}</p>
                     {n.link && (
                       <div style={{ marginTop: 16 }}>
-                        <a href={n.link} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "inline-block", fontSize: 13, padding: "8px 16px", textDecoration: "none" }}>🔗 Ver por completo</a>
+                        <a href={n.link.startsWith("http") ? n.link : `https://${n.link}`} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "inline-block", fontSize: 13, padding: "8px 16px", textDecoration: "none" }}>🔗 Ver por completo</a>
                       </div>
                     )}
                   </div>
@@ -367,7 +367,7 @@ export const Home = ({
                 <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.6, whiteSpace: "pre-wrap", marginBottom: 24 }}>{noticias[0].contenido}</p>
                 
                 {noticias[0].link && (
-                  <a href={noticias[0].link} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "block", textAlign: "center", padding: "12px", textDecoration: "none", marginBottom: 16 }}>🔗 Ver por completo</a>
+                  <a href={noticias[0].link.startsWith("http") ? noticias[0].link : `https://${noticias[0].link}`} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "block", textAlign: "center", padding: "12px", textDecoration: "none", marginBottom: 16 }}>🔗 Ver por completo</a>
                 )}
                 
                 {/* Botón grande para cerrar abajo también */}
