@@ -27,6 +27,7 @@ export const Home = ({
   const [currentNewsIdx, setCurrentNewsIdx] = useState(0);
   const [newsHovered, setNewsHovered] = useState(false);
   const [touchStartX, setTouchStartX] = useState(null);
+  const [expandedNews, setExpandedNews] = useState(null);
 
   // Autoplay para noticias
   useEffect(() => {
@@ -238,11 +239,12 @@ export const Home = ({
                       fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, 
                       whiteSpace: "pre-wrap", maxHeight: 150, overflowY: "auto", paddingRight: 4 
                     }}>{n.contenido}</p>
-                    {n.link && (
-                      <div style={{ marginTop: 16 }}>
-                        <a href={n.link.startsWith("http") ? n.link : `https://${n.link}`} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "inline-block", fontSize: 13, padding: "8px 16px", textDecoration: "none" }}>🔗 Ver por completo</a>
-                      </div>
-                    )}
+                    <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
+                      {n.link && (
+                        <a href={n.link.startsWith("http") ? n.link : `https://${n.link}`} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "inline-flex", alignItems: "center", fontSize: 13, padding: "8px 16px", textDecoration: "none" }}>📲 Únete al Canal de Difusión</a>
+                      )}
+                      <button onClick={() => setExpandedNews(n)} className="btn btn-ghost" style={{ display: "inline-flex", alignItems: "center", fontSize: 13, padding: "8px 16px" }}>🔍 Agrandar noticia</button>
+                    </div>
                   </div>
                 </div>
               );
@@ -333,6 +335,36 @@ export const Home = ({
           ))}
         </div>
       </div>
+      
+      {/* Modal Manual para Agrandar Noticia */}
+      {expandedNews && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div className="card fade-in" style={{ maxWidth: 550, width: "100%", maxHeight: "90vh", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", background: "var(--card-bg)" }}>
+            
+            <button onClick={() => setExpandedNews(null)} 
+              style={{ position: "absolute", top: 12, right: 12, background: "rgba(0,0,0,0.6)", color: "white", border: "none", width: 32, height: 32, borderRadius: "50%", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>✖</button>
+            
+            <div style={{ overflowY: "auto", flex: 1 }}>
+              {expandedNews.imagenUrl && (
+                <img src={expandedNews.imagenUrl} alt={expandedNews.titulo} 
+                  onError={(e) => { e.target.style.display = 'none'; }} 
+                  style={{ width: "100%", height: 250, objectFit: "cover", display: "block", backgroundColor: "#f1f5f9" }} />
+              )}
+              <div style={{ padding: 24 }}>
+                <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--text-dark)", marginBottom: 8, lineHeight: 1.3 }}>{expandedNews.titulo}</h3>
+                <div style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 20, fontWeight: 600 }}>🗓️ {formatFechaExacta(expandedNews.createdAt)}</div>
+                <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, whiteSpace: "pre-wrap", marginBottom: 24 }}>{expandedNews.contenido}</p>
+                
+                {expandedNews.link && (
+                  <a href={expandedNews.link.startsWith("http") ? expandedNews.link : `https://${expandedNews.link}`} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "block", textAlign: "center", padding: "14px", textDecoration: "none", marginBottom: 16, fontSize: 15 }}>📲 Únete al Canal de Difusión</a>
+                )}
+                
+                <button className="btn btn-ghost" onClick={() => setExpandedNews(null)} style={{ width: "100%", padding: "12px", background: "var(--border-color)", fontWeight: "bold" }}>Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
