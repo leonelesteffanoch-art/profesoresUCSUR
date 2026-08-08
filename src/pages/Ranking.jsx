@@ -1,11 +1,10 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { B, BD, OR } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { Link } from "react-router-dom";
 
-export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
-  const [cursoFiltro, setCursoFiltro] = useState("");
+export const Ranking = ({ profesores, rankTab, setRankTab, rankCursoFiltro: cursoFiltro, setRankCursoFiltro: setCursoFiltro, navigate }) => {
 
   const todosLosCursos = useMemo(() => {
     const cursos = new Set();

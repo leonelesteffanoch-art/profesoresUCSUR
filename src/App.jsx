@@ -142,6 +142,7 @@ export default function App() {
   const [addCursoFac, setAddCursoFac] = useState([]);
   const [toast, setToast] = useState(null);
   const [rankTab, setRankTab] = useState("top");
+  const [rankCursoFiltro, setRankCursoFiltro] = useState("");
   const [loading, setLoading] = useState(true);
   const [adminUser, setAdminUser] = useState(null);
   const [adminEmail, setAdminEmail] = useState("");
@@ -650,6 +651,7 @@ export default function App() {
               <Ranking 
                 profesores={profesores}
                 rankTab={rankTab} setRankTab={setRankTab}
+                rankCursoFiltro={rankCursoFiltro} setRankCursoFiltro={setRankCursoFiltro}
                 navigate={navigate}
               />
             </div>
