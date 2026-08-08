@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL, SEDES } from "../constants.js";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/UI/Avatar.jsx";
@@ -28,7 +28,7 @@ export const Home = ({
   const [newsHovered, setNewsHovered] = useState(false);
 
   // Autoplay para noticias
-  React.useEffect(() => {
+  useEffect(() => {
     if (!noticias || noticias.length <= 1 || newsHovered) return;
     const interval = setInterval(() => {
       setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1));
