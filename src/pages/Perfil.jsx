@@ -110,9 +110,14 @@ export const Perfil = ({
             {!hasRecommended && (
               <div style={{ marginTop: 16 }}>
                 {!showRecommend ? (
-                  <button className="btn" onClick={() => setShowRecommend(true)} style={{ fontSize: 14, padding: "10px 20px", background: "var(--primary-blue)", color: "#fff", fontWeight: 800, borderRadius: 12, boxShadow: "0 6px 16px rgba(59, 130, 246, 0.3)", border: "none", transition: "transform 0.2s" }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
-                    💡 Sugerir para otra facultad
-                  </button>
+                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                    <button className="btn" onClick={() => setShowRecommend(true)} style={{ fontSize: 14, padding: "10px 20px", background: "var(--primary-blue)", color: "#fff", fontWeight: 800, borderRadius: 12, boxShadow: "0 6px 16px rgba(59, 130, 246, 0.3)", border: "none", transition: "transform 0.2s" }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+                      💡 Sugerir para otra facultad
+                    </button>
+                    <button className="btn" onClick={() => navigate("agregar", selProf)} style={{ fontSize: 14, padding: "10px 20px", background: "var(--card-bg)", color: "var(--text-dark)", fontWeight: 800, borderRadius: 12, border: "2px solid var(--border-color)", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--primary-blue)"; e.currentTarget.style.color = "var(--primary-blue)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-color)"; e.currentTarget.style.color = "var(--text-dark)"; }}>
+                      ➕ Añadir un curso
+                    </button>
+                  </div>
                 ) : (
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", background: "var(--card-bg)", padding: "12px", borderRadius: 16, border: "2px solid var(--primary-blue)" }}>
                     <select className="input" style={{ padding: "10px 14px", fontSize: 14, flex: 1, minWidth: 150 }} value={recFacultad} onChange={e => setRecFacultad(e.target.value)}>

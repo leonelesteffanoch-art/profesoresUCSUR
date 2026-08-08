@@ -18,7 +18,7 @@ import { Admin } from "./pages/Admin.jsx";
 import { Feedback } from "./pages/Feedback.jsx";
 
 // Wrapper that resolves profesor from URL param
-function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, votados, setVotados, formRef }) {
+function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, votados, setVotados, formRef, navigate }) {
   const { profId } = useParams();
   const nav = useNavigate();
   const [form, setForm] = useState(FORM_EMPTY);
@@ -118,6 +118,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
         votados={votados} toggleUtil={toggleUtil}
         reportes={reportes} reportarResena={reportarResena}
         formRef={formRef}
+        navigate={navigate}
       />
     </div>
   );
@@ -284,10 +285,17 @@ export default function App() {
   // Universal navigate function that maps old page names to routes
   const navigate = useCallback((p, prof = null) => {
     setAddProf(ADD_EMPTY); setAddMode("nuevo"); setAddProfSel(null); setAddCurso(""); setAddCursoSede([]); setAddCursoFac([]);
+    
     if (p === "home") nav("/");
     else if (p === "perfil" && prof) nav(`/profesor/${prof.id}`);
     else if (p === "ranking") nav("/ranking");
-    else if (p === "agregar") nav("/agregar");
+    else if (p === "agregar") {
+      if (prof) {
+        setAddMode("curso");
+        setAddProfSel(prof);
+      }
+      nav("/agregar");
+    }
     else if (p === "feedback") nav("/feedback");
     else if (p === "admin") nav("/admin");
     else nav(`/${p}`);
@@ -641,6 +649,7 @@ export default function App() {
               reportes={reportes}
               votados={votados} setVotados={setVotados}
               formRef={formRef} recomendarFacultad={recomendarFacultad}
+              navigate={navigate}
             />
           } />
 
