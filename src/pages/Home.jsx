@@ -26,6 +26,7 @@ export const Home = ({
 }) => {
   const [currentNewsIdx, setCurrentNewsIdx] = useState(0);
   const [newsHovered, setNewsHovered] = useState(false);
+  const [touchStartX, setTouchStartX] = useState(null);
 
   // Autoplay para noticias
   useEffect(() => {
@@ -106,7 +107,8 @@ export const Home = ({
               </select>
             </div>
             
-            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }}>
+            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 12, alignItems: "center", WebkitOverflowScrolling: "touch" }}>
+              {/* Facultades */}
               {FACULTADES.map(f => (
                 <button key={f} onClick={() => setFacFiltro(f)}
                   aria-pressed={facFiltro === f}
@@ -117,13 +119,13 @@ export const Home = ({
                     color: facFiltro === f ? "#fff" : (FAC_COLOR[f] || "var(--text-muted)"), 
                     borderColor: facFiltro === f ? (FAC_COLOR[f] || B) : (FAC_BG[f] || "var(--border-color)") 
                   }}>
-                  {f === "Todas" ? "Todas" : `${FAC_EMOJI[f] || ""} ${f}`}
+                  {f === "Todas" ? "Todas Facultades" : `${FAC_EMOJI[f] || ""} ${f}`}
                 </button>
               ))}
-            </div>
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", paddingBottom: 8, marginTop: 4 }}>
-              {/* Botón Todas */}
+              <div style={{ width: 1, height: 24, background: "var(--border-color)", flexShrink: 0, margin: "0 2px" }} />
+
+              {/* Sedes */}
               <button onClick={() => setSedeFiltro([])}
                 aria-pressed={sedeFiltro.length === 0}
                 style={{ 
@@ -154,7 +156,7 @@ export const Home = ({
                       color: isSelected ? "#fff" : "var(--text-muted)", 
                       borderColor: isSelected ? c : "var(--border-color)" 
                     }}>
-                    📍 {s}
+                    📍 Sede {s}
                   </button>
                 );
               })}
@@ -171,7 +173,16 @@ export const Home = ({
       {noticias && noticias.length > 0 && (
         <div style={{ maxWidth: 780, margin: "24px auto 0", padding: "0 16px" }}
              onMouseEnter={() => setNewsHovered(true)}
-             onMouseLeave={() => setNewsHovered(false)}>
+             onMouseLeave={() => setNewsHovered(false)}
+             onTouchStart={e => setTouchStartX(e.touches[0].clientX)}
+             onTouchEnd={e => {
+               if (touchStartX === null) return;
+               const touchEndX = e.changedTouches[0].clientX;
+               const diff = touchStartX - touchEndX;
+               if (diff > 50) setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1));
+               else if (diff < -50) setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1));
+               setTouchStartX(null);
+             }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 8, margin: 0 }}>
               <span>📢</span> Novedades de la plataforma
@@ -196,12 +207,12 @@ export const Home = ({
           <div style={{ position: "relative" }}>
             {noticias.length > 1 && (
               <>
-                <button className="btn btn-ghost" onClick={() => setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1))}
-                  style={{ position: "absolute", left: -16, top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "var(--card-bg)", border: "1px solid var(--border-color)", width: 40, height: 40, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                <button className="btn btn-ghost desktop-only" onClick={() => setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1))}
+                  style={{ position: "absolute", left: -48, top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "var(--card-bg)", border: "1px solid var(--border-color)", width: 40, height: 40, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
                   ←
                 </button>
-                <button className="btn btn-ghost" onClick={() => setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1))}
-                  style={{ position: "absolute", right: -16, top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "var(--card-bg)", border: "1px solid var(--border-color)", width: 40, height: 40, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                <button className="btn btn-ghost desktop-only" onClick={() => setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1))}
+                  style={{ position: "absolute", right: -48, top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "var(--card-bg)", border: "1px solid var(--border-color)", width: 40, height: 40, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
                   →
                 </button>
               </>
