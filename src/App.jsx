@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
-import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, increment } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, increment, writeBatch } from "firebase/firestore";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { db, auth, COL_RESENAS } from "./services/firebase.js";
 import { FORM_EMPTY, ADD_EMPTY, FRASES_INICIO, CRIT } from "./constants.js";
@@ -486,32 +486,39 @@ export default function App() {
   const fusionarCursosGlobal = async (cursoMalo, cursoBueno) => {
     if (!cursoMalo || !cursoBueno) {
       showToast("⚠️ Debes seleccionar un curso incorrecto y escribir el correcto.");
-      return;
+      return false;
     }
-    if (cursoMalo.toLowerCase() === cursoBueno.toLowerCase() && cursoMalo !== cursoBueno) {
-      // Diferencia de tildes o mayúsculas. Es válido fusionar.
-    } else if (cursoMalo === cursoBueno) {
+    // Comparar sin tildes para detectar duplicados por acentuación
+    const normMalo = normalizeText(cursoMalo);
+    const normBueno = normalizeText(cursoBueno);
+    
+    if (cursoMalo === cursoBueno) {
       showToast("⚠️ El curso incorrecto y el correcto son exactamente iguales.");
-      return;
+      return false;
     }
 
-    if (!window.confirm(`¿Reemplazar "${cursoMalo}" por "${cursoBueno}" en todos los profesores?`)) return;
+    const profesAfectados = profesores.filter(p => (p.cursos || []).includes(cursoMalo));
+    if (profesAfectados.length === 0) {
+      showToast(`⚠️ No se encontró a ningún profesor con el curso "${cursoMalo}".`);
+      return false;
+    }
+
+    if (!window.confirm(`¿Reemplazar "${cursoMalo}" por "${cursoBueno}" en ${profesAfectados.length} profesor(es)?`)) return false;
     
     try {
-      const profesAfectados = profesores.filter(p => (p.cursos || []).includes(cursoMalo));
-      if (profesAfectados.length === 0) {
-        showToast(`⚠️ No se encontró a ningún profesor con el curso "${cursoMalo}".`);
-        return;
-      }
-
+      // Usar writeBatch para hacer todas las escrituras en una sola operación de red
+      const batch = writeBatch(db);
       for (const p of profesAfectados) {
         const nuevosCursos = [...new Set([...(p.cursos || []).filter(c => c !== cursoMalo), cursoBueno])];
-        await updateDoc(doc(db, "profesores", p.id), { cursos: nuevosCursos });
+        batch.update(doc(db, "profesores", p.id), { cursos: nuevosCursos });
       }
-      showToast(`✅ Se reemplazó el curso en ${profesAfectados.length} profesor(es).`);
+      await batch.commit();
+      showToast(`✅ "${cursoMalo}" → "${cursoBueno}" en ${profesAfectados.length} profesor(es).`);
+      return true;
     } catch (e) {
-      console.error(e);
+      console.error("Error fusionando cursos:", e);
       showToast("❌ Error al fusionar cursos.");
+      return false;
     }
   };
 

@@ -637,9 +637,11 @@ export const Admin = ({
               </select>
               <span style={{ color: "var(--text-muted)" }}>👉</span>
               <input className="input" placeholder="Nombre correcto (ej: Bioquímica)" value={fusionarCursoBueno} onChange={e => setFusionarCursoBueno(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} />
-              <button className="btn btn-blue" disabled={!fusionarCursoMalo || !fusionarCursoBueno.trim()} onClick={() => {
-                fusionarCursosGlobal(fusionarCursoMalo, capitalizeName(fusionarCursoBueno.trim()));
-                setFusionarCursoMalo(""); setFusionarCursoBueno("");
+              <button className="btn btn-blue" disabled={!fusionarCursoMalo || !fusionarCursoBueno.trim()} onClick={async () => {
+                const malo = fusionarCursoMalo;
+                const bueno = capitalizeName(fusionarCursoBueno.trim());
+                const ok = await fusionarCursosGlobal(malo, bueno);
+                if (ok) { setFusionarCursoMalo(""); setFusionarCursoBueno(""); }
               }} style={{ padding: "12px 24px" }}>Fusionar</button>
             </div>
           </div>
