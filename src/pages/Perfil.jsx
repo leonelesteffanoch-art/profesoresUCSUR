@@ -259,10 +259,10 @@ export const Perfil = ({
             </div>
             
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-              {CRIT.map(c => <span key={c} style={{ background: "#f3f6fb", borderRadius: 8, padding: "4px 12px", fontSize: 12, color: "#5a6a80", fontWeight: 600 }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}: <strong style={{ color: ratingColor(r.criterios[c]) }}>{r.criterios[c]}</strong></span>)}
+              {CRIT.map(c => <span key={c} style={{ background: "var(--card-bg-alt, #f3f6fb)", borderRadius: 8, padding: "4px 12px", fontSize: 12, color: "var(--text-muted, #5a6a80)", fontWeight: 600, border: "1px solid var(--border-color)" }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}: <strong style={{ color: ratingColor(r.criterios[c]) }}>{r.criterios[c]}</strong></span>)}
             </div>
             
-            <p style={{ fontSize: 15, color: "#2d3a50", lineHeight: 1.75 }}>{r.texto}</p>
+            <p style={{ fontSize: 15, color: "var(--text-dark)", lineHeight: 1.75 }}>{r.texto}</p>
             
             <Divider />
             

@@ -174,7 +174,17 @@ export default function App() {
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "profesores"), snap => {
-      setProfesores(snap.docs.map(d => ({ id: d.id, _randomOrder: Math.random(), ...d.data() })));
+      setProfesores(snap.docs.map(d => {
+        const data = d.data();
+        const facultades = Array.isArray(data.facultad) ? data.facultad : [data.facultad].filter(Boolean);
+        return { 
+          id: d.id, 
+          _randomOrder: Math.random(), 
+          ...data,
+          facultad: facultades[0] || "",
+          facultades: facultades
+        };
+      }));
       setLoading(false);
     });
     return () => unsub();
@@ -301,7 +311,7 @@ export default function App() {
 
       const profRef = await addDoc(collection(db, "profesores"), { 
         nombre: capitalizeName(addProf.nombre.trim()), 
-        facultad: addProf.facultad, 
+        facultad: addProf.facultades ? addProf.facultades : [addProf.facultad], 
         cursos: [capitalizeName(addProf.curso.trim())], 
         sede: addProf.sede,
         bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
@@ -346,9 +356,14 @@ export default function App() {
     } catch (e) { showToast("❌ Error al agregar el curso."); }
   };
 
-  const editarProfesor = async (id, nombre, bio, sede, alerta = "") => {
+  const editarProfesor = async (id, nombre, bio, sede, alerta = "", facultades = []) => {
     try {
-      await updateDoc(doc(db, "profesores", id), { nombre: capitalizeName(nombre.trim()), bio: bio.trim(), sede, alerta: alerta.trim() });
+      const updates = { nombre: capitalizeName(nombre.trim()), bio: bio.trim(), sede, alerta: alerta.trim() };
+      if (facultades && facultades.length > 0) {
+        updates.facultades = facultades;
+        updates.facultad = facultades[0];
+      }
+      await updateDoc(doc(db, "profesores", id), updates);
       showToast("✅ Profesor actualizado.");
     } catch (e) {
       showToast("❌ Error al editar el profesor.");

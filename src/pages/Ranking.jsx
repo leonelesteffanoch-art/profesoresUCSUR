@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { B, BD, OR } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
+import { Link } from "react-router-dom";
 
 export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
   const [cursoFiltro, setCursoFiltro] = useState("");
@@ -56,7 +57,7 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
             const p = podio[idx]; 
             if (!p) return null; 
             return (
-              <div key={p.id} onClick={() => navigate("perfil", p)} className="card-hover" style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer", flex: 1, maxWidth: 180, transition: "transform .2s" }}>
+              <Link key={p.id} to={`/profesor/${p.id}`} className="card-hover" style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer", flex: 1, maxWidth: 180, transition: "transform .2s", textDecoration: "none" }}>
                 <span style={{ fontSize: 32, marginBottom: 8, filter: "drop-shadow(0 4px 6px rgba(0,0,0,.1))" }}>{medals[idx]}</span>
                 <Avatar name={p.nombre} fac={p.facultad} size={idx === 0 ? 72 : 56} />
                 <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text-dark)", marginTop: 10, textAlign: "center" }}>{p.nombre.split(" ")[0]}</div>
@@ -76,13 +77,13 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
                 }}>
                   <span style={{ color: "#fff", fontWeight: 800, fontSize: 18 }}>#{idx + 1}</span>
                 </div>
-              </div>
+              </Link>
           ); })}
         </div>
         <div className="card" style={{ padding: "8px 0" }}>
           {top.slice(3).map((p, i) => (
-            <div key={p.id} onClick={() => navigate("perfil", p)}
-              style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s" }}
+            <Link key={p.id} to={`/profesor/${p.id}`}
+              style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none" }}
               onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
               <span style={{ fontSize: 14, color: "var(--text-light)", fontWeight: 800, width: 32 }}>#{i + 4}</span>
               <Avatar name={p.nombre} fac={p.facultad} size={42} />
@@ -94,7 +95,7 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
                 <RatingChip r={p.rating} />
                 <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 600 }}>{p.totalReseñas || 0} reseñas</span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </>}
@@ -107,8 +108,8 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
 
       {rankTab === "worst" && <div className="card" style={{ padding: "8px 0" }}>
         {worst.map((p, i) => (
-          <div key={p.id} onClick={() => navigate("perfil", p)}
-            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s" }}
+          <Link key={p.id} to={`/profesor/${p.id}`}
+            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none" }}
             onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
             <span style={{ fontSize: 24, width: 32, textAlign: "center" }}>{i === 0 ? "💀" : i === 1 ? "😬" : "😕"}</span>
             <Avatar name={p.nombre} fac={p.facultad} size={42} />
@@ -120,14 +121,14 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
               <RatingChip r={p.rating} />
               <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 600 }}>{p.totalReseñas || 0} reseñas</span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>}
 
       {rankTab === "popular" && <div className="card" style={{ padding: "8px 0" }}>
         {popular.map((p, i) => (
-          <div key={p.id} onClick={() => navigate("perfil", p)}
-            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s" }}
+          <Link key={p.id} to={`/profesor/${p.id}`}
+            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none" }}
             onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
             <span style={{ fontSize: 14, color: "var(--text-light)", fontWeight: 800, width: 32 }}>#{i + 1}</span>
             <Avatar name={p.nombre} fac={p.facultad} size={42} />
@@ -141,7 +142,7 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
               </div>
               <span style={{ fontSize: 14, fontWeight: 800, color: B }}>{p.totalReseñas || 0}</span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>}
     </div>

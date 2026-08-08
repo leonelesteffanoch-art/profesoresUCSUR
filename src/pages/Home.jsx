@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL, SEDES } from "../constants.js";
+import { Link } from "react-router-dom";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
@@ -27,7 +28,7 @@ export const Home = ({
 
   const filtered = profesores
     .filter(p => normalizeText(p.nombre).includes(normalizeText(busqueda)) || p.cursos?.some(c => normalizeText(c).includes(normalizeText(busqueda))))
-    .filter(p => facFiltro === "Todas" || p.facultad === facFiltro)
+    .filter(p => facFiltro === "Todas" || p.facultades?.includes(facFiltro))
     .filter(p => sedeFiltro.length === 0 || (p.sede && sedeFiltro.includes(p.sede)))
     .sort((a, b) => {
       if (sortBy === "alfabetico") return a.nombre.localeCompare(b.nombre);
@@ -243,23 +244,25 @@ export const Home = ({
             </div>
           )}
           {filtered.map((p, i) => (
-            <div key={p.id} className="card card-hover fade-in" onClick={() => navigate("perfil", p)}
-              style={{ padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, borderLeft: `5px solid ${FAC_COLOR[p.facultad] || B}`, animationDelay: `${i * .04}s`, cursor: "pointer" }}>
+            <Link key={p.id} to={`/profesor/${p.id}`} className="card card-hover fade-in" 
+              style={{ padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, borderLeft: `5px solid ${FAC_COLOR[p.facultad] || B}`, animationDelay: `${i * .04}s`, textDecoration: "none" }}>
               <Avatar name={p.nombre} fac={p.facultad} size={56} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text-dark)", marginBottom: 6 }}>{p.nombre}</div>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  <span className="pill" style={{ background: FAC_BG[p.facultad] || BL, color: FAC_COLOR[p.facultad] || BD }}>{FAC_EMOJI[p.facultad] || ""} {p.facultad}</span>
-                  {p.sede && <span className="pill" style={{ background: "#f3f4f6", color: "#374151" }}>📍 Sede {p.sede}</span>}
-                  {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+                  {p.facultades?.map(f => (
+                    <span key={f} className="pill" style={{ background: FAC_BG[f] || BL, color: FAC_COLOR[f] || BD }}>{FAC_EMOJI[f] || ""} {f}</span>
+                  ))}
                 </div>
+                {p.sede && <span className="pill" style={{ background: "#f3f4f6", color: "#374151" }}>📍 Sede {p.sede}</span>}
+                {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
                 <RatingChip r={p.rating} />
                 <div style={{ marginTop: 6 }}><Stars value={p.rating} size={14} gap={1} /></div>
                 <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 4, fontWeight: 600 }}>{p.totalReseñas || 0} reseñas</div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

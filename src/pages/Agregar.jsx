@@ -83,10 +83,34 @@ export const Agregar = ({
               )}
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Facultad del profesor</label>
-              <select className="input" style={{ cursor: "pointer" }} value={addProf.facultad} onChange={e => setAddProf(p => ({ ...p, facultad: e.target.value }))}>
-                {FACULTADES.filter(f => f !== "Todas").map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
+              <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Facultad(es) del profesor</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {FACULTADES.filter(f => f !== "Todas").map(f => {
+                  const facs = addProf.facultades || [addProf.facultad];
+                  const isSelected = facs.includes(f);
+                  return (
+                    <button key={f} className="pill" onClick={() => {
+                      if (isSelected) {
+                        const newFacs = facs.filter(x => x !== f);
+                        if (newFacs.length > 0) setAddProf(p => ({ ...p, facultades: newFacs, facultad: newFacs[0] }));
+                      } else {
+                        const newFacs = [...facs, f];
+                        setAddProf(p => ({ ...p, facultades: newFacs, facultad: newFacs[0] }));
+                      }
+                    }}
+                    style={{ 
+                      background: isSelected ? FAC_COLOR[f] : "transparent",
+                      color: isSelected ? "#fff" : "var(--text-muted)",
+                      border: `1.5px solid ${FAC_COLOR[f] || B}`,
+                      cursor: "pointer",
+                      padding: "6px 12px",
+                      fontWeight: 600
+                    }}>
+                      {f}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div>
               <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Sede</label>

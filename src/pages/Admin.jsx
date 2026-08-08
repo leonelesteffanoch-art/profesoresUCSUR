@@ -46,11 +46,13 @@ export const Admin = ({
   const [editProfDetailsBio, setEditProfDetailsBio] = useState("");
   const [editProfDetailsSede, setEditProfDetailsSede] = useState("");
   const [editProfDetailsAlerta, setEditProfDetailsAlerta] = useState("");
+  const [editProfDetailsFacultades, setEditProfDetailsFacultades] = useState([]);
 
   // Filtros Profesores
   const [busquedaAdmin, setBusquedaAdmin] = useState("");
-  const [facFiltroAdmin, setFacFiltroAdmin] = useState("Todas");
-  const [sedeFiltroAdmin, setSedeFiltroAdmin] = useState("Todas");
+  const [facFiltroAdmin, setFacFiltroAdmin] = useState([]);
+  const [sedeFiltroAdmin, setSedeFiltroAdmin] = useState([]);
+  const [cursoFiltroAdmin, setCursoFiltroAdmin] = useState([]);
   const [ordenProfAdmin, setOrdenProfAdmin] = useState("rating_desc");
 
   // Filtros Reseñas
@@ -62,10 +64,13 @@ export const Admin = ({
   const pendingFeedbacks = feedbacks?.filter(f => f.estado !== "archivado") || [];
   const archivedFeedbacks = feedbacks?.filter(f => f.estado === "archivado") || [];
 
+  const allCursosAdmin = [...new Set(profesores.flatMap(p => p.cursos || []))].sort();
+
   const filteredProfesores = profesores
-    .filter(p => p.nombre?.toLowerCase().includes(busquedaAdmin.toLowerCase()) || p.cursos?.some(c => c.toLowerCase().includes(busquedaAdmin.toLowerCase())))
-    .filter(p => facFiltroAdmin === "Todas" || p.facultad === facFiltroAdmin)
-    .filter(p => sedeFiltroAdmin === "Todas" || (p.sede && p.sede === sedeFiltroAdmin) || (!p.sede && sedeFiltroAdmin === "Sin Sede"))
+    .filter(p => normalizeText(p.nombre).includes(normalizeText(busquedaAdmin)) || p.cursos?.some(c => normalizeText(c).includes(normalizeText(busquedaAdmin))))
+    .filter(p => facFiltroAdmin.length === 0 || p.facultades?.some(f => facFiltroAdmin.includes(f)))
+    .filter(p => sedeFiltroAdmin.length === 0 || sedeFiltroAdmin.includes(p.sede || "Sin Sede"))
+    .filter(p => cursoFiltroAdmin.length === 0 || p.cursos?.some(c => cursoFiltroAdmin.includes(c)))
     .sort((a, b) => {
       if (ordenProfAdmin === "rating_desc") return (b.rating || 0) - (a.rating || 0);
       if (ordenProfAdmin === "rating_asc") return (a.rating || 0) - (b.rating || 0);
@@ -234,15 +239,51 @@ export const Admin = ({
             <h4 style={{ fontSize: 14, fontWeight: 800, color: "var(--text-dark)", marginBottom: 4 }}>Filtros de Profesores</h4>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
               <input className="input" value={busquedaAdmin} onChange={e => setBusquedaAdmin(e.target.value)} placeholder="Buscar profe o curso..." style={{ padding: "10px 14px", fontSize: 13 }} />
-              <select className="input" style={{ padding: "10px 14px", fontSize: 13, cursor: "pointer" }} value={facFiltroAdmin} onChange={e => setFacFiltroAdmin(e.target.value)}>
-                <option value="Todas">Todas las facultades</option>
-                {FACULTADES.map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
-              <select className="input" style={{ padding: "10px 14px", fontSize: 13, cursor: "pointer" }} value={sedeFiltroAdmin} onChange={e => setSedeFiltroAdmin(e.target.value)}>
-                <option value="Todas">Todas las sedes</option>
-                <option value="Sin Sede">Sin sede asignada</option>
-                {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <details className="input" style={{ padding: 0, margin: 0, cursor: "pointer" }}>
+                <summary style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, userSelect: "none" }}>
+                  Facultades: {facFiltroAdmin.length === 0 ? "Todas" : facFiltroAdmin.length}
+                </summary>
+                <div style={{ padding: "8px 14px", display: "flex", flexDirection: "column", gap: 8, maxHeight: 200, overflowY: "auto", borderTop: "1px solid var(--border-color)", background: "var(--card-bg)" }}>
+                  {FACULTADES.filter(f => f !== "Todas").map(f => (
+                    <label key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer" }}>
+                      <input type="checkbox" checked={facFiltroAdmin.includes(f)} onChange={e => {
+                        if (e.target.checked) setFacFiltroAdmin([...facFiltroAdmin, f]);
+                        else setFacFiltroAdmin(facFiltroAdmin.filter(x => x !== f));
+                      }} /> {f}
+                    </label>
+                  ))}
+                </div>
+              </details>
+              <details className="input" style={{ padding: 0, margin: 0, cursor: "pointer" }}>
+                <summary style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, userSelect: "none" }}>
+                  Sedes: {sedeFiltroAdmin.length === 0 ? "Todas" : sedeFiltroAdmin.length}
+                </summary>
+                <div style={{ padding: "8px 14px", display: "flex", flexDirection: "column", gap: 8, maxHeight: 200, overflowY: "auto", borderTop: "1px solid var(--border-color)", background: "var(--card-bg)" }}>
+                  {["Sin Sede", ...SEDES].map(s => (
+                    <label key={s} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer" }}>
+                      <input type="checkbox" checked={sedeFiltroAdmin.includes(s)} onChange={e => {
+                        if (e.target.checked) setSedeFiltroAdmin([...sedeFiltroAdmin, s]);
+                        else setSedeFiltroAdmin(sedeFiltroAdmin.filter(x => x !== s));
+                      }} /> {s}
+                    </label>
+                  ))}
+                </div>
+              </details>
+              <details className="input" style={{ padding: 0, margin: 0, cursor: "pointer" }}>
+                <summary style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, userSelect: "none" }}>
+                  Cursos: {cursoFiltroAdmin.length === 0 ? "Todos" : cursoFiltroAdmin.length}
+                </summary>
+                <div style={{ padding: "8px 14px", display: "flex", flexDirection: "column", gap: 8, maxHeight: 200, overflowY: "auto", borderTop: "1px solid var(--border-color)", background: "var(--card-bg)" }}>
+                  {allCursosAdmin.map(c => (
+                    <label key={c} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer" }}>
+                      <input type="checkbox" checked={cursoFiltroAdmin.includes(c)} onChange={e => {
+                        if (e.target.checked) setCursoFiltroAdmin([...cursoFiltroAdmin, c]);
+                        else setCursoFiltroAdmin(cursoFiltroAdmin.filter(x => x !== c));
+                      }} /> {c}
+                    </label>
+                  ))}
+                </div>
+              </details>
               <select className="input" style={{ padding: "10px 14px", fontSize: 13, cursor: "pointer" }} value={ordenProfAdmin} onChange={e => setOrdenProfAdmin(e.target.value)}>
                 <option value="rating_desc">⭐ Mejor calificación</option>
                 <option value="rating_asc">📉 Peor calificación</option>
@@ -272,10 +313,26 @@ export const Admin = ({
                             {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                         </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                          <span style={{ width: "100%", fontSize: 12, fontWeight: 700, color: "var(--text-light)" }}>Facultades del profesor:</span>
+                          {FACULTADES.filter(f => f !== "Todas").map(f => {
+                            const isSel = editProfDetailsFacultades.includes(f);
+                            return (
+                              <button key={f} className="pill" onClick={() => {
+                                if (isSel) {
+                                  const newF = editProfDetailsFacultades.filter(x => x !== f);
+                                  if (newF.length > 0) setEditProfDetailsFacultades(newF);
+                                } else setEditProfDetailsFacultades([...editProfDetailsFacultades, f]);
+                              }} style={{ background: isSel ? B : "transparent", color: isSel ? "#fff" : "var(--text-muted)", border: `1px solid ${B}`, padding: "4px 8px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                                {f}
+                              </button>
+                            );
+                          })}
+                        </div>
                         <div style={{ display: "flex", gap: 8 }}>
                           <button className="btn btn-green" style={{ fontSize: 12, padding: "6px 12px" }} onClick={async () => {
                             if (!editProfDetailsNombre.trim()) { showToast("⚠️ Escribe un nombre."); return; }
-                            await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio, editProfDetailsSede, editProfDetailsAlerta);
+                            await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio, editProfDetailsSede, editProfDetailsAlerta, editProfDetailsFacultades);
                             setEditProfDetailsId(null);
                           }}>Guardar</button>
                           <button className="btn btn-ghost" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => setEditProfDetailsId(null)}>Cancelar</button>
@@ -291,11 +348,14 @@ export const Admin = ({
                             setEditProfDetailsBio(p.bio || "");
                             setEditProfDetailsSede(p.sede || "");
                             setEditProfDetailsAlerta(p.alerta || "");
+                            setEditProfDetailsFacultades(p.facultades || [p.facultad]);
                           }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14 }} title="Editar profe">✏️</button>
                         </div>
                         {p.alerta && <div style={{ fontSize: 12, fontWeight: 700, color: "#DC2626", background: "#fef2f2", padding: "4px 8px", borderRadius: 6, marginBottom: 4, display: "inline-block" }}>⚠️ {p.alerta}</div>}
                         {p.bio && <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 4 }}>{p.bio}</div>}
-                        <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>{p.facultad} {p.sede && `· Sede ${p.sede}`} · {p.totalReseñas || 0} reseñas</div>
+                        <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 8, fontWeight: 500 }}>
+                          {(p.facultades || [p.facultad]).join(", ")} {p.sede && `· Sede ${p.sede}`} · {p.totalReseñas || 0} reseñas
+                        </div>
                       </>
                     )}
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -431,13 +491,13 @@ export const Admin = ({
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
               {pendingFeedbacks.map(f => (
-                <div key={f.id} className="card" style={{ padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, borderLeft: f.respuesta ? "4px solid #cbd5e1" : "4px solid #fef08a", opacity: f.respuesta ? 0.7 : 1 }}>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: 15, color: "#2d3a50", lineHeight: 1.6, marginBottom: 8, whiteSpace: "pre-wrap" }}>{f.mensaje}</p>
+                <div key={f.id} className="card" style={{ padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, borderLeft: f.respuesta ? "4px solid #cbd5e1" : "4px solid #fef08a", opacity: f.respuesta ? 0.7 : 1, flexWrap: "wrap" }}>
+                  <div style={{ flex: "1 1 250px", minWidth: 0 }}>
+                    <p style={{ fontSize: 15, color: "#2d3a50", lineHeight: 1.6, marginBottom: 8, whiteSpace: "pre-wrap", background: "#f8fafc", padding: "12px 16px", borderRadius: 12, border: "1px solid #e2e8f0" }}>{f.mensaje}</p>
                     {f.contacto && <div style={{ fontSize: 13, color: "var(--text-dark)", fontWeight: 600, marginBottom: 4 }}>Contacto: {f.contacto}</div>}
                     <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500, marginBottom: f.respuesta ? 8 : 0 }}>🕐 {formatFecha(f.createdAt)}</div>
                     {f.respuesta && (
-                      <div style={{ background: "#fef8c4", padding: 12, borderRadius: 8, marginTop: 8, borderLeft: "3px solid #eab308" }}>
+                      <div style={{ background: "#fef8c4", padding: 12, borderRadius: 8, marginTop: 12, borderLeft: "3px solid #eab308" }}>
                         <div style={{ fontSize: 12, fontWeight: 800, color: "#a16207", marginBottom: 4 }}>Tu respuesta (Pública):</div>
                         <div style={{ fontSize: 14, color: "#713f12", whiteSpace: "pre-wrap" }}>{f.respuesta}</div>
                       </div>
@@ -457,9 +517,9 @@ export const Admin = ({
                       </div>
                     )}
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {!f.respuesta && replyFeedbackId !== f.id && <button className="btn btn-blue" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => { setReplyFeedbackId(f.id); setReplyFeedbackText(`> "${f.mensaje}"\n\n`); }}>💬 Responder</button>}
-                    <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px", flexShrink: 0 }} onClick={() => eliminarFeedback(f.id)}>🗑️ {f.respuesta ? "Eliminar" : "Descartar"}</button>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignSelf: "flex-end" }}>
+                    {!f.respuesta && replyFeedbackId !== f.id && <button className="btn btn-blue" style={{ fontSize: 13, padding: "6px 12px" }} onClick={() => { setReplyFeedbackId(f.id); setReplyFeedbackText(`> "${f.mensaje}"\n\n`); }}>💬 Responder</button>}
+                    <button className="btn btn-red" style={{ fontSize: 13, padding: "6px 12px" }} onClick={() => eliminarFeedback(f.id)}>🗑️ {f.respuesta ? "Eliminar" : "Descartar"}</button>
                   </div>
                 </div>
               ))}
