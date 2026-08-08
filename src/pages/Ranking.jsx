@@ -27,17 +27,17 @@ export const Ranking = ({ profesores, rankTab, setRankTab, navigate }) => {
 
   return (
     <div style={{ maxWidth: 780, margin: "0 auto", padding: "28px 16px 64px" }}>
-      <h2 style={{ fontSize: 28, fontWeight: 800, color: BD, marginBottom: 6 }}>🏆 Ranking de profesores</h2>
-      <p style={{ fontSize: 14, color: "var(--text-light)", marginBottom: 20, fontWeight: 500 }}>Basado en calificaciones reales de estudiantes.</p>
+      <h2 style={{ fontSize: 28, fontWeight: 800, color: BD, marginBottom: 6, textAlign: "center" }}>🏆 Ranking de profesores</h2>
+      <p style={{ fontSize: 14, color: "var(--text-light)", marginBottom: 20, fontWeight: 500, textAlign: "center" }}>Basado en calificaciones reales de estudiantes.</p>
       
-      <div style={{ marginBottom: 28 }}>
-        <select className="input" style={{ width: "100%", maxWidth: 300, padding: "12px 16px", fontSize: 14, cursor: "pointer", fontWeight: 600 }} value={cursoFiltro} onChange={e => setCursoFiltro(e.target.value)}>
+      <div style={{ marginBottom: 28, textAlign: "center" }}>
+        <select className="input" style={{ width: "100%", maxWidth: 300, padding: "12px 16px", fontSize: 14, cursor: "pointer", fontWeight: 600, margin: "0 auto" }} value={cursoFiltro} onChange={e => setCursoFiltro(e.target.value)}>
           <option value="">🏫 Todos los cursos</option>
           {todosLosCursos.map(c => <option key={c} value={c}>📚 {c}</option>)}
         </select>
       </div>
 
-      <div style={{ display: "flex", gap: 6, background: "var(--border-color)", borderRadius: 14, padding: 6, width: "fit-content", marginBottom: 28, overflowX: "auto", maxWidth: "100%" }}>
+      <div style={{ display: "flex", gap: 6, background: "var(--border-color)", borderRadius: 14, padding: 6, width: "fit-content", marginBottom: 28, overflowX: "auto", maxWidth: "100%", margin: "0 auto 28px" }}>
         {[["top", "⭐ Top rated"], ["worst", "💔 Peor rated"], ["popular", "🔥 Populares"]].map(([k, l]) => (
           <button key={k} className="tab" onClick={() => setRankTab(k)} 
             style={{ 

@@ -114,7 +114,13 @@ export const Admin = ({
   const handleEliminarReporte = async (rep, resena, prof) => {
     try {
       if (resena && prof) await eliminarResena(prof, resena);
-      await updateDoc(doc(db, "reportes", rep.id), { estado: "borrada" });
+      // Archive ALL pending reports that target this same review
+      const relatedReports = reportes.filter(r => r.resId === rep.resId && r.estado === "pendiente");
+      for (const r of relatedReports) {
+        await updateDoc(doc(db, "reportes", r.id), { estado: "borrada" });
+      }
+      if (relatedReports.length === 0) await updateDoc(doc(db, "reportes", rep.id), { estado: "borrada" });
+      
       showToast("🗑️ Reseña eliminada (Reporte archivado).");
     } catch (e) {
       showToast("❌ Error al eliminar.");
@@ -123,7 +129,13 @@ export const Admin = ({
 
   const handleIgnorarReporte = async (rep) => {
     try {
-      await updateDoc(doc(db, "reportes", rep.id), { estado: "ignorada" });
+      // Archive ALL pending reports that target this same review
+      const relatedReports = reportes.filter(r => r.resId === rep.resId && r.estado === "pendiente");
+      for (const r of relatedReports) {
+        await updateDoc(doc(db, "reportes", r.id), { estado: "ignorada" });
+      }
+      if (relatedReports.length === 0) await updateDoc(doc(db, "reportes", rep.id), { estado: "ignorada" });
+
       showToast("✅ Reporte descartado (Archivado).");
     } catch (e) {
       showToast("❌ Error al descartar.");
@@ -497,9 +509,16 @@ export const Admin = ({
             {(() => {
               const profDuplicates = [];
               const normProfs = profesores.map(p => ({ ...p, normName: normalizeText(p.nombre) }));
+              const getWordSet = name => new Set(name.split(" ").filter(w => w.length > 2));
+
               for (let i = 0; i < normProfs.length; i++) {
                 for (let j = i + 1; j < normProfs.length; j++) {
-                  if (normProfs[i].normName === normProfs[j].normName) {
+                  const set1 = getWordSet(normProfs[i].normName);
+                  const set2 = getWordSet(normProfs[j].normName);
+                  let common = 0;
+                  set1.forEach(w => { if (set2.has(w)) common++; });
+                  
+                  if (normProfs[i].normName === normProfs[j].normName || (common >= 2 && (common === set1.size || common === set2.size))) {
                     profDuplicates.push({ p1: normProfs[i], p2: normProfs[j] });
                   }
                 }
