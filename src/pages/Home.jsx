@@ -122,9 +122,9 @@ export const Home = ({
                   {f === "Todas" ? "Todas Facultades" : `${FAC_EMOJI[f] || ""} ${f}`}
                 </button>
               ))}
+            </div>
 
-              <div style={{ width: 1, height: 24, background: "var(--border-color)", flexShrink: 0, margin: "0 2px" }} />
-
+            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 12, alignItems: "center", WebkitOverflowScrolling: "touch" }}>
               {/* Sedes */}
               <button onClick={() => setSedeFiltro([])}
                 aria-pressed={sedeFiltro.length === 0}
