@@ -580,9 +580,9 @@ export default function App() {
     } catch (e) { showToast("❌ Error al eliminar."); }
   };
 
-  const crearNoticia = async (titulo, contenido, imagenUrl) => {
+  const crearNoticia = async (titulo, contenido, imagenUrl, link = "") => {
     try {
-      await addDoc(collection(db, "noticias"), { titulo, contenido, imagenUrl: imagenUrl || "", createdAt: serverTimestamp() });
+      await addDoc(collection(db, "noticias"), { titulo, contenido, imagenUrl: imagenUrl || "", link: link || "", createdAt: serverTimestamp() });
       showToast("✅ Noticia publicada.");
     } catch (e) {
       showToast("❌ Error al publicar noticia.");

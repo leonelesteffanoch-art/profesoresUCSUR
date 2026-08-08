@@ -238,6 +238,11 @@ export const Home = ({
                       fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, 
                       whiteSpace: "pre-wrap", maxHeight: 150, overflowY: "auto", paddingRight: 4 
                     }}>{n.contenido}</p>
+                    {n.link && (
+                      <div style={{ marginTop: 16 }}>
+                        <a href={n.link} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "inline-block", fontSize: 13, padding: "8px 16px", textDecoration: "none" }}>🔗 Ver por completo</a>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

@@ -39,6 +39,7 @@ export const Admin = ({
   const [notiTitulo, setNotiTitulo] = useState("");
   const [notiContenido, setNotiContenido] = useState("");
   const [notiImagen, setNotiImagen] = useState("");
+  const [notiLink, setNotiLink] = useState("");
 
   const [replyFeedbackId, setReplyFeedbackId] = useState(null);
   const [replyFeedbackText, setReplyFeedbackText] = useState("");
@@ -106,13 +107,14 @@ export const Admin = ({
 
   const handleCrearNoticia = async () => {
     if (!notiTitulo.trim() || !notiContenido.trim()) {
-      showToast("⚠️ Completa el título y el contenido.");
+      alert("Título y contenido son obligatorios.");
       return;
     }
-    await crearNoticia(notiTitulo, notiContenido, notiImagen);
+    await crearNoticia(notiTitulo, notiContenido, notiImagen, notiLink);
     setNotiTitulo("");
     setNotiContenido("");
     setNotiImagen("");
+    setNotiLink("");
   };
 
   const handleLogin = async () => {
@@ -606,6 +608,7 @@ export const Admin = ({
             <input className="input" placeholder="Título de la noticia" value={notiTitulo} onChange={e => setNotiTitulo(e.target.value)} style={{ marginBottom: 12, padding: "12px 16px" }} />
             <textarea className="textarea" placeholder="Contenido de la noticia (puedes escribir varios párrafos)..." value={notiContenido} onChange={e => setNotiContenido(e.target.value)} style={{ padding: "12px 16px", minHeight: 100, marginBottom: 12 }} />
             <input className="input" placeholder="URL de la imagen (Opcional)" value={notiImagen} onChange={e => setNotiImagen(e.target.value)} style={{ marginBottom: 12, padding: "12px 16px" }} />
+            <input className="input" placeholder="Enlace externo / Link (Opcional)" value={notiLink} onChange={e => setNotiLink(e.target.value)} style={{ marginBottom: 12, padding: "12px 16px" }} />
             <button className="btn btn-blue" onClick={handleCrearNoticia} style={{ padding: "10px 20px" }}>📢 Publicar Noticia</button>
             
             {noticias?.length > 0 && (
