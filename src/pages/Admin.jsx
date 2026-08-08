@@ -44,7 +44,7 @@ export const Admin = ({
   const [editProfDetailsId, setEditProfDetailsId] = useState(null);
   const [editProfDetailsNombre, setEditProfDetailsNombre] = useState("");
   const [editProfDetailsBio, setEditProfDetailsBio] = useState("");
-  const [editProfDetailsSede, setEditProfDetailsSede] = useState("");
+  const [editProfDetailsSedes, setEditProfDetailsSedes] = useState([]);
   const [editProfDetailsAlerta, setEditProfDetailsAlerta] = useState("");
   const [editProfDetailsFacultades, setEditProfDetailsFacultades] = useState([]);
 
@@ -291,7 +291,6 @@ export const Admin = ({
                 <option value="nombre_asc">🔤 Orden alfabético (A-Z)</option>
               </select>
             </div>
-            </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
               <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 600 }}>
                 Mostrando {filteredProfesores.length} profesores
@@ -321,11 +320,24 @@ export const Admin = ({
                         <input className="input" value={editProfDetailsNombre} onChange={e => setEditProfDetailsNombre(e.target.value)} placeholder="Nombre del profesor" style={{ fontSize: 15, fontWeight: 800, padding: "8px 12px" }} />
                         <textarea className="textarea" value={editProfDetailsBio} onChange={e => setEditProfDetailsBio(e.target.value)} placeholder="Biografía / Descripción" style={{ fontSize: 13, padding: "8px 12px", minHeight: 60 }} />
                         <input className="input" value={editProfDetailsAlerta} onChange={e => setEditProfDetailsAlerta(e.target.value)} placeholder="⚠️ Alerta (Ej: Bajo investigación por reseñas falsas)" style={{ fontSize: 13, padding: "8px 12px", border: "1px solid #fecaca", background: "#fef2f2" }} />
-                        <div style={{ display: "flex", gap: 8 }}>
-                          <select className="input" style={{ fontSize: 13, padding: "8px 12px", width: "100%" }} value={editProfDetailsSede} onChange={e => setEditProfDetailsSede(e.target.value)}>
-                            <option value="">Sin Sede</option>
-                            {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
-                          </select>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                          <span style={{ width: "100%", fontSize: 12, fontWeight: 700, color: "var(--text-light)" }}>Sedes del profesor:</span>
+                          {SEDES.map(s => {
+                            const isSel = editProfDetailsSedes.includes(s);
+                            const sedeColors = { "Villa": "#2563EB", "Norte": "#059669", "Aramburú": "#D97706", "Ate": "#7C3AED" };
+                            const c = sedeColors[s] || B;
+                            return (
+                              <button key={s} className="pill" onClick={() => {
+                                if (isSel) {
+                                  const newS = editProfDetailsSedes.filter(x => x !== s);
+                                  if (newS.length > 0) setEditProfDetailsSedes(newS);
+                                  else setEditProfDetailsSedes([]);
+                                } else setEditProfDetailsSedes([...editProfDetailsSedes, s]);
+                              }} style={{ background: isSel ? c : "transparent", color: isSel ? "#fff" : "var(--text-muted)", border: `1px solid ${c}`, padding: "4px 8px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                                {s}
+                              </button>
+                            );
+                          })}
                         </div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
                           <span style={{ width: "100%", fontSize: 12, fontWeight: 700, color: "var(--text-light)" }}>Facultades del profesor:</span>
@@ -346,7 +358,7 @@ export const Admin = ({
                         <div style={{ display: "flex", gap: 8 }}>
                           <button className="btn btn-green" style={{ fontSize: 12, padding: "6px 12px" }} onClick={async () => {
                             if (!editProfDetailsNombre.trim()) { showToast("⚠️ Escribe un nombre."); return; }
-                            await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio, editProfDetailsSede, editProfDetailsAlerta, editProfDetailsFacultades);
+                            await editarProfesor(p.id, editProfDetailsNombre, editProfDetailsBio, "", editProfDetailsAlerta, editProfDetailsFacultades, editProfDetailsSedes);
                             setEditProfDetailsId(null);
                           }}>Guardar</button>
                           <button className="btn btn-ghost" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => setEditProfDetailsId(null)}>Cancelar</button>
@@ -360,7 +372,7 @@ export const Admin = ({
                             setEditProfDetailsId(p.id);
                             setEditProfDetailsNombre(p.nombre);
                             setEditProfDetailsBio(p.bio || "");
-                            setEditProfDetailsSede(p.sede || "");
+                            setEditProfDetailsSedes(p.sedes || [p.sede].filter(Boolean));
                             setEditProfDetailsAlerta(p.alerta || "");
                             setEditProfDetailsFacultades(p.facultades || [p.facultad]);
                           }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14 }} title="Editar profe">✏️</button>
@@ -423,7 +435,6 @@ export const Admin = ({
                 <option value="rating_desc">⭐ Mejores calificaciones (5★)</option>
                 <option value="rating_asc">📉 Peores calificaciones (1★)</option>
               </select>
-            </div>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
               <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 600 }}>

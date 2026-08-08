@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { B, OR } from "../constants.js";
 
@@ -6,6 +6,8 @@ export const Feedback = ({ navigate, crearFeedback, feedbacks }) => {
   const [mensaje, setMensaje] = useState("");
   const [contacto, setContacto] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const formRef = useRef(null);
 
   const handleSubmit = async () => {
     if (!mensaje.trim()) return;
@@ -28,14 +30,36 @@ export const Feedback = ({ navigate, crearFeedback, feedbacks }) => {
 
       <div className="feedback-layout">
         {/* Formulario (Derecha en PC, Arriba en Celular) */}
-        <div className="feedback-form card fade-in" style={{ padding: 32 }}>
-          <div style={{ textAlign: "center", marginBottom: 24 }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>💡</div>
-            <h2 style={{ fontSize: 24, fontWeight: 800, color: "var(--text-dark)", marginBottom: 8 }}>Buzón de Sugerencias</h2>
-            <p style={{ fontSize: 14, color: "var(--text-light)", fontWeight: 500, lineHeight: 1.5 }}>
-              ¿Tienes alguna idea para mejorar la página o encontraste algún error? Déjanos un mensaje. ¡Es 100% anónimo!
-            </p>
-          </div>
+        <div className="feedback-form" ref={formRef}>
+          {!showForm ? (
+            <div 
+              className="card banner-btn fade-in" 
+              style={{ padding: "20px 24px", display: "flex", alignItems: "center", gap: 16, background: `linear-gradient(135deg, ${B}, #1e3a5f)`, cursor: "pointer", border: "none", flexWrap: "wrap" }}
+              onClick={() => {
+                setShowForm(true);
+                setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+              }}>
+              <div style={{ fontSize: 32 }}>💡</div>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 4 }}>¿Tienes alguna sugerencia?</div>
+                <div style={{ color: "rgba(255,255,255,.85)", fontSize: 13, fontWeight: 500 }}>Ayúdanos a mejorar o reporta errores. Es 100% anónimo.</div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,.25)", borderRadius: 12, padding: "10px 18px", color: "#fff", fontWeight: 800, fontSize: 14, flexShrink: 0, textAlign: "center", width: "100%", maxWidth: 120 }}>
+                Escribir ↓
+              </div>
+            </div>
+          ) : (
+            <div className="card fade-in" style={{ padding: 32, border: `2px solid ${B}40`, boxShadow: `0 8px 32px ${B}15` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ background: `${B}18`, borderRadius: 12, padding: "10px 14px", fontSize: 24 }}>💡</div>
+                  <div>
+                    <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-dark)" }}>Buzón de Sugerencias</h2>
+                    <p style={{ fontSize: 13, color: "var(--text-light)", fontWeight: 500, marginTop: 2 }}>100% anónimo y privado</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowForm(false)} style={{ background: "var(--bg-main)", border: "1px solid var(--border-color)", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer", color: "var(--text-light)" }}>✕</button>
+              </div>
 
           <div style={{ marginBottom: 20 }}>
             <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 8, fontWeight: 700 }}>TU MENSAJE <span style={{ color: OR }}>*</span></label>
@@ -68,8 +92,10 @@ export const Feedback = ({ navigate, crearFeedback, feedbacks }) => {
             {enviando ? "Enviando..." : "🚀 Enviar Sugerencia"}
           </button>
         </div>
+        )}
+      </div>
 
-        {/* Sugerencias respondidas de la comunidad (Izquierda en PC, Abajo en Celular) */}
+      {/* Sugerencias respondidas de la comunidad (Izquierda en PC, Abajo en Celular) */}
         <div className="feedback-answers">
           {(feedbacks || []).filter(f => f.respuesta && f.esPublico).length > 0 ? (
             <>

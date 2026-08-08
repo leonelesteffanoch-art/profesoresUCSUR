@@ -75,10 +75,14 @@ export const Perfil = ({
             <div style={{ flex: 1, minWidth: 200 }}>
               <h2 style={{ fontSize: 26, fontWeight: 800, color: "var(--text-dark)", marginBottom: 8, lineHeight: 1.2 }}>{selProf.nombre}</h2>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
-                <span className="pill" style={{ background: FAC_BG[selProf.facultad] || BL, color: FAC_COLOR[selProf.facultad] || BD, fontSize: 13, padding: "6px 14px" }}>
-                  {FAC_EMOJI[selProf.facultad] || ""} {selProf.facultad}
-                </span>
-                {selProf.sede && <span className="pill" style={{ background: "#f3f4f6", color: "#374151", fontSize: 13, padding: "6px 14px" }}>📍 Sede {selProf.sede}</span>}
+                {(selProf.facultades || [selProf.facultad]).map(f => (
+                  <span key={f} className="pill" style={{ background: FAC_BG[f] || BL, color: FAC_COLOR[f] || BD, fontSize: 13, padding: "6px 14px" }}>
+                    {FAC_EMOJI[f] || ""} {f}
+                  </span>
+                ))}
+                {(selProf.sedes || [selProf.sede].filter(Boolean)).map(s => (
+                  <span key={s} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)", fontSize: 13, padding: "6px 14px" }}>📍 Sede {s}</span>
+                ))}
                 {(selProf.cursos || []).map(c => {
                   const rank = getCourseRank(c);
                   return (

@@ -29,7 +29,7 @@ export const Home = ({
   const filtered = profesores
     .filter(p => normalizeText(p.nombre).includes(normalizeText(busqueda)) || p.cursos?.some(c => normalizeText(c).includes(normalizeText(busqueda))))
     .filter(p => facFiltro === "Todas" || p.facultades?.includes(facFiltro))
-    .filter(p => sedeFiltro.length === 0 || (p.sede && sedeFiltro.includes(p.sede)))
+    .filter(p => sedeFiltro.length === 0 || p.sedes?.some(s => sedeFiltro.includes(s)))
     .sort((a, b) => {
       if (sortBy === "alfabetico") return a.nombre.localeCompare(b.nombre);
       if (sortBy === "aleatorio") return (b._randomOrder || 0) - (a._randomOrder || 0);
@@ -254,7 +254,7 @@ export const Home = ({
                     <span key={f} className="pill" style={{ background: FAC_BG[f] || BL, color: FAC_COLOR[f] || BD }}>{FAC_EMOJI[f] || ""} {f}</span>
                   ))}
                 </div>
-                {p.sede && <span className="pill" style={{ background: "#f3f4f6", color: "#374151" }}>📍 Sede {p.sede}</span>}
+                {(p.sedes || [p.sede].filter(Boolean)).map(s => <span key={s} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📍 Sede {s}</span>)}
                 {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>

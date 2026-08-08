@@ -113,10 +113,37 @@ export const Agregar = ({
               </div>
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Sede</label>
-              <select className="input" style={{ cursor: "pointer" }} value={addProf.sede} onChange={e => setAddProf(p => ({ ...p, sede: e.target.value }))}>
-                {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Sedes</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {SEDES.map(s => {
+                  const sedes = addProf.sedes || [addProf.sede].filter(Boolean);
+                  const isSelected = sedes.includes(s);
+                  const sedeColors = { "Villa": "#2563EB", "Norte": "#059669", "Aramburú": "#D97706", "Ate": "#7C3AED" };
+                  const c = sedeColors[s] || B;
+                  return (
+                    <button key={s} className="pill" onClick={() => {
+                      if (isSelected) {
+                        const newSedes = sedes.filter(x => x !== s);
+                        if (newSedes.length > 0) setAddProf(p => ({ ...p, sedes: newSedes, sede: newSedes[0] }));
+                        else setAddProf(p => ({ ...p, sedes: [], sede: "" }));
+                      } else {
+                        const newSedes = [...sedes, s];
+                        setAddProf(p => ({ ...p, sedes: newSedes, sede: newSedes[0] }));
+                      }
+                    }}
+                    style={{ 
+                      background: isSelected ? c : "transparent",
+                      color: isSelected ? "#fff" : "var(--text-muted)",
+                      border: `1.5px solid ${c}`,
+                      cursor: "pointer",
+                      padding: "6px 12px",
+                      fontWeight: 600
+                    }}>
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div>
               <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Curso que enseña</label>
@@ -303,11 +330,33 @@ export const Agregar = ({
                 <div style={{ fontSize: 11, color: "var(--text-light)", marginTop: 6, fontWeight: 500, lineHeight: 1.4, marginBottom: 12 }}>
                   <span style={{ color: OR, fontWeight: 800 }}>Nota:</span> Por favor ingresar cursos 1 por 1 si no se encuentran asignados al docente y con buena ortografía.
                 </div>
-                <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Actualizar Sede (Opcional)</label>
-                <select className="input" style={{ cursor: "pointer" }} value={addCursoSede} onChange={e => setAddCursoSede(e.target.value)}>
-                  <option value="">Mantener sede actual ({addProfSel.sede || "No especificada"})</option>
-                  {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Añadir Nuevas Sedes (Opcional)</label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {SEDES.filter(s => !(addProfSel.sedes || [addProfSel.sede]).includes(s)).map(s => {
+                    const isSelected = addCursoSede.includes(s);
+                    const sedeColors = { "Villa": "#2563EB", "Norte": "#059669", "Aramburú": "#D97706", "Ate": "#7C3AED" };
+                    const c = sedeColors[s] || B;
+                    return (
+                      <button key={s} className="pill" onClick={() => {
+                        if (isSelected) setAddCursoSede(addCursoSede.filter(x => x !== s));
+                        else setAddCursoSede([...addCursoSede, s]);
+                      }}
+                      style={{ 
+                        background: isSelected ? c : "transparent",
+                        color: isSelected ? "#fff" : "var(--text-muted)",
+                        border: `1.5px solid ${c}`,
+                        cursor: "pointer",
+                        padding: "6px 12px",
+                        fontWeight: 600
+                      }}>
+                        {s}
+                      </button>
+                    );
+                  })}
+                  {SEDES.filter(s => !(addProfSel.sedes || [addProfSel.sede]).includes(s)).length === 0 && (
+                    <div style={{ fontSize: 12, color: "var(--text-light)" }}>Este profesor ya enseña en todas las sedes disponibles.</div>
+                  )}
+                </div>
               </div>
               <button className="btn btn-orange" onClick={submitAgregarCurso} style={{ width: "100%", padding: "14px", fontSize: 15, marginTop: 8 }}>
                 Agregar curso a {addProfSel.nombre.split(" ")[0]}

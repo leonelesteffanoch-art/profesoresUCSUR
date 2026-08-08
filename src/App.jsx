@@ -137,7 +137,7 @@ export default function App() {
   const [addMode, setAddMode] = useState("nuevo");
   const [addProfSel, setAddProfSel] = useState(null);
   const [addCurso, setAddCurso] = useState("");
-  const [addCursoSede, setAddCursoSede] = useState("");
+  const [addCursoSede, setAddCursoSede] = useState([]);
   const [toast, setToast] = useState(null);
   const [rankTab, setRankTab] = useState("top");
   const [loading, setLoading] = useState(true);
@@ -177,12 +177,21 @@ export default function App() {
       setProfesores(snap.docs.map(d => {
         const data = d.data();
         const facultades = Array.isArray(data.facultad) ? data.facultad : [data.facultad].filter(Boolean);
+        let parsedSedes = [];
+        if (data.sedes && Array.isArray(data.sedes)) {
+          parsedSedes = data.sedes;
+        } else if (data.sede) {
+          parsedSedes = [data.sede];
+        }
+        
         return { 
           id: d.id, 
           _randomOrder: Math.random(), 
           ...data,
           facultad: facultades[0] || "",
-          facultades: facultades
+          facultades: facultades,
+          sede: parsedSedes[0] || "",
+          sedes: parsedSedes
         };
       }));
       setLoading(false);
@@ -218,11 +227,15 @@ export default function App() {
   }, [adminUser, profesores.length]);
 
   useEffect(() => {
+    if (!adminUser) {
+      setReportes([]);
+      return;
+    }
     const unsub = onSnapshot(collection(db, "reportes"), snap => {
       setReportes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
     return () => unsub();
-  }, []);
+  }, [adminUser]);
 
   useEffect(() => {
     const q = query(collection(db, "noticias"), orderBy("createdAt", "desc"));
@@ -233,11 +246,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!adminUser) {
+      setFeedbacks([]);
+      return;
+    }
     const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, snap => {
-      if (adminUser) {
-        setFeedbacks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      }
+      setFeedbacks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
     return () => unsub();
   }, [adminUser]);
@@ -313,7 +328,8 @@ export default function App() {
         nombre: capitalizeName(addProf.nombre.trim()), 
         facultad: addProf.facultades ? addProf.facultades : [addProf.facultad], 
         cursos: [capitalizeName(addProf.curso.trim())], 
-        sede: addProf.sede,
+        sede: addProf.sedes ? addProf.sedes[0] : addProf.sede,
+        sedes: addProf.sedes ? addProf.sedes : [addProf.sede].filter(Boolean),
         bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
         rating: initialRating, 
         totalReseñas: 1, 
@@ -348,7 +364,11 @@ export default function App() {
     if ((addProfSel.cursos || []).map(c => normalizeText(c)).includes(normalizeText(newCurso))) { showToast("⚠️ Ese curso ya está registrado."); return; }
     try {
       const updates = { cursos: [...(addProfSel.cursos || []), newCurso] };
-      if (nuevaSede && nuevaSede !== addProfSel.sede) updates.sede = nuevaSede;
+      if (nuevaSede && nuevaSede.length > 0) {
+        const combinedSedes = [...new Set([...(addProfSel.sedes || []), ...nuevaSede])];
+        updates.sedes = combinedSedes;
+        updates.sede = combinedSedes[0];
+      }
       
       await updateDoc(doc(db, "profesores", addProfSel.id), updates);
       showToast(`✅ Curso "${newCurso}" agregado a ${addProfSel.nombre}`);
@@ -356,12 +376,19 @@ export default function App() {
     } catch (e) { showToast("❌ Error al agregar el curso."); }
   };
 
-  const editarProfesor = async (id, nombre, bio, sede, alerta = "", facultades = []) => {
+  const editarProfesor = async (id, nombre, bio, sede, alerta = "", facultades = [], sedes = []) => {
     try {
-      const updates = { nombre: capitalizeName(nombre.trim()), bio: bio.trim(), sede, alerta: alerta.trim() };
+      const updates = { nombre: capitalizeName(nombre.trim()), bio: bio.trim(), alerta: alerta.trim() };
+      
       if (facultades && facultades.length > 0) {
         updates.facultades = facultades;
         updates.facultad = facultades[0];
+      }
+      if (sedes && sedes.length > 0) {
+        updates.sedes = sedes;
+        updates.sede = sedes[0];
+      } else {
+        updates.sede = sede;
       }
       await updateDoc(doc(db, "profesores", id), updates);
       showToast("✅ Profesor actualizado.");
