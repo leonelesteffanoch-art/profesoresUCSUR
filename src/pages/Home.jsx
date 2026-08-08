@@ -27,6 +27,17 @@ export const Home = ({
   const [currentNewsIdx, setCurrentNewsIdx] = useState(0);
   const [newsHovered, setNewsHovered] = useState(false);
   const [touchStartX, setTouchStartX] = useState(null);
+  const [showNewsModal, setShowNewsModal] = useState(false);
+
+  useEffect(() => {
+    if (noticias && noticias.length > 0) {
+      const latestNews = noticias[0];
+      const lastSeenId = localStorage.getItem("lastSeenNewsId");
+      if (lastSeenId !== latestNews.id) {
+        setShowNewsModal(true);
+      }
+    }
+  }, [noticias]);
 
   // Autoplay para noticias
   useEffect(() => {
@@ -333,6 +344,27 @@ export const Home = ({
           ))}
         </div>
       </div>
+      
+      {showNewsModal && noticias?.length > 0 && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div className="card fade-in" style={{ maxWidth: 500, width: "100%", maxHeight: "90vh", overflowY: "auto", position: "relative" }}>
+            <button onClick={() => { setShowNewsModal(false); localStorage.setItem("lastSeenNewsId", noticias[0].id); }} style={{ position: "absolute", top: 12, right: 12, background: "rgba(0,0,0,0.1)", border: "none", width: 32, height: 32, borderRadius: "50%", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>✖</button>
+            {noticias[0].imagenUrl && (
+              <img src={noticias[0].imagenUrl} alt={noticias[0].titulo} style={{ width: "100%", height: 200, objectFit: "cover", display: "block" }} />
+            )}
+            <div style={{ padding: 24 }}>
+              <div style={{ background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 8px", borderRadius: 10, letterSpacing: 0.5, display: "inline-block", marginBottom: 12 }}>¡NUEVA NOTICIA!</div>
+              <h3 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-dark)", marginBottom: 8, lineHeight: 1.3 }}>{noticias[0].titulo}</h3>
+              <div style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 16, fontWeight: 600 }}>🗓️ {formatFechaExacta(noticias[0].createdAt)}</div>
+              <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.6, whiteSpace: "pre-wrap", marginBottom: 24 }}>{noticias[0].contenido}</p>
+              {noticias[0].link && (
+                <a href={noticias[0].link} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "block", textAlign: "center", padding: "12px", textDecoration: "none", marginBottom: 12 }}>🔗 Ver por completo</a>
+              )}
+              <button className="btn btn-ghost" onClick={() => { setShowNewsModal(false); localStorage.setItem("lastSeenNewsId", noticias[0].id); }} style={{ width: "100%", padding: "12px" }}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
