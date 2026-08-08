@@ -30,7 +30,8 @@ export const Admin = ({
   responderFeedback,
   editarProfesor,
   editCursoProf, setEditCursoProf,
-  editCursoVal, setEditCursoVal
+  editCursoVal, setEditCursoVal,
+  fusionarCursosGlobal
 }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -59,6 +60,12 @@ export const Admin = ({
   const [busquedaResena, setBusquedaResena] = useState("");
   const [facFiltroResena, setFacFiltroResena] = useState("Todas");
   const [ordenResena, setOrdenResena] = useState("recientes");
+  const [cursoFiltroResena, setCursoFiltroResena] = useState("");
+
+  // Fusión de cursos
+  const [fusionarCursoMalo, setFusionarCursoMalo] = useState("");
+  const [fusionarCursoBueno, setFusionarCursoBueno] = useState("");
+
   const pendingReportes = reportes.filter(r => r.estado === "pendiente");
   const archivedReportes = reportes.filter(r => r.estado !== "pendiente");
   const pendingFeedbacks = feedbacks?.filter(f => f.estado !== "archivado") || [];
@@ -620,6 +627,23 @@ export const Admin = ({
       {/* MANTENIMIENTO TAB */}
       {activeTab === "mantenimiento" && (
         <div className="fade-in">
+          <div className="card" style={{ padding: 24, marginBottom: 32 }}>
+            <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>🔗 Fusionar Cursos Globalmente</h4>
+            <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 24 }}>Reemplaza una versión incorrecta de un curso por la correcta en <b>todos</b> los profesores a la vez (ej. cambiar "bioquimica" por "Bioquímica").</p>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+              <select className="input" value={fusionarCursoMalo} onChange={e => setFusionarCursoMalo(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "12px 16px" }}>
+                <option value="">Selecciona el curso INCORRECTO...</option>
+                {[...new Set(profesores.flatMap(p => p.cursos || []))].sort().map(c => <option key={`malo-${c}`} value={c}>{c}</option>)}
+              </select>
+              <span style={{ color: "var(--text-muted)" }}>👉</span>
+              <input className="input" placeholder="Nombre correcto (ej: Bioquímica)" value={fusionarCursoBueno} onChange={e => setFusionarCursoBueno(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} />
+              <button className="btn btn-blue" disabled={!fusionarCursoMalo || !fusionarCursoBueno.trim()} onClick={() => {
+                fusionarCursosGlobal(fusionarCursoMalo, capitalizeName(fusionarCursoBueno.trim()));
+                setFusionarCursoMalo(""); setFusionarCursoBueno("");
+              }} style={{ padding: "12px 24px" }}>Fusionar</button>
+            </div>
+          </div>
+
           <div className="card" style={{ padding: 24, marginBottom: 32 }}>
             <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>🛠️ Análisis de Base de Datos</h4>
             <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 24 }}>Aquí puedes detectar si hay profesores duplicados por diferencias de tildes o mayúsculas, y cursos duplicados en un mismo profesor.</p>

@@ -362,9 +362,15 @@ export default function App() {
 
   const submitAgregarCurso = async (nuevaSede) => {
     if (!addProfSel) return;
-    const newCurso = capitalizeName(addCurso.trim());
+    let newCurso = capitalizeName(addCurso.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if ((addProfSel.cursos || []).map(c => normalizeText(c)).includes(normalizeText(newCurso))) { showToast("⚠️ Ese curso ya está registrado."); return; }
+
+    const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
+    const normInput = normalizeText(newCurso);
+    const existingMatch = allGlobal.find(c => normalizeText(c) === normInput);
+    if (existingMatch) newCurso = existingMatch;
+
+    if ((addProfSel.cursos || []).includes(newCurso)) { showToast("⚠️ Ese curso ya está registrado."); return; }
     try {
       const updates = { cursos: [...(addProfSel.cursos || []), newCurso] };
       if (nuevaSede && nuevaSede.length > 0) {
@@ -421,9 +427,15 @@ export default function App() {
   };
 
   const adminAgregarCurso = async (prof) => {
-    const newCurso = capitalizeName(editCursoVal.trim());
+    let newCurso = capitalizeName(editCursoVal.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if ((prof.cursos || []).map(c => normalizeText(c)).includes(normalizeText(newCurso))) { showToast("⚠️ Ese curso ya existe."); return; }
+
+    const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
+    const normInput = normalizeText(newCurso);
+    const existingMatch = allGlobal.find(c => normalizeText(c) === normInput);
+    if (existingMatch) newCurso = existingMatch;
+
+    if ((prof.cursos || []).includes(newCurso)) { showToast("⚠️ Ese curso ya existe."); return; }
     try {
       await updateDoc(doc(db, "profesores", prof.id), { cursos: [...(prof.cursos || []), newCurso] });
       setEditCursoProf(null); setEditCursoVal("");
@@ -439,6 +451,22 @@ export default function App() {
       await deleteDoc(doc(db, "profesores", p.id));
       showToast(`🗑️ ${p.nombre} eliminado.`);
     } catch (e) { showToast("❌ Error al eliminar."); }
+  };
+
+  const fusionarCursosGlobal = async (cursoMalo, cursoBueno) => {
+    if (!cursoMalo || !cursoBueno || cursoMalo === cursoBueno) return;
+    if (!window.confirm(`¿Reemplazar "${cursoMalo}" por "${cursoBueno}" en todos los profesores?`)) return;
+    
+    try {
+      const profesAfectados = profesores.filter(p => (p.cursos || []).includes(cursoMalo));
+      for (const p of profesAfectados) {
+        const nuevosCursos = [...new Set([...(p.cursos || []).filter(c => c !== cursoMalo), cursoBueno])];
+        await updateDoc(doc(db, "profesores", p.id), { cursos: nuevosCursos });
+      }
+      showToast(`✅ Se actualizó el curso en ${profesAfectados.length} profesor(es).`);
+    } catch (e) {
+      showToast("❌ Error al fusionar cursos.");
+    }
   };
 
   const eliminarResena = async (p, r) => {
@@ -595,6 +623,7 @@ export default function App() {
                 eliminarProfesor={eliminarProfesor}
                 eliminarCurso={eliminarCurso}
                 adminAgregarCurso={adminAgregarCurso}
+                fusionarCursosGlobal={fusionarCursosGlobal}
                 crearNoticia={crearNoticia} eliminarNoticia={eliminarNoticia}
                 eliminarFeedback={eliminarFeedback} destruirFeedback={destruirFeedback} responderFeedback={responderFeedback}
                 editarProfesor={editarProfesor}
