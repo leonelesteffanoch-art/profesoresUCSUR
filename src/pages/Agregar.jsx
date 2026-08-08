@@ -10,6 +10,7 @@ export const Agregar = ({
   addProfSel, setAddProfSel,
   addCurso, setAddCurso,
   addCursoSede, setAddCursoSede,
+  addCursoFac, setAddCursoFac,
   submitAddProf,
   submitAgregarCurso,
   carreras
@@ -374,6 +375,33 @@ export const Agregar = ({
                     <div style={{ fontSize: 12, color: "var(--text-light)" }}>Este profesor ya enseña en todas las sedes disponibles.</div>
                   )}
                 </div>
+                <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8, marginTop: 16 }}>Añadir Nuevas Facultades (Opcional)</label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+                  {FACULTADES.filter(f => f !== "Todas" && !(addProfSel.facultades || [addProfSel.facultad]).includes(f)).map(f => {
+                    const isSelected = addCursoFac.includes(f);
+                    const c = FAC_COLOR[f] || B;
+                    return (
+                      <button key={f} className="pill" onClick={() => {
+                        if (isSelected) setAddCursoFac(addCursoFac.filter(x => x !== f));
+                        else setAddCursoFac([...addCursoFac, f]);
+                      }}
+                      style={{ 
+                        background: isSelected ? (FAC_BG[f] || BL) : "transparent",
+                        color: isSelected ? c : "var(--text-muted)",
+                        border: `1.5px solid ${c}`,
+                        cursor: "pointer",
+                        padding: "6px 12px",
+                        fontWeight: 600
+                      }}>
+                        {f}
+                      </button>
+                    );
+                  })}
+                  {FACULTADES.filter(f => f !== "Todas" && !(addProfSel.facultades || [addProfSel.facultad]).includes(f)).length === 0 && (
+                    <div style={{ fontSize: 12, color: "var(--text-light)" }}>Este profesor ya enseña en todas las facultades.</div>
+                  )}
+                </div>
+
               </div>
               <button className="btn btn-orange" onClick={submitAgregarCurso} style={{ width: "100%", padding: "14px", fontSize: 15, marginTop: 8 }}>
                 Agregar curso a {addProfSel.nombre.split(" ")[0]}

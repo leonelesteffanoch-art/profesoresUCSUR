@@ -138,6 +138,7 @@ export default function App() {
   const [addProfSel, setAddProfSel] = useState(null);
   const [addCurso, setAddCurso] = useState("");
   const [addCursoSede, setAddCursoSede] = useState([]);
+  const [addCursoFac, setAddCursoFac] = useState([]);
   const [toast, setToast] = useState(null);
   const [rankTab, setRankTab] = useState("top");
   const [loading, setLoading] = useState(true);
@@ -282,7 +283,7 @@ export default function App() {
 
   // Universal navigate function that maps old page names to routes
   const navigate = useCallback((p, prof = null) => {
-    setAddProf(ADD_EMPTY); setAddMode("nuevo"); setAddProfSel(null); setAddCurso("");
+    setAddProf(ADD_EMPTY); setAddMode("nuevo"); setAddProfSel(null); setAddCurso(""); setAddCursoSede([]); setAddCursoFac([]);
     if (p === "home") nav("/");
     else if (p === "perfil" && prof) nav(`/profesor/${prof.id}`);
     else if (p === "ranking") nav("/ranking");
@@ -360,7 +361,7 @@ export default function App() {
     }
   };
 
-  const submitAgregarCurso = async (nuevaSede) => {
+  const submitAgregarCurso = async (nuevaSede, nuevaFac) => {
     if (!addProfSel) return;
     let newCurso = capitalizeName(addCurso.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
@@ -377,6 +378,11 @@ export default function App() {
         const combinedSedes = [...new Set([...(addProfSel.sedes || []), ...nuevaSede])];
         updates.sedes = combinedSedes;
         updates.sede = combinedSedes[0];
+      }
+      if (nuevaFac && nuevaFac.length > 0) {
+        const combinedFacs = [...new Set([...(addProfSel.facultades || [addProfSel.facultad]), ...nuevaFac])];
+        updates.facultades = combinedFacs;
+        updates.facultad = combinedFacs[0];
       }
       
       await updateDoc(doc(db, "profesores", addProfSel.id), updates);
@@ -576,8 +582,9 @@ export default function App() {
                 addProfSel={addProfSel} setAddProfSel={setAddProfSel}
                 addCurso={addCurso} setAddCurso={setAddCurso}
                 addCursoSede={addCursoSede} setAddCursoSede={setAddCursoSede}
+                addCursoFac={addCursoFac} setAddCursoFac={setAddCursoFac}
                 submitAddProf={submitAddProf}
-                submitAgregarCurso={() => submitAgregarCurso(addCursoSede)}
+                submitAgregarCurso={() => submitAgregarCurso(addCursoSede, addCursoFac)}
                 carreras={carreras}
               />
             </div>
