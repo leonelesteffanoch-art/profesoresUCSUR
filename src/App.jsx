@@ -369,7 +369,16 @@ export default function App() {
     const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
     const normInput = normalizeText(newCurso);
     const existingMatch = allGlobal.find(c => normalizeText(c) === normInput);
-    if (existingMatch) newCurso = existingMatch;
+    
+    // Auto-correction: Si existe pero el usuario escribió una versión CON tilde y el existente NO tiene, preferimos el del usuario.
+    if (existingMatch) {
+      if (newCurso !== normInput && existingMatch === normInput) {
+        // El usuario escribió con tildes (newCurso !== normInput), pero la BD tiene la versión sin tildes (existingMatch === normInput).
+        // Nos quedamos con newCurso.
+      } else {
+        newCurso = existingMatch;
+      }
+    }
 
     if ((addProfSel.cursos || []).includes(newCurso)) { showToast("⚠️ Ese curso ya está registrado."); return; }
     try {
@@ -439,7 +448,14 @@ export default function App() {
     const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
     const normInput = normalizeText(newCurso);
     const existingMatch = allGlobal.find(c => normalizeText(c) === normInput);
-    if (existingMatch) newCurso = existingMatch;
+    
+    if (existingMatch) {
+      if (newCurso !== normInput && existingMatch === normInput) {
+        // Preferir el del usuario si tiene tildes
+      } else {
+        newCurso = existingMatch;
+      }
+    }
 
     if ((prof.cursos || []).includes(newCurso)) { showToast("⚠️ Ese curso ya existe."); return; }
     try {
@@ -460,17 +476,33 @@ export default function App() {
   };
 
   const fusionarCursosGlobal = async (cursoMalo, cursoBueno) => {
-    if (!cursoMalo || !cursoBueno || cursoMalo === cursoBueno) return;
+    if (!cursoMalo || !cursoBueno) {
+      showToast("⚠️ Debes seleccionar un curso incorrecto y escribir el correcto.");
+      return;
+    }
+    if (cursoMalo.toLowerCase() === cursoBueno.toLowerCase() && cursoMalo !== cursoBueno) {
+      // Diferencia de tildes o mayúsculas. Es válido fusionar.
+    } else if (cursoMalo === cursoBueno) {
+      showToast("⚠️ El curso incorrecto y el correcto son exactamente iguales.");
+      return;
+    }
+
     if (!window.confirm(`¿Reemplazar "${cursoMalo}" por "${cursoBueno}" en todos los profesores?`)) return;
     
     try {
       const profesAfectados = profesores.filter(p => (p.cursos || []).includes(cursoMalo));
+      if (profesAfectados.length === 0) {
+        showToast(`⚠️ No se encontró a ningún profesor con el curso "${cursoMalo}".`);
+        return;
+      }
+
       for (const p of profesAfectados) {
         const nuevosCursos = [...new Set([...(p.cursos || []).filter(c => c !== cursoMalo), cursoBueno])];
         await updateDoc(doc(db, "profesores", p.id), { cursos: nuevosCursos });
       }
-      showToast(`✅ Se actualizó el curso en ${profesAfectados.length} profesor(es).`);
+      showToast(`✅ Se reemplazó el curso en ${profesAfectados.length} profesor(es).`);
     } catch (e) {
+      console.error(e);
       showToast("❌ Error al fusionar cursos.");
     }
   };
