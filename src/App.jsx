@@ -316,6 +316,10 @@ export default function App() {
   const submitAddProf = async () => {
     if (!addProf.nombre.trim()) { showToast("⚠️ Escribe el nombre del profesor."); return; }
     if (!addProf.curso.trim()) { showToast("⚠️ Escribe al menos un curso."); return; }
+    if (addProf.curso.includes(",") || / y /i.test(addProf.curso)) {
+      showToast("⚠️ Por favor ingresa UN solo curso a la vez (sin comas ni 'y').");
+      return;
+    }
     if (addProf.incluirResena && (CRIT.some(c => addProf[c] === 0) || !addProf.texto.trim())) {
       showToast("⚠️ Completa todos los criterios y escribe un comentario de reseña.");
       return;
@@ -373,6 +377,10 @@ export default function App() {
     if (!addProfSel) return;
     let newCurso = capitalizeName(addCurso.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
+    if (newCurso.includes(",") || / y /i.test(newCurso)) {
+      showToast("⚠️ Por favor ingresa UN solo curso a la vez (sin comas ni 'y').");
+      return;
+    }
 
     const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
     const normInput = normalizeText(newCurso);
@@ -518,6 +526,33 @@ export default function App() {
     } catch (e) {
       console.error("Error fusionando cursos:", e);
       showToast("❌ Error al fusionar cursos.");
+      return false;
+    }
+  };
+
+  const dividirCursoGlobal = async (cursoMalo, cursosNuevos) => {
+    if (!cursoMalo || !cursosNuevos || cursosNuevos.length === 0) {
+      showToast("⚠️ Debes seleccionar el curso a dividir y escribir los cursos correctos.");
+      return false;
+    }
+    const profesAfectados = profesores.filter(p => (p.cursos || []).includes(cursoMalo));
+    if (profesAfectados.length === 0) {
+      showToast(`⚠️ No se encontró a ningún profesor con el curso "${cursoMalo}".`);
+      return false;
+    }
+    if (!window.confirm(`¿Dividir "${cursoMalo}" en ${cursosNuevos.map(c => `"${c}"`).join(" + ")} en ${profesAfectados.length} profesor(es)?`)) return false;
+    try {
+      const batch = writeBatch(db);
+      for (const p of profesAfectados) {
+        const nuevosCursos = [...new Set([...(p.cursos || []).filter(c => c !== cursoMalo), ...cursosNuevos])];
+        batch.update(doc(db, "profesores", p.id), { cursos: nuevosCursos });
+      }
+      await batch.commit();
+      showToast(`✅ "${cursoMalo}" dividido en ${cursosNuevos.length} cursos en ${profesAfectados.length} profesor(es).`);
+      return true;
+    } catch (e) {
+      console.error("Error dividiendo curso:", e);
+      showToast("❌ Error al dividir curso.");
       return false;
     }
   };
@@ -679,6 +714,7 @@ export default function App() {
                 eliminarCurso={eliminarCurso}
                 adminAgregarCurso={adminAgregarCurso}
                 fusionarCursosGlobal={fusionarCursosGlobal}
+                dividirCursoGlobal={dividirCursoGlobal}
                 crearNoticia={crearNoticia} eliminarNoticia={eliminarNoticia}
                 eliminarFeedback={eliminarFeedback} destruirFeedback={destruirFeedback} responderFeedback={responderFeedback}
                 editarProfesor={editarProfesor}

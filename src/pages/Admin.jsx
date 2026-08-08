@@ -31,7 +31,8 @@ export const Admin = ({
   editarProfesor,
   editCursoProf, setEditCursoProf,
   editCursoVal, setEditCursoVal,
-  fusionarCursosGlobal
+  fusionarCursosGlobal,
+  dividirCursoGlobal
 }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -65,6 +66,10 @@ export const Admin = ({
   // Fusión de cursos
   const [fusionarCursoMalo, setFusionarCursoMalo] = useState("");
   const [fusionarCursoBueno, setFusionarCursoBueno] = useState("");
+
+  // División de cursos
+  const [dividirCursoSel, setDividirCursoSel] = useState("");
+  const [dividirCursosNuevos, setDividirCursosNuevos] = useState("");
 
   const pendingReportes = reportes.filter(r => r.estado === "pendiente");
   const archivedReportes = reportes.filter(r => r.estado !== "pendiente");
@@ -643,6 +648,32 @@ export const Admin = ({
                 const ok = await fusionarCursosGlobal(malo, bueno);
                 if (ok) { setFusionarCursoMalo(""); setFusionarCursoBueno(""); }
               }} style={{ padding: "12px 24px" }}>Fusionar</button>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: 24, marginBottom: 32 }}>
+            <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>✂️ Dividir Curso</h4>
+            <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 24 }}>Separa un curso mal escrito en <b>varios cursos correctos</b> (ej. "Matematica I y Matematica II" → "Matemática 1" + "Matemática 2").</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <select className="input" value={dividirCursoSel} onChange={e => setDividirCursoSel(e.target.value)} style={{ padding: "12px 16px" }}>
+                <option value="">Selecciona el curso a dividir...</option>
+                {[...new Set(profesores.flatMap(p => p.cursos || []))].sort().map(c => <option key={`div-${c}`} value={c}>{c}</option>)}
+              </select>
+              <input className="input" placeholder='Cursos correctos separados por coma (ej: Matemática 1, Matemática 2)' value={dividirCursosNuevos} onChange={e => setDividirCursosNuevos(e.target.value)} style={{ padding: "12px 16px" }} />
+              {dividirCursosNuevos.trim() && (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {dividirCursosNuevos.split(",").map(c => c.trim()).filter(Boolean).map((c, i) => (
+                    <span key={i} style={{ background: "#dbeafe", color: "#1e40af", padding: "4px 12px", borderRadius: 20, fontSize: 13, fontWeight: 700 }}>📚 {capitalizeName(c)}</span>
+                  ))}
+                </div>
+              )}
+              <button className="btn btn-blue" disabled={!dividirCursoSel || !dividirCursosNuevos.trim()} onClick={async () => {
+                const malo = dividirCursoSel;
+                const nuevos = dividirCursosNuevos.split(",").map(c => capitalizeName(c.trim())).filter(Boolean);
+                if (nuevos.length < 2) { showToast("⚠️ Escribe al menos 2 cursos separados por coma."); return; }
+                const ok = await dividirCursoGlobal(malo, nuevos);
+                if (ok) { setDividirCursoSel(""); setDividirCursosNuevos(""); }
+              }} style={{ padding: "12px 24px", alignSelf: "flex-start" }}>Dividir</button>
             </div>
           </div>
 
