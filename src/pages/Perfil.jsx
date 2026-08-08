@@ -75,60 +75,61 @@ export const Perfil = ({
       {/* Card del profe */}
       <div className="card" style={{ marginBottom: 20, overflow: "hidden", border: `1.5px solid ${FAC_COLOR[selProf.facultad] || B}30` }}>
         <div style={{ background: `linear-gradient(135deg, ${FAC_COLOR[selProf.facultad] || BD}15, ${OR}08)`, padding: "28px 28px 20px" }}>
-          <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 16 }}>
             <Avatar name={selProf.nombre} fac={selProf.facultad} size={84} />
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: "var(--text-dark)", marginBottom: 8, lineHeight: 1.2 }}>{selProf.nombre}</h2>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
-                {(selProf.facultades || [selProf.facultad]).map(f => (
-                  <span key={f} className="pill" style={{ background: FAC_BG[f] || BL, color: FAC_COLOR[f] || BD, fontSize: 13, padding: "6px 14px" }}>
-                    {FAC_EMOJI[f] || ""} {f}
-                  </span>
-                ))}
-                {(selProf.sedes || [selProf.sede].filter(Boolean)).map(s => (
-                  <span key={s} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)", fontSize: 13, padding: "6px 14px" }}>📍 Sede {s}</span>
-                ))}
-                {(selProf.cursos || []).map(c => {
-                  const rank = getCourseRank(c);
-                  return (
-                    <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80", fontSize: 13, padding: "6px 14px" }}>
-                      📚 {c} 
-                      {rank && <span style={{ color: rank === 1 ? "#d97706" : rank === 2 ? "#64748b" : rank === 3 ? "#92400e" : B, fontWeight: 800, marginLeft: 4 }} title={`Top #${rank} en ${c}`}>#{rank}</span>}
-                    </span>
-                  );
-                })}
-              </div>
-              {selProf.bio && <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{selProf.bio}</p>}
-              
-              {!hasRecommended && (
-                <div style={{ marginTop: 12 }}>
-                  {!showRecommend ? (
-                    <button className="btn btn-ghost" onClick={() => setShowRecommend(true)} style={{ fontSize: 13, padding: "6px 12px", border: "1px dashed var(--border-color)", color: "var(--text-light)" }}>
-                      💡 Sugerir para otra facultad
-                    </button>
-                  ) : (
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", background: "var(--card-bg)", padding: 8, borderRadius: 12, border: "1px solid var(--border-color)" }}>
-                      <select className="input" style={{ padding: "8px 12px", fontSize: 13, flex: 1, minWidth: 150 }} value={recFacultad} onChange={e => setRecFacultad(e.target.value)}>
-                        <option value="">Seleccionar facultad...</option>
-                        {FACULTADES_FORM.filter(f => !(selProf.facultades || [selProf.facultad]).includes(f)).map(f => (
-                          <option key={f} value={f}>{f}</option>
-                        ))}
-                      </select>
-                      <button className="btn btn-blue" disabled={!recFacultad} style={{ padding: "8px 16px", fontSize: 13 }} onClick={() => {
-                        recomendarFacultad(selProf.id, recFacultad);
-                        setShowRecommend(false);
-                      }}>Enviar</button>
-                      <button className="btn btn-ghost" style={{ padding: "8px 16px", fontSize: 13 }} onClick={() => setShowRecommend(false)}>✕</button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            <div style={{ textAlign: "center", background: "#fff", borderRadius: 20, padding: "20px 28px", border: "1px solid var(--border-color)", boxShadow: "0 8px 24px rgba(0,0,0,.06)" }}>
+            <div style={{ textAlign: "center", background: "var(--card-bg)", borderRadius: 20, padding: "16px 24px", border: "1px solid var(--border-color)", boxShadow: "0 8px 24px rgba(0,0,0,.06)" }}>
               <RatingChip r={globalRating} large />
               <div style={{ marginTop: 8 }}><Stars value={globalRating} size={16} gap={2} /></div>
               <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 8, fontWeight: 700 }}>{allR.length} reseñas</div>
             </div>
+          </div>
+          
+          <div>
+            <h2 style={{ fontSize: 26, fontWeight: 800, color: "var(--text-dark)", marginBottom: 12, lineHeight: 1.2 }}>{selProf.nombre}</h2>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+              {(selProf.facultades || [selProf.facultad]).map(f => (
+                <span key={f} className="pill" style={{ background: FAC_BG[f] || BL, color: FAC_COLOR[f] || BD, fontSize: 13, padding: "6px 14px" }}>
+                  {FAC_EMOJI[f] || ""} {f}
+                </span>
+              ))}
+              {(selProf.sedes || [selProf.sede].filter(Boolean)).map(s => (
+                <span key={s} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)", fontSize: 13, padding: "6px 14px" }}>📍 Sede {s}</span>
+              ))}
+              {(selProf.cursos || []).map(c => {
+                const rank = getCourseRank(c);
+                return (
+                  <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80", fontSize: 13, padding: "6px 14px" }}>
+                    📚 {c} 
+                    {rank && <span style={{ color: rank === 1 ? "#d97706" : rank === 2 ? "#64748b" : rank === 3 ? "#92400e" : B, fontWeight: 800, marginLeft: 4 }} title={`Top #${rank} en ${c}`}>#{rank}</span>}
+                  </span>
+                );
+              })}
+            </div>
+            {selProf.bio && <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{selProf.bio}</p>}
+            
+            {!hasRecommended && (
+              <div style={{ marginTop: 16 }}>
+                {!showRecommend ? (
+                  <button className="btn" onClick={() => setShowRecommend(true)} style={{ fontSize: 14, padding: "10px 20px", background: "var(--primary-blue)", color: "#fff", fontWeight: 800, borderRadius: 12, boxShadow: "0 6px 16px rgba(59, 130, 246, 0.3)", border: "none", transition: "transform 0.2s" }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+                    💡 Sugerir para otra facultad
+                  </button>
+                ) : (
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", background: "var(--card-bg)", padding: "12px", borderRadius: 16, border: "2px solid var(--primary-blue)" }}>
+                    <select className="input" style={{ padding: "10px 14px", fontSize: 14, flex: 1, minWidth: 150 }} value={recFacultad} onChange={e => setRecFacultad(e.target.value)}>
+                      <option value="">Seleccionar facultad...</option>
+                      {FACULTADES_FORM.filter(f => !(selProf.facultades || [selProf.facultad]).includes(f)).map(f => (
+                        <option key={f} value={f}>{f}</option>
+                      ))}
+                    </select>
+                    <button className="btn" disabled={!recFacultad} style={{ padding: "10px 20px", fontSize: 14, background: "var(--primary-blue)", color: "#fff", fontWeight: 800, borderRadius: 12, border: "none" }} onClick={() => {
+                      recomendarFacultad(selProf.id, recFacultad);
+                      setShowRecommend(false);
+                    }}>Enviar</button>
+                    <button className="btn btn-ghost" style={{ padding: "10px", fontSize: 14, color: "var(--text-light)" }} onClick={() => setShowRecommend(false)}>✕</button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <Divider />
