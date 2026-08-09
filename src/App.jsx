@@ -722,6 +722,7 @@ export default function App() {
                 eliminarCurso={eliminarCurso}
                 adminAgregarCurso={adminAgregarCurso}
                 fusionarCursosGlobal={fusionarCursosGlobal}
+                fusionarProfesores={fusionarProfesores}
                 dividirCursoGlobal={dividirCursoGlobal}
                 crearNoticia={crearNoticia} eliminarNoticia={eliminarNoticia}
                 eliminarFeedback={eliminarFeedback} destruirFeedback={destruirFeedback} responderFeedback={responderFeedback}

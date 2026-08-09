@@ -32,7 +32,8 @@ export const Admin = ({
   editCursoProf, setEditCursoProf,
   editCursoVal, setEditCursoVal,
   fusionarCursosGlobal,
-  dividirCursoGlobal
+  dividirCursoGlobal,
+  fusionarProfesores
 }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -639,12 +640,31 @@ export const Admin = ({
             <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>🔗 Fusionar Cursos Globalmente</h4>
             <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 24 }}>Reemplaza una versión incorrecta de un curso por la correcta en <b>todos</b> los profesores a la vez (ej. cambiar "bioquimica" por "Bioquímica").</p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-              <select className="input" value={fusionarCursoMalo} onChange={e => setFusionarCursoMalo(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "12px 16px" }}>
-                <option value="">Selecciona el curso INCORRECTO...</option>
-                {[...new Set(profesores.flatMap(p => p.cursos || []))].sort().map(c => <option key={`malo-${c}`} value={c}>{c}</option>)}
-              </select>
+              <input 
+                list="cursos-incorrectos-list"
+                className="input" 
+                placeholder="Selecciona el curso INCORRECTO..." 
+                value={fusionarCursoMalo} 
+                onChange={e => setFusionarCursoMalo(e.target.value)} 
+                style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} 
+              />
+              <datalist id="cursos-incorrectos-list">
+                {[...new Set(profesores.flatMap(p => p.cursos || []))].sort().map(c => <option key={`malo-${c}`} value={c} />)}
+              </datalist>
               <span style={{ color: "var(--text-muted)" }}>👉</span>
-              <input className="input" placeholder="Nombre correcto (ej: Bioquímica)" value={fusionarCursoBueno} onChange={e => setFusionarCursoBueno(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} />
+              
+              <input 
+                list="cursos-correctos-list"
+                className="input" 
+                placeholder="Nombre correcto (ej: Bioquímica)" 
+                value={fusionarCursoBueno} 
+                onChange={e => setFusionarCursoBueno(e.target.value)} 
+                style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} 
+              />
+              <datalist id="cursos-correctos-list">
+                {[...new Set(profesores.flatMap(p => p.cursos || []))].sort().map(c => <option key={`bueno-${c}`} value={c} />)}
+              </datalist>
+              
               <button className="btn btn-blue" disabled={!fusionarCursoMalo || !fusionarCursoBueno.trim()} onClick={async () => {
                 const malo = fusionarCursoMalo;
                 const bueno = capitalizeName(fusionarCursoBueno.trim());
@@ -717,6 +737,21 @@ export const Admin = ({
                 });
               });
 
+              const globalCourseDuplicates = [];
+              const globalCMap = {};
+              profesores.forEach(p => {
+                (p.cursos || []).forEach(c => {
+                  const nc = normalizeText(c).replace(/\s+/g, ' '); // quitar multiples espacios
+                  if (!globalCMap[nc]) globalCMap[nc] = new Set();
+                  globalCMap[nc].add(c);
+                });
+              });
+              Object.values(globalCMap).forEach(set => {
+                if (set.size > 1) {
+                  globalCourseDuplicates.push(Array.from(set));
+                }
+              });
+
               const uppercaseProfs = profesores.filter(p => p.nombre && p.nombre.trim().length > 0 && p.nombre.toUpperCase() === p.nombre && /[A-Z]/.test(p.nombre));
 
               return (
@@ -734,8 +769,30 @@ export const Admin = ({
                               <div style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>2. {d.p2.nombre} <span style={{ color: "var(--text-light)", fontWeight: 400, fontSize: 12 }}>({d.p2.totalReseñas || 0} reseñas)</span></div>
                             </div>
                             <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
-                              <button className="btn btn-red" onClick={() => eliminarProfesor(d.p1)} style={{ padding: "6px 12px", fontSize: 12 }}>Borrar el 1</button>
-                              <button className="btn btn-red" onClick={() => eliminarProfesor(d.p2)} style={{ padding: "6px 12px", fontSize: 12 }}>Borrar el 2</button>
+                              <button className="btn btn-blue" onClick={() => fusionarProfesores(d.p2, d.p1)} style={{ padding: "6px 12px", fontSize: 12 }}>Fusionar hacia el 1</button>
+                              <button className="btn btn-blue" onClick={() => fusionarProfesores(d.p1, d.p2)} style={{ padding: "6px 12px", fontSize: 12 }}>Fusionar hacia el 2</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>🌍 Cursos duplicados GLOBALMENTE ({globalCourseDuplicates.length})</h5>
+                    {globalCourseDuplicates.length === 0 ? (
+                      <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No hay variaciones de escritura del mismo curso.</div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {globalCourseDuplicates.map((arr, i) => (
+                          <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12 }}>
+                            <div style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 8, fontWeight: 600 }}>Variaciones encontradas:</div>
+                            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                              {arr.map((c, j) => (
+                                <span key={j} style={{ background: "#f3f6fb", color: "#1e40af", padding: "4px 10px", borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: "pointer" }} onClick={() => { setFusionarCursoMalo(c); window.scrollTo(0,0); }}>
+                                  {c}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         ))}
