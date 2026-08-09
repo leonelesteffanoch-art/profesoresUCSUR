@@ -580,6 +580,64 @@ export default function App() {
     } catch (e) { showToast("❌ Error al eliminar."); }
   };
 
+  const fusionarProfesores = async (profEliminar, profDestino) => {
+    if (!profEliminar || !profDestino) return false;
+    if (!window.confirm(`¿Estás seguro de fusionar a "${profEliminar.nombre}" hacia "${profDestino.nombre}"?\n\nEsto moverá todas sus reseñas al profesor destino y ELIMINARÁ permanentemente al profesor duplicado.`)) return false;
+    
+    try {
+      const batch = writeBatch(db);
+      
+      // 1. Mover todas las reseñas de profEliminar a profDestino
+      const resenasQuery = query(collection(db, "profesores", profEliminar.id, COL_RESENAS));
+      const resenasSnapshot = await getDocs(resenasQuery);
+      
+      resenasSnapshot.forEach(docSnap => {
+        const oldRef = docSnap.ref;
+        const newRef = doc(db, "profesores", profDestino.id, COL_RESENAS, docSnap.id);
+        const data = docSnap.data();
+        
+        batch.set(newRef, {
+          ...data,
+          profNombre: profDestino.nombre,
+          profFac: profDestino.facultad
+        });
+        batch.delete(oldRef);
+      });
+      
+      // 2. Combinar cursos, facultades y sedes sin duplicados
+      const mergedCursos = [...new Set([...(profDestino.cursos || []), ...(profEliminar.cursos || [])])].sort();
+      const mergedFacultades = [...new Set([...(profDestino.facultades || [profDestino.facultad]), ...(profEliminar.facultades || [profEliminar.facultad])])];
+      const mergedSedes = [...new Set([...(profDestino.sedes || (profDestino.sede ? [profDestino.sede] : [])), ...(profEliminar.sedes || (profEliminar.sede ? [profEliminar.sede] : []))])];
+      
+      // 3. Actualizar profesor destino
+      batch.update(doc(db, "profesores", profDestino.id), {
+        cursos: mergedCursos,
+        facultades: mergedFacultades,
+        sedes: mergedSedes
+      });
+      
+      // 4. Eliminar al profesor duplicado (profEliminar)
+      batch.delete(doc(db, "profesores", profEliminar.id));
+      
+      await batch.commit();
+      
+      // 5. Recalcular el rating del profesor destino con sus nuevas reseñas consolidadas
+      // Instead of relying on a non-existent actualizarRatingYResenas, we calculate it here
+      const remainingOld = resenas[profDestino.id] || [];
+      const movedNew = resenasSnapshot.docs.map(d => d.data());
+      const mergedReviews = [...remainingOld, ...movedNew];
+      const newRating = calcRating(mergedReviews);
+      await updateDoc(doc(db, "profesores", profDestino.id), { rating: newRating, totalReseñas: mergedReviews.length });
+      
+      showToast(`✅ Profesores fusionados correctamente.`);
+      return true;
+    } catch (error) {
+      console.error("Error al fusionar profesores:", error);
+      showToast("❌ Error al fusionar profesores.");
+      return false;
+    }
+  };
+
   const crearNoticia = async (titulo, contenido, imagenUrl, link = "") => {
     try {
       await addDoc(collection(db, "noticias"), { titulo, contenido, imagenUrl: imagenUrl || "", link: link || "", createdAt: serverTimestamp() });
