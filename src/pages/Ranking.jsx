@@ -18,9 +18,18 @@ export const Ranking = ({ profesores, rankTab, setRankTab, rankCursoFiltro: curs
   }, [profesores, cursoFiltro]);
 
   const withR = profesoresFiltrados.filter(p => p.totalReseñas > 0);
-  const top = [...withR].sort((a, b) => b.rating - a.rating);
-  const worst = [...withR].sort((a, b) => a.rating - b.rating);
+  
+  const C = withR.length ? withR.reduce((sum, p) => sum + p.rating, 0) / withR.length : 0;
+  const m = 3; // Minimum reviews needed to be confident
+  const bayesianRating = (p) => {
+    const v = p.totalReseñas || 0;
+    return (v * p.rating + m * C) / (v + m);
+  };
+
+  const top = [...withR].sort((a, b) => bayesianRating(b) - bayesianRating(a));
+  const worst = [...withR].sort((a, b) => bayesianRating(a) - bayesianRating(b));
   const popular = [...profesoresFiltrados].sort((a, b) => (b.totalReseñas || 0) - (a.totalReseñas || 0));
+  
   const maxR = Math.max(...profesoresFiltrados.map(p => p.totalReseñas || 0), 1);
   const podio = top.slice(0, 3);
   const ord = [1, 0, 2], heights = ["70px", "90px", "50px"], medals = ["🥇", "🥈", "🥉"];

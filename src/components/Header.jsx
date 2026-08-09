@@ -94,10 +94,10 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
             key={p} 
             className={`mobile-nav-link${page === p ? " active" : ""}`}
             onClick={() => handleNav(p)}
-            style={p === "feedback" ? { background: "var(--ghost-bg)", border: "1px dashed var(--primary-orange)" } : {}}
+            style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", fontWeight: 800, marginTop: 8 } : {}}
           >
             <span style={{ fontSize: 20 }}>{icon}</span>
-            <span style={p === "feedback" ? { color: "var(--primary-orange)" } : {}}>{label}</span>
+            <span style={p === "feedback" ? { color: "#fff" } : {}}>{label}</span>
           </div>
         ))}
         <div style={{ marginTop: "auto", paddingTop: 24, borderTop: "1px solid var(--border-color)" }}>
