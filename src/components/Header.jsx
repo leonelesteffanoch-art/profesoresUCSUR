@@ -60,6 +60,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
               key={p} 
               className={`nav-link${page === p ? " active" : ""}`} 
               onClick={() => handleNav(p)}
+              style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", padding: "6px 12px", borderRadius: 20, fontWeight: 800 } : {}}
             >
               {icon} {label}
             </span>
@@ -93,9 +94,10 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
             key={p} 
             className={`mobile-nav-link${page === p ? " active" : ""}`}
             onClick={() => handleNav(p)}
+            style={p === "feedback" ? { background: "var(--ghost-bg)", border: "1px dashed var(--primary-orange)" } : {}}
           >
             <span style={{ fontSize: 20 }}>{icon}</span>
-            <span>{label}</span>
+            <span style={p === "feedback" ? { color: "var(--primary-orange)" } : {}}>{label}</span>
           </div>
         ))}
         <div style={{ marginTop: "auto", paddingTop: 24, borderTop: "1px solid var(--border-color)" }}>

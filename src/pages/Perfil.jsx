@@ -279,18 +279,18 @@ export const Perfil = ({
         return (
           <div key={r.id} className="card fade-in" style={{ padding: "20px 24px", marginBottom: 14, animationDelay: `${idx * .05}s` }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#edf1f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🎓</div>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#edf1f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0, marginTop: 2 }}>🎓</div>
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)" }}>
                     Estudiante anónimo
                     {r.facultadAlumno && <span style={{ fontWeight: 600, color: "var(--text-light)", fontSize: 12 }}> · {r.facultadAlumno.replace("Ciencias de la ", "").replace("Ciencias ", "")}</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-light)", display: "flex", gap: 8, flexWrap: "wrap", marginTop: 2, fontWeight: 500 }}>
-                    <span>🕐 {formatFecha(r.createdAt)}</span>
-                    {r.carrera && <span>· 🎓 {r.carrera}</span>}
-                    {r.ciclo && <span>· 📅 Llevado en el ciclo {r.ciclo}</span>}
-                    {r.semestre && <span>· 🗓️ {r.semestre}</span>}
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
+                    <span style={{ padding: "3px 8px", background: "var(--ghost-bg)", borderRadius: 6, fontSize: 11, fontWeight: 600, color: "var(--text-muted)" }}>🕐 {formatFecha(r.createdAt)}</span>
+                    {r.carrera && <span style={{ padding: "3px 8px", background: "var(--ghost-bg)", borderRadius: 6, fontSize: 11, fontWeight: 600, color: "var(--text-muted)" }}>🎓 {r.carrera}</span>}
+                    {r.ciclo && <span style={{ padding: "3px 8px", background: "var(--ghost-bg)", borderRadius: 6, fontSize: 11, fontWeight: 600, color: "var(--text-muted)" }}>📅 Ciclo {r.ciclo}</span>}
+                    {r.semestre && <span style={{ padding: "3px 8px", background: "var(--ghost-bg)", borderRadius: 6, fontSize: 11, fontWeight: 600, color: "var(--text-muted)" }}>🗓️ {r.semestre}</span>}
                   </div>
                 </div>
               </div>

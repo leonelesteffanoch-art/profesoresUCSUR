@@ -667,7 +667,7 @@ export const Admin = ({
               
               <button className="btn btn-blue" disabled={!fusionarCursoMalo || !fusionarCursoBueno.trim()} onClick={async () => {
                 const malo = fusionarCursoMalo;
-                const bueno = capitalizeName(fusionarCursoBueno.trim());
+                const bueno = fusionarCursoBueno.trim();
                 const ok = await fusionarCursosGlobal(malo, bueno);
                 if (ok) { setFusionarCursoMalo(""); setFusionarCursoBueno(""); }
               }} style={{ padding: "12px 24px" }}>Fusionar</button>
