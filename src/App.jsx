@@ -102,11 +102,6 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
       <Perfil
         profesores={profesores}
         selProf={selProf}
-        navigate={(p, prof) => {
-          if (p === "home") nav("/");
-          else if (p === "perfil" && prof) nav(`/profesor/${prof.id}`);
-          else nav(`/${p}`);
-        }}
         allR={allR}
         globalRating={globalRating}
         critAvg={critAvg}
@@ -119,6 +114,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
         reportes={reportes} reportarResena={reportarResena}
         formRef={formRef}
         navigate={navigate}
+        recomendarFacultad={recomendarFacultad}
       />
     </div>
   );
