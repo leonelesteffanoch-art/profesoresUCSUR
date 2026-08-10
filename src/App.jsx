@@ -360,7 +360,7 @@ export default function App() {
       const profRef = await addDoc(collection(db, "profesores"), { 
         nombre: capitalizeName(addProf.nombre.trim()), 
         facultad: addProf.facultades ? addProf.facultades : [addProf.facultad], 
-        cursos: [addProf.curso.trim()], 
+        cursos: [capitalizeName(addProf.curso.trim())], 
         sede: addProf.sedes ? addProf.sedes[0] : addProf.sede,
         sedes: addProf.sedes ? addProf.sedes : [addProf.sede].filter(Boolean),
         bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
@@ -394,7 +394,7 @@ export default function App() {
 
   const submitAgregarCurso = async (nuevaSede, nuevaFac) => {
     if (!addProfSel) return;
-    let newCurso = addCurso.trim();
+    let newCurso = capitalizeName(addCurso.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
     if (newCurso.includes(",") || / y /i.test(newCurso)) {
       showToast("⚠️ Por favor ingresa UN solo curso a la vez (sin comas ni 'y').");
@@ -477,7 +477,7 @@ export default function App() {
   };
 
   const adminAgregarCurso = async (prof) => {
-    let newCurso = editCursoVal.trim();
+    let newCurso = capitalizeName(editCursoVal.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
 
     const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
