@@ -14,6 +14,7 @@ export const Admin = ({
   adminLoading, setAdminLoading,
   profesores,
   todasResenas,
+  cargarTodasLasResenas,
   reportes,
   noticias,
   feedbacks,
