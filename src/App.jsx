@@ -118,7 +118,6 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
         votados={votados} toggleUtil={toggleUtil}
         reportes={reportes} reportarResena={reportarResena}
         formRef={formRef}
-        navigate={navigate}
         recomendarFacultad={recomendarFacultad}
       />
     </div>
