@@ -111,7 +111,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
         globalRating={globalRating}
         critAvg={critAvg}
         form={form} setForm={setForm}
-        formErr={formErr}
+        formErr={formErr} setFormErr={setFormErr}
         submitResena={submitResena}
         carrerasForm={carrerasForm}
         carreras={carreras}
@@ -360,7 +360,7 @@ export default function App() {
       const profRef = await addDoc(collection(db, "profesores"), { 
         nombre: capitalizeName(addProf.nombre.trim()), 
         facultad: addProf.facultades ? addProf.facultades : [addProf.facultad], 
-        cursos: [capitalizeName(addProf.curso.trim())], 
+        cursos: [addProf.curso.trim()], 
         sede: addProf.sedes ? addProf.sedes[0] : addProf.sede,
         sedes: addProf.sedes ? addProf.sedes : [addProf.sede].filter(Boolean),
         bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
@@ -394,7 +394,7 @@ export default function App() {
 
   const submitAgregarCurso = async (nuevaSede, nuevaFac) => {
     if (!addProfSel) return;
-    let newCurso = capitalizeName(addCurso.trim());
+    let newCurso = addCurso.trim();
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
     if (newCurso.includes(",") || / y /i.test(newCurso)) {
       showToast("⚠️ Por favor ingresa UN solo curso a la vez (sin comas ni 'y').");
@@ -477,7 +477,7 @@ export default function App() {
   };
 
   const adminAgregarCurso = async (prof) => {
-    let newCurso = capitalizeName(editCursoVal.trim());
+    let newCurso = editCursoVal.trim();
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
 
     const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];

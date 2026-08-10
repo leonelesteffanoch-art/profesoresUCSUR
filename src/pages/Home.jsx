@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { createPortal } from "react-dom";
 import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL, SEDES } from "../constants.js";
 import { Link } from "react-router-dom";
@@ -325,25 +325,65 @@ export const Home = ({
             </div>
           )}
           {filtered.slice(0, visibleCount).map((p, i) => (
-            <Link key={p.id} to={`/profesor/${p.id}`} className="card card-hover fade-in" 
-              style={{ padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, borderLeft: `5px solid ${FAC_COLOR[p.facultad] || B}`, animationDelay: `${i * .04}s`, textDecoration: "none" }}>
-              <Avatar name={p.nombre} fac={p.facultad} size={56} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text-dark)", marginBottom: 6 }}>{p.nombre}</div>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-                  {p.facultades?.map(f => (
-                    <span key={f} className="pill" style={{ background: FAC_BG[f] || BL, color: FAC_COLOR[f] || BD }}>{FAC_EMOJI[f] || ""} {f}</span>
-                  ))}
-                  {(p.sedes || [p.sede].filter(Boolean)).map(s => <span key={s} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📍 Sede {s}</span>)}
-                  {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
+            <Fragment key={p.id}>
+              {i === 4 && (
+                <div className="card fade-in" style={{ gridColumn: "1 / -1", background: `linear-gradient(135deg, ${B}, ${BD})`, padding: "24px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+                  <div>
+                    <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, marginBottom: 4 }}>¿Tus amigos andan perdidos con la matrícula?</div>
+                    <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, fontWeight: 500 }}>¡Pásales el link de la página y sálvales el ciclo!</div>
+                  </div>
+                  <button className="btn" onClick={(e) => {
+                      e.preventDefault();
+                      if (navigator.share) {
+                        navigator.share({ title: "ProfesoresUCSUR", text: "Mira las reseñas de los profes antes de matricularte:", url: window.location.origin });
+                      } else {
+                        navigator.clipboard.writeText(window.location.origin);
+                        alert("¡Enlace copiado al portapapeles!");
+                      }
+                    }} style={{ background: "#fff", color: BD, fontWeight: 800, padding: "12px 24px" }}>
+                    📲 Compartir la página
+                  </button>
                 </div>
-              </div>
-              <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <RatingChip r={p.rating} />
-                <div style={{ marginTop: 6 }}><Stars value={p.rating} size={14} gap={1} /></div>
-                <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 4, fontWeight: 600 }}>{p.totalReseñas || 0} reseñas</div>
-              </div>
-            </Link>
+              )}
+              {i === 12 && (
+                <div className="card fade-in" style={{ gridColumn: "1 / -1", background: `linear-gradient(135deg, ${OR}, #f09040)`, padding: "24px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+                  <div>
+                    <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, marginBottom: 4 }}>Ayuda a que la comunidad crezca 🌱</div>
+                    <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, fontWeight: 500 }}>Mientras más personas usen la página, ¡mejores reseñas tendremos todos!</div>
+                  </div>
+                  <button className="btn" onClick={(e) => {
+                      e.preventDefault();
+                      if (navigator.share) {
+                        navigator.share({ title: "ProfesoresUCSUR", text: "Únete a la comunidad y revisa qué profes valen la pena:", url: window.location.origin });
+                      } else {
+                        navigator.clipboard.writeText(window.location.origin);
+                        alert("¡Enlace copiado al portapapeles!");
+                      }
+                    }} style={{ background: "#fff", color: OR, fontWeight: 800, padding: "12px 24px" }}>
+                    🚀 Recomendar a un amigo
+                  </button>
+                </div>
+              )}
+              <Link to={`/profesor/${p.id}`} className="card card-hover fade-in" 
+                style={{ padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, borderLeft: `5px solid ${FAC_COLOR[p.facultad] || B}`, animationDelay: `${i * .04}s`, textDecoration: "none" }}>
+                <Avatar name={p.nombre} fac={p.facultad} size={56} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text-dark)", marginBottom: 6 }}>{p.nombre}</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+                    {p.facultades?.map(f => (
+                      <span key={f} className="pill" style={{ background: FAC_BG[f] || BL, color: FAC_COLOR[f] || BD }}>{FAC_EMOJI[f] || ""} {f}</span>
+                    ))}
+                    {(p.sedes || [p.sede].filter(Boolean)).map(s => <span key={s} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📍 Sede {s}</span>)}
+                    {(p.cursos || []).map(c => <span key={c} className="pill" style={{ background: "var(--border-color)", color: "var(--text-muted)" }}>📚 {c}</span>)}
+                  </div>
+                </div>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <RatingChip r={p.rating} />
+                  <div style={{ marginTop: 6 }}><Stars value={p.rating} size={14} gap={1} /></div>
+                  <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 4, fontWeight: 600 }}>{p.totalReseñas || 0} reseñas</div>
+                </div>
+              </Link>
+            </Fragment>
           ))}
         </div>
         

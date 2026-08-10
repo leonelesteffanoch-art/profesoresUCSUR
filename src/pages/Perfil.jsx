@@ -17,7 +17,7 @@ export const Perfil = ({
   globalRating,
   critAvg,
   form, setForm,
-  formErr,
+  formErr, setFormErr,
   submitResena,
   carrerasForm,
   carreras,
