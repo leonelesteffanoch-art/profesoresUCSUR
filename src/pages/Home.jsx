@@ -32,6 +32,12 @@ export const Home = ({
   const [visibleCount, setVisibleCount] = useState(15);
 
   useEffect(() => {
+    document.title = "Profesores UCSUR | Califica y descubre a tus profesores";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", "Descubre, califica y lee reseñas de los profesores de la Universidad Científica del Sur (UCSUR).");
+  }, []);
+
+  useEffect(() => {
     setVisibleCount(15);
   }, [busqueda, facFiltro, sedeFiltro, sortBy]);
 
