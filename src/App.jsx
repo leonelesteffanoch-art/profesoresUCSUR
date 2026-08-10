@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from "react";
 import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
-import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, increment, writeBatch, deleteField } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, increment, writeBatch, deleteField, where } from "firebase/firestore";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { db, auth, COL_RESENAS } from "./services/firebase.js";
 import { FORM_EMPTY, ADD_EMPTY, FRASES_INICIO, CRIT } from "./constants.js";
@@ -262,9 +262,14 @@ export default function App() {
 
   useEffect(() => {
     if (!adminUser) {
-      setFeedbacks([]);
-      return;
+      // Usuarios normales solo ven respuestas públicas
+      const q = query(collection(db, "feedbacks"), where("esPublico", "==", true));
+      const unsub = onSnapshot(q, snap => {
+        setFeedbacks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      });
+      return () => unsub();
     }
+    // Admin ve todo
     const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, snap => {
       setFeedbacks(snap.docs.map(d => ({ id: d.id, ...d.data() })));

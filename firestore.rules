@@ -63,7 +63,8 @@ service cloud.firestore {
     
     match /feedbacks/{feedbackId} {
       allow create: if isLogged();
-      allow read, update, delete: if isAdmin();
+      allow read: if isAdmin() || resource.data.esPublico == true;
+      allow update, delete: if isAdmin();
     }
   }
 }
