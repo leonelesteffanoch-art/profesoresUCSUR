@@ -32,7 +32,6 @@ export const Perfil = ({
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showRecommend, setShowRecommend] = useState(false);
   const [recFacultad, setRecFacultad] = useState("");
-  const [formStep, setFormStep] = useState(1);
   if (!selProf) return null;
 
   const hasRecommended = localStorage.getItem(`rec_fac_${selProf.id}`) === "true";
@@ -179,41 +178,37 @@ export const Perfil = ({
             <div style={{ fontWeight: 800, color: BD, fontSize: 18 }}>Dejar una reseña anónima</div>
             <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500, marginTop: 2 }}>🔒 Sin nombre, sin cuenta, 100% privado</div>
           </div>
-          <div style={{ background: "var(--ghost-bg)", padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 800, color: "var(--text-muted)" }}>
-            Paso {formStep} de 3
-          </div>
         </div>
 
-        {formStep === 1 && (
-          <div className="fade-in">
-            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>CALIFICA ESTOS CRITERIOS <span style={{ color: OR }}>*</span></div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 12, marginBottom: 24 }}>
+        <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          
+          {/* SECCIÓN 1: CRITERIOS */}
+          <div style={{ background: "var(--ghost-bg)", padding: 20, borderRadius: 16, border: "1px solid var(--border-color)" }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16, letterSpacing: 0.5, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ background: OR, color: "#fff", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 12 }}>1</span>
+              CALIFICA ESTOS CRITERIOS
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 12 }}>
               {CRIT.map(c => (
-                <div key={c} className={`crit-box${form[c] > 0 ? " active" : ""}`}>
+                <div key={c} className={`crit-box${form[c] > 0 ? " active" : ""}`} style={{ background: "var(--card-bg)" }}>
                   <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 8, fontWeight: 700 }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}</div>
                   <Stars value={form[c]} onChange={v => setForm(prev => ({ ...prev, [c]: v }))} size={24} gap={4} />
                   {form[c] > 0 && <div style={{ fontSize: 12, color: ratingColor(form[c]), fontWeight: 800, marginTop: 6 }}>{ratingLabel(form[c])}</div>}
                 </div>
               ))}
             </div>
-            
-            <button className="btn btn-blue" onClick={() => {
-              if (CRIT.some(c => form[c] === 0)) { setFormErr("Califica todos los criterios primero."); } 
-              else { setFormErr(""); setFormStep(2); }
-            }} style={{ width: "100%", padding: 14, fontSize: 15, fontWeight: 700 }}>
-              Siguiente →
-            </button>
-            {formErr && <div style={{ color: "#DC2626", fontSize: 13, marginTop: 8, textAlign: "center", fontWeight: 600 }}>{formErr}</div>}
           </div>
-        )}
 
-        {formStep === 2 && (
-          <div className="fade-in">
-            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>TU INFORMACIÓN <span style={{ fontWeight: 500 }}>(opcional)</span></div>
+          {/* SECCIÓN 2: INFORMACIÓN */}
+          <div style={{ background: "var(--ghost-bg)", padding: 20, borderRadius: 16, border: "1px solid var(--border-color)" }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16, letterSpacing: 0.5, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ background: "var(--text-light)", color: "#fff", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 12 }}>2</span>
+              TU INFORMACIÓN <span style={{ fontWeight: 500, color: "var(--text-muted)" }}>(opcional)</span>
+            </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 18 }}>
               <div>
                 <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🏫 Tu facultad</label>
-                <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer" }} value={form.facultadAlumno}
+                <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", background: "var(--card-bg)" }} value={form.facultadAlumno}
                   onChange={e => setForm(prev => ({ ...prev, facultadAlumno: e.target.value, carrera: "" }))}>
                   <option value="">Selecciona tu facultad</option>
                   {FACULTADES_FORM.map(f => <option key={f} value={f}>{f}</option>)}
@@ -221,7 +216,7 @@ export const Perfil = ({
               </div>
               <div>
                 <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🎓 Tu carrera</label>
-                <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer" }} value={form.carrera}
+                <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", background: "var(--card-bg)" }} value={form.carrera}
                   onChange={e => {
                     const val = e.target.value;
                     const matchFac = Object.keys(carreras || {}).find(fac => carreras[fac].includes(val));
@@ -238,13 +233,13 @@ export const Perfil = ({
               </div>
             </div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 8, fontWeight: 700 }}>📅 Ciclo en el que llevaste el curso</label>
+              <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 8, fontWeight: 700 }}>📅 Ciclo cursado</label>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                   <button key={n} onClick={() => setForm(prev => ({ ...prev, ciclo: prev.ciclo === String(n) ? "" : String(n) }))}
                     style={{ 
                       padding: "8px 16px", borderRadius: 20, border: `1.5px solid`, fontSize: 13, fontWeight: 800, cursor: "pointer", 
-                      transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", background: form.ciclo === String(n) ? B : "transparent", 
+                      transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)", background: form.ciclo === String(n) ? B : "var(--card-bg)", 
                       color: form.ciclo === String(n) ? "#fff" : "var(--text-light)", borderColor: form.ciclo === String(n) ? B : "var(--border-color)" 
                     }}>
                     {n}
@@ -252,44 +247,41 @@ export const Perfil = ({
                 ))}
               </div>
             </div>
-            <div style={{ marginBottom: 24 }}>
+            <div>
               <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6, fontWeight: 700 }}>🗓️ Semestre cursado</label>
-              <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none" }} value={form.semestre || ""}
+              <select className="input" style={{ padding: "12px 14px", fontSize: 14, cursor: "pointer", appearance: "none", background: "var(--card-bg)" }} value={form.semestre || ""}
                 onChange={e => setForm(prev => ({ ...prev, semestre: e.target.value }))}>
                 <option value="">No especificar</option>
                 {SEMESTRES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-
-            <div style={{ display: "flex", gap: 12 }}>
-              <button className="btn btn-ghost" onClick={() => setFormStep(1)} style={{ flex: 1, padding: 14, fontSize: 15, fontWeight: 700 }}>← Atrás</button>
-              <button className="btn btn-blue" onClick={() => setFormStep(3)} style={{ flex: 2, padding: 14, fontSize: 15, fontWeight: 700 }}>Siguiente →</button>
-            </div>
           </div>
-        )}
 
-        {formStep === 3 && (
-          <div className="fade-in">
-            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 12, letterSpacing: 0.5 }}>TU OPINIÓN <span style={{ color: OR }}>*</span></div>
-            <textarea className="textarea" style={{ fontSize: 14, padding: 16 }} value={form.texto} onChange={e => { if (e.target.value.length <= 500) setForm(prev => ({ ...prev, texto: e.target.value })); }} placeholder="Cuéntales a otros alumnos cómo es este profesor: sus clases, su trato, los exámenes..." maxLength={500} />
+          {/* SECCIÓN 3: OPINIÓN */}
+          <div style={{ background: "var(--ghost-bg)", padding: 20, borderRadius: 16, border: "1px solid var(--border-color)" }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16, letterSpacing: 0.5, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ background: OR, color: "#fff", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 12 }}>3</span>
+              TU OPINIÓN
+            </div>
+            <textarea className="textarea" style={{ fontSize: 14, padding: 16, background: "var(--card-bg)", minHeight: 120 }} value={form.texto} onChange={e => { if (e.target.value.length <= 500) setForm(prev => ({ ...prev, texto: e.target.value })); }} placeholder="Cuéntales a otros alumnos cómo es este profesor: sus clases, su trato, los exámenes..." maxLength={500} />
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
               <span style={{ fontSize: 12, color: form.texto.length >= 450 ? "#DC2626" : "var(--text-light)", fontWeight: 600, transition: "color .2s" }}>{form.texto.length} / 500</span>
               {form.texto.length < 20 && form.texto.length > 0 && <span style={{ fontSize: 12, color: OR, fontWeight: 600 }}>Mínimo 20 caracteres</span>}
             </div>
-            {formErr && <div style={{ color: "#DC2626", fontSize: 13, marginTop: 8, background: "#fef2f2", padding: "10px 16px", borderRadius: 12, border: "1px solid #fecaca", fontWeight: 600 }}>{formErr}</div>}
-            
-            <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-              <button className="btn btn-ghost" onClick={() => setFormStep(2)} style={{ padding: "16px 20px", fontSize: 15, fontWeight: 700 }}>←</button>
-              <button className="btn-cta" onClick={() => {
-                if (form.texto.length < 20) { setFormErr("Escribe al menos 20 caracteres."); return; }
-                submitResena();
-                if (form.texto.length >= 20) { setFormStep(1); setShowReviewForm(false); }
-              }} style={{ flex: 1, fontSize: 16, padding: 16 }}>
-                🔒 Publicar reseña anónima
-              </button>
-            </div>
           </div>
-        )}
+
+          {formErr && <div style={{ color: "#DC2626", fontSize: 13, background: "#fef2f2", padding: "12px 16px", borderRadius: 12, border: "1px solid #fecaca", fontWeight: 600, textAlign: "center" }}>{formErr}</div>}
+          
+          <button className="btn-cta" onClick={() => {
+            if (CRIT.some(c => form[c] === 0)) { setFormErr("Califica todos los criterios primero."); return; }
+            if (form.texto.length < 20) { setFormErr("Escribe al menos 20 caracteres en tu opinión."); return; }
+            setFormErr("");
+            submitResena();
+            setShowReviewForm(false);
+          }} style={{ width: "100%", fontSize: 16, padding: 18, marginTop: 8 }}>
+            🔒 Publicar reseña anónima
+          </button>
+        </div>
       </div>
       )}
 
