@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from "react";
 import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
 import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, increment, writeBatch, deleteField } from "firebase/firestore";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
@@ -14,7 +14,7 @@ import { Home } from "./pages/Home.jsx";
 import { Ranking } from "./pages/Ranking.jsx";
 import { Agregar } from "./pages/Agregar.jsx";
 import { Perfil } from "./pages/Perfil.jsx";
-import { Admin } from "./pages/Admin.jsx";
+const Admin = lazy(() => import("./pages/Admin.jsx"));
 import { Feedback } from "./pages/Feedback.jsx";
 
 // Wrapper that resolves profesor from URL param
@@ -810,7 +810,8 @@ export default function App() {
           } />
 
           <Route path="/admin" element={
-            <div className="page-transition">
+            <Suspense fallback={<div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Cargando panel de administración...</div>}>
+              <div className="page-transition">
               <Admin 
                 adminUser={adminUser}
                 adminEmail={adminEmail} setAdminEmail={setAdminEmail}
@@ -841,6 +842,7 @@ export default function App() {
                 limpiarTodasSugerencias={limpiarTodasSugerencias}
               />
             </div>
+            </Suspense>
           } />
 
           {/* Fallback: redirect to home */}

@@ -5,7 +5,7 @@ export const CritBar = ({ label, icon, value, delay = 0 }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10, animation: `fadeIn .4s ease ${delay}s both` }}>
     <span style={{ fontSize: 16, width: 24, textAlign: "center" }}>{icon}</span>
     <span style={{ fontSize: 13, color: "var(--text-muted)", width: 90, flexShrink: 0, fontWeight: 500 }}>{label}</span>
-    <div style={{ flex: 1, background: "#edf1f7", borderRadius: 8, height: 10, overflow: "hidden" }}>
+    <div style={{ flex: 1, background: "var(--ghost-bg)", borderRadius: 8, height: 10, overflow: "hidden" }}>
       <div style={{ 
         width: `${value * 20}%`, 
         background: `linear-gradient(90deg, ${B}, ${OR})`, 

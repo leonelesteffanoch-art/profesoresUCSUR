@@ -65,7 +65,7 @@ export const Agregar = ({
               <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Nombre completo del profesor</label>
               <input className="input" value={addProf.nombre} onChange={e => setAddProf(p => ({ ...p, nombre: e.target.value }))} placeholder="Ej. Juan Pérez García" autoComplete="off" />
               {sugerencias.length > 0 && (
-                <div style={{ marginTop: 10, background: "#fff8f2", border: `1.5px solid ${OR}`, borderRadius: 14, padding: "14px 16px" }}>
+                <div style={{ marginTop: 10, background: "var(--ghost-bg)", border: `1.5px solid ${OR}`, borderRadius: 14, padding: "14px 16px" }}>
                   <div style={{ fontSize: 12, color: OR, fontWeight: 800, marginBottom: 10, letterSpacing: 0.5 }}>⚠️ PROFESORES SIMILARES — ¿Ya existe?</div>
                   {sugerencias.map(p => (
                     <div key={p.id} onClick={() => { setAddProfSel(p); setAddMode("curso"); }}
@@ -305,10 +305,10 @@ export const Agregar = ({
               value={addProfSel ? addProfSel.nombre : addProf.nombre}
               onChange={e => { setAddProf(p => ({ ...p, nombre: e.target.value })); setAddProfSel(null); }} />
             {!addProfSel && addProf.nombre.length >= 2 && (
-              <div style={{ marginTop: 8, border: "1.5px solid var(--border-color)", borderRadius: 14, overflow: "hidden", background: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,.08)" }}>
+              <div style={{ marginTop: 8, border: "1.5px solid var(--border-color)", borderRadius: 14, overflow: "hidden", background: "var(--card-bg)", boxShadow: "0 8px 24px rgba(0,0,0,.08)" }}>
                 {profesores.filter(p => similarity(p.nombre, addProf.nombre) > 0.3).sort((a, b) => similarity(b.nombre, addProf.nombre) - similarity(a.nombre, addProf.nombre)).slice(0, 6).map((p, i) => (
                   <div key={p.id} onClick={() => setAddProfSel(p)}
-                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderTop: i > 0 ? "1px solid #edf1f7" : "none", cursor: "pointer", transition: "background .2s" }}
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s" }}
                     onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                     <Avatar name={p.nombre} fac={p.facultad} size={40} />
                     <div style={{ flex: 1 }}>
@@ -338,7 +338,7 @@ export const Agregar = ({
                 <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, fontWeight: 700, letterSpacing: 0.5 }}>CURSOS ACTUALES</div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {(addProfSel.cursos || []).map(c => (
-                    <span key={c} style={{ background: "#fff", padding: "4px 12px", borderRadius: 20, fontSize: 13, color: (FAC_COLOR[addProfSel.facultad] || BD), fontWeight: 700, border: `1px solid ${FAC_COLOR[addProfSel.facultad] || B}30`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>📚 {c}</span>
+                    <span key={c} style={{ background: "var(--card-bg)", padding: "4px 12px", borderRadius: 20, fontSize: 13, color: (FAC_COLOR[addProfSel.facultad] || BD), fontWeight: 700, border: `1px solid ${FAC_COLOR[addProfSel.facultad] || B}30`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>📚 {c}</span>
                   ))}
                 </div>
               </div>

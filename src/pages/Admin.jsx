@@ -7,7 +7,7 @@ import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
 import { formatFecha, avg, ratingColor, normalizeText, capitalizeName } from "../utils/helpers.js";
 
-export const Admin = ({
+export default function Admin({
   adminUser,
   adminEmail, setAdminEmail,
   adminPass, setAdminPass,
@@ -38,7 +38,7 @@ export const Admin = ({
   aplicarSugerenciaFacultad,
   rechazarSugerenciaFacultad,
   limpiarTodasSugerencias
-}) => {
+}) {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   const [notiTitulo, setNotiTitulo] = useState("");
@@ -421,7 +421,7 @@ export const Admin = ({
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                               {Object.entries(p.recomendacionesFacultad).map(([fac, votos]) => (
-                                <div key={fac} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#fff", padding: "6px 12px", borderRadius: 8, border: "1px solid #fde68a", flexWrap: "wrap", gap: 8 }}>
+                                <div key={fac} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--card-bg)", padding: "6px 12px", borderRadius: 8, border: "1px solid #fde68a", flexWrap: "wrap", gap: 8 }}>
                                   <div style={{ fontSize: 13, fontWeight: 600, color: "#b45309", display: "flex", alignItems: "center", gap: 6 }}>
                                     {fac} <span style={{ background: "#f59e0b", color: "#fff", padding: "2px 6px", borderRadius: 10, fontSize: 10, fontWeight: 800 }}>{votos} votos</span>
                                   </div>
@@ -572,12 +572,12 @@ export const Admin = ({
                     <div style={{ display: "flex", gap: 12, alignItems: "flex-start", flexWrap: "wrap" }}>
                       <div style={{ flex: 1, minWidth: 200 }}>
                         <div style={{ fontSize: 13, color: "#DC2626", fontWeight: 800, marginBottom: 6 }}>🚨 Reporte en {prof?.nombre || "Profesor eliminado"}</div>
-                        <p style={{ fontSize: 14, color: "#2d3a50", lineHeight: 1.6, background: "#fff", padding: "12px 16px", borderRadius: 12, border: "1px solid #fecaca" }}>{rep.texto}</p>
+                        <p style={{ fontSize: 14, color: "var(--text-dark)", lineHeight: 1.6, background: "var(--card-bg)", padding: "12px 16px", borderRadius: 12, border: "1px solid #fecaca" }}>{rep.texto}</p>
                         {rep.fecha && <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 8, fontWeight: 500 }}>🕐 {formatFecha(rep.fecha)}</div>}
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
                         <button className="btn btn-red" style={{ fontSize: 13, padding: "8px 16px" }} onClick={() => handleEliminarReporte(rep, resena, prof)}>🗑️ Eliminar Reseña</button>
-                        <button className="btn btn-ghost" style={{ fontSize: 13, padding: "8px 16px", background: "#fff" }} onClick={() => handleIgnorarReporte(rep)}>✅ Ignorar Reporte</button>
+                        <button className="btn btn-ghost" style={{ fontSize: 13, padding: "8px 16px", background: "var(--ghost-bg)" }} onClick={() => handleIgnorarReporte(rep)}>✅ Ignorar Reporte</button>
                       </div>
                     </div>
                   </div>
