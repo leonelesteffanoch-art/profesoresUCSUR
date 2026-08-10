@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
-import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, increment, writeBatch } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, increment, writeBatch, deleteField } from "firebase/firestore";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { db, auth, COL_RESENAS } from "./services/firebase.js";
 import { FORM_EMPTY, ADD_EMPTY, FRASES_INICIO, CRIT } from "./constants.js";
@@ -461,10 +461,46 @@ export default function App() {
       await updateDoc(doc(db, "profesores", id), {
         [`recomendacionesFacultad.${facultad}`]: increment(1)
       });
-      localStorage.setItem(`rec_fac_${id}`, "true");
+      localStorage.setItem(`rec_fac_${id}_${facultad}`, "true");
       showToast(`✅ Sugerencia para ${facultad} enviada.`);
     } catch (e) {
       showToast("❌ Error al enviar la sugerencia.");
+    }
+  };
+
+  const aplicarSugerenciaFacultad = async (prof, facultad) => {
+    try {
+      const combinedFacs = [...new Set([...(prof.facultades || [prof.facultad]), facultad])];
+      await updateDoc(doc(db, "profesores", prof.id), {
+        facultades: combinedFacs,
+        facultad: combinedFacs[0],
+        [`recomendacionesFacultad.${facultad}`]: deleteField()
+      });
+      showToast(`✅ Facultad ${facultad} agregada a ${prof.nombre}.`);
+    } catch (e) {
+      showToast("❌ Error al aplicar sugerencia.");
+    }
+  };
+
+  const rechazarSugerenciaFacultad = async (profId, facultad) => {
+    try {
+      await updateDoc(doc(db, "profesores", profId), {
+        [`recomendacionesFacultad.${facultad}`]: deleteField()
+      });
+      showToast("✅ Sugerencia rechazada.");
+    } catch (e) {
+      showToast("❌ Error al rechazar sugerencia.");
+    }
+  };
+
+  const limpiarTodasSugerencias = async (profId) => {
+    try {
+      await updateDoc(doc(db, "profesores", profId), {
+        recomendacionesFacultad: deleteField()
+      });
+      showToast("✅ Sugerencias limpiadas.");
+    } catch (e) {
+      showToast("❌ Error al limpiar sugerencias.");
     }
   };
 
@@ -800,6 +836,9 @@ export default function App() {
                 editarProfesor={editarProfesor}
                 editCursoProf={editCursoProf} setEditCursoProf={setEditCursoProf}
                 editCursoVal={editCursoVal} setEditCursoVal={setEditCursoVal}
+                aplicarSugerenciaFacultad={aplicarSugerenciaFacultad}
+                rechazarSugerenciaFacultad={rechazarSugerenciaFacultad}
+                limpiarTodasSugerencias={limpiarTodasSugerencias}
               />
             </div>
           } />

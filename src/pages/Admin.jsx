@@ -34,7 +34,10 @@ export const Admin = ({
   editCursoVal, setEditCursoVal,
   fusionarCursosGlobal,
   dividirCursoGlobal,
-  fusionarProfesores
+  fusionarProfesores,
+  aplicarSugerenciaFacultad,
+  rechazarSugerenciaFacultad,
+  limpiarTodasSugerencias
 }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -58,6 +61,7 @@ export const Admin = ({
   const [facFiltroAdmin, setFacFiltroAdmin] = useState([]);
   const [sedeFiltroAdmin, setSedeFiltroAdmin] = useState([]);
   const [cursoFiltroAdmin, setCursoFiltroAdmin] = useState([]);
+  const [filtroSugerenciasAdmin, setFiltroSugerenciasAdmin] = useState(false);
   const [ordenProfAdmin, setOrdenProfAdmin] = useState("rating_desc");
 
   // Filtros Reseñas
@@ -86,6 +90,7 @@ export const Admin = ({
     .filter(p => facFiltroAdmin.length === 0 || p.facultades?.some(f => facFiltroAdmin.includes(f)))
     .filter(p => sedeFiltroAdmin.length === 0 || sedeFiltroAdmin.includes(p.sede || "Sin Sede"))
     .filter(p => cursoFiltroAdmin.length === 0 || p.cursos?.some(c => cursoFiltroAdmin.includes(c)))
+    .filter(p => !filtroSugerenciasAdmin || (p.recomendacionesFacultad && Object.keys(p.recomendacionesFacultad).length > 0))
     .sort((a, b) => {
       if (ordenProfAdmin === "rating_desc") return (b.rating || 0) - (a.rating || 0);
       if (ordenProfAdmin === "rating_asc") return (a.rating || 0) - (b.rating || 0);
@@ -235,7 +240,8 @@ export const Admin = ({
               { label: "Profesores", n: profesores.length, icon: "👨‍🏫", color: B }, 
               { label: "Reseñas totales", n: todasResenas.length, icon: "💬", color: OR }, 
               { label: "Noticias", n: noticias?.length || 0, icon: "📰", color: "#059669" },
-              { label: "Feedbacks", n: feedbacks?.length || 0, icon: "💡", color: "#EAB308" },
+              { label: "Sugerencias Fac.", n: profesores.filter(p => p.recomendacionesFacultad && Object.keys(p.recomendacionesFacultad).length > 0).length, icon: "💡", color: "#F59E0B" },
+              { label: "Feedbacks", n: feedbacks?.length || 0, icon: "🗣️", color: "#EAB308" },
               { label: "Reportes", n: reportes.length, icon: "🚨", color: "#DC2626" }
             ].map(s => (
               <div key={s.label} className="card" style={{ padding: "20px 24px", borderLeft: `5px solid ${s.color}` }}>
@@ -306,18 +312,23 @@ export const Admin = ({
                 <option value="resenas_desc">💬 Más reseñas</option>
                 <option value="nombre_asc">🔤 Orden alfabético (A-Z)</option>
               </select>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", background: "var(--card-bg)", padding: "10px 14px", borderRadius: 12, border: "1px solid var(--border-color)", flexWrap: "nowrap", whiteSpace: "nowrap" }}>
+                <input type="checkbox" checked={filtroSugerenciasAdmin} onChange={e => setFiltroSugerenciasAdmin(e.target.checked)} />
+                Solo con sugerencias
+              </label>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
               <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 600 }}>
                 Mostrando {filteredProfesores.length} profesores
               </div>
-              {(busquedaAdmin || facFiltroAdmin.length > 0 || sedeFiltroAdmin.length > 0 || cursoFiltroAdmin.length > 0 || ordenProfAdmin !== "rating_desc") && (
+              {(busquedaAdmin || facFiltroAdmin.length > 0 || sedeFiltroAdmin.length > 0 || cursoFiltroAdmin.length > 0 || ordenProfAdmin !== "rating_desc" || filtroSugerenciasAdmin) && (
                 <button className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 8px" }} onClick={() => {
                   setBusquedaAdmin("");
                   setFacFiltroAdmin([]);
                   setSedeFiltroAdmin([]);
                   setCursoFiltroAdmin([]);
                   setOrdenProfAdmin("rating_desc");
+                  setFiltroSugerenciasAdmin(false);
                 }}>
                   Limpiar filtros
                 </button>
@@ -399,12 +410,32 @@ export const Admin = ({
                           {(p.facultades || [p.facultad]).join(", ")} {p.sede && `· Sede ${p.sede}`} · {p.totalReseñas || 0} reseñas
                         </div>
                         {p.recomendacionesFacultad && Object.keys(p.recomendacionesFacultad).length > 0 && (
-                          <div style={{ marginTop: 4, marginBottom: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                            {Object.entries(p.recomendacionesFacultad).map(([fac, votos]) => (
-                              <span key={fac} style={{ background: "#fef3c7", border: "1px solid #f59e0b", color: "#b45309", padding: "4px 10px", borderRadius: 12, fontSize: 12, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
-                                ⚠️ Sugerido para: {fac} <span style={{ background: "#f59e0b", color: "#fff", padding: "2px 6px", borderRadius: 10, fontSize: 10 }}>{votos}</span>
-                              </span>
-                            ))}
+                          <div style={{ marginTop: 8, padding: 12, background: "#fef3c7", borderRadius: 12, border: "1px solid #fcd34d" }}>
+                            <div style={{ fontSize: 12, fontWeight: 800, color: "#92400e", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span>💡 Sugerencias de Facultad</span>
+                              {Object.keys(p.recomendacionesFacultad).length > 1 && (
+                                <button className="btn btn-ghost" style={{ padding: "2px 8px", fontSize: 11, color: "#b45309" }} onClick={() => limpiarTodasSugerencias(p.id)}>
+                                  Limpiar todas
+                                </button>
+                              )}
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                              {Object.entries(p.recomendacionesFacultad).map(([fac, votos]) => (
+                                <div key={fac} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#fff", padding: "6px 12px", borderRadius: 8, border: "1px solid #fde68a", flexWrap: "wrap", gap: 8 }}>
+                                  <div style={{ fontSize: 13, fontWeight: 600, color: "#b45309", display: "flex", alignItems: "center", gap: 6 }}>
+                                    {fac} <span style={{ background: "#f59e0b", color: "#fff", padding: "2px 6px", borderRadius: 10, fontSize: 10, fontWeight: 800 }}>{votos} votos</span>
+                                  </div>
+                                  <div style={{ display: "flex", gap: 4 }}>
+                                    <button className="btn" style={{ padding: "4px 10px", fontSize: 11, background: "#10b981", color: "#fff", borderRadius: 6, border: "none", fontWeight: 700 }} onClick={() => aplicarSugerenciaFacultad(p, fac)}>
+                                      ✅ Aplicar
+                                    </button>
+                                    <button className="btn btn-ghost" style={{ padding: "4px 10px", fontSize: 11, color: "#ef4444", borderRadius: 6, fontWeight: 700, background: "#fee2e2" }} onClick={() => rechazarSugerenciaFacultad(p.id, fac)}>
+                                      ❌ Rechazar
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </>

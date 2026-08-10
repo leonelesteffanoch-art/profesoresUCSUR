@@ -34,7 +34,10 @@ export const Perfil = ({
   const [recFacultad, setRecFacultad] = useState("");
   if (!selProf) return null;
 
-  const hasRecommended = localStorage.getItem(`rec_fac_${selProf.id}`) === "true";
+  const availableFaculties = FACULTADES_FORM.filter(f => 
+    !(selProf.facultades || [selProf.facultad]).includes(f) &&
+    localStorage.getItem(`rec_fac_${selProf.id}_${f}`) !== "true"
+  );
 
   const getCourseRank = (curso) => {
     if (!profesores || (selProf.totalReseñas || 0) === 0) return null;
@@ -113,29 +116,33 @@ export const Perfil = ({
             </div>
             {selProf.bio && <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{selProf.bio}</p>}
             
-            {!hasRecommended && (
+            {availableFaculties.length > 0 && (
               <div style={{ marginTop: 16 }}>
                 {!showRecommend ? (
-                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                    <button className="btn" onClick={() => setShowRecommend(true)} style={{ fontSize: 14, padding: "10px 20px", background: "var(--primary-blue)", color: "#fff", fontWeight: 800, borderRadius: 12, boxShadow: "0 6px 16px rgba(59, 130, 246, 0.3)", border: "none", transition: "transform 0.2s" }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
-                      💡 Sugerir para otra facultad
-                    </button>
-                    <button className="btn" onClick={() => navigate("agregar", selProf)} style={{ fontSize: 14, padding: "10px 20px", background: "var(--card-bg)", color: "var(--text-dark)", fontWeight: 800, borderRadius: 12, border: "2px solid var(--border-color)", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--primary-blue)"; e.currentTarget.style.color = "var(--primary-blue)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-color)"; e.currentTarget.style.color = "var(--text-dark)"; }}>
-                      ➕ Añadir un curso
-                    </button>
+                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap", flexDirection: "column" }}>
+                    <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>¿Este profe también enseña en otra facultad? Sugiere cuál y lo revisaremos.</div>
+                    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                      <button className="btn" onClick={() => setShowRecommend(true)} style={{ fontSize: 14, padding: "10px 20px", background: "var(--primary-blue)", color: "#fff", fontWeight: 800, borderRadius: 12, boxShadow: "0 6px 16px rgba(59, 130, 246, 0.3)", border: "none", transition: "transform 0.2s" }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+                        💡 Sugerir para otra facultad
+                      </button>
+                      <button className="btn" onClick={() => navigate("agregar", selProf)} style={{ fontSize: 14, padding: "10px 20px", background: "var(--card-bg)", color: "var(--text-dark)", fontWeight: 800, borderRadius: 12, border: "2px solid var(--border-color)", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--primary-blue)"; e.currentTarget.style.color = "var(--primary-blue)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-color)"; e.currentTarget.style.color = "var(--text-dark)"; }}>
+                        ➕ Añadir un curso
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", background: "var(--card-bg)", padding: "12px", borderRadius: 16, border: "2px solid var(--primary-blue)" }}>
                     <select className="input" style={{ padding: "10px 14px", fontSize: 14, flex: 1, minWidth: 150 }} value={recFacultad} onChange={e => setRecFacultad(e.target.value)}>
                       <option value="">Seleccionar facultad...</option>
-                      {FACULTADES_FORM.filter(f => !(selProf.facultades || [selProf.facultad]).includes(f)).map(f => (
+                      {availableFaculties.map(f => (
                         <option key={f} value={f}>{f}</option>
                       ))}
                     </select>
                     <button className="btn" disabled={!recFacultad} style={{ padding: "10px 20px", fontSize: 14, background: "var(--primary-blue)", color: "#fff", fontWeight: 800, borderRadius: 12, border: "none" }} onClick={() => {
                       recomendarFacultad(selProf.id, recFacultad);
+                      setRecFacultad("");
                       setShowRecommend(false);
-                    }}>Enviar</button>
+                    }}>Enviar sugerencia</button>
                     <button className="btn btn-ghost" style={{ padding: "10px", fontSize: 14, color: "var(--text-light)" }} onClick={() => setShowRecommend(false)}>✕</button>
                   </div>
                 )}

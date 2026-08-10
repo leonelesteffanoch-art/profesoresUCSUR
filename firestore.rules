@@ -21,7 +21,7 @@ service cloud.firestore {
       
       // Permitir actualizar solo si es admin, o si solo se cambian rating/totalReseñas o cursos
       allow update: if isAdmin() 
-                    || (isLogged() && request.resource.data.diff(resource.data).affectedKeys().hasAny(['rating', 'totalReseñas', 'cursos']));
+                    || (isLogged() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rating', 'totalReseñas', 'cursos']));
       
       allow delete: if isAdmin();
 
@@ -40,7 +40,7 @@ service cloud.firestore {
                       && request.resource.data.criterios.examenes <= 5;
         
         allow update: if isAdmin() 
-                      || (isLogged() && request.resource.data.diff(resource.data).affectedKeys().hasAny(['util', 'noUtil']));
+                      || (isLogged() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['util', 'noUtil']));
         
         allow delete: if isAdmin();
       }
