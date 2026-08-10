@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from "react";
 import { createPortal } from "react-dom";
-import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL, SEDES } from "../constants.js";
+import { FACULTADES, FAC_COLOR, FAC_BG, FAC_EMOJI, B, BD, BL, OR, SEDES } from "../constants.js";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
