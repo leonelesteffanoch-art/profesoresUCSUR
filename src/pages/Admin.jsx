@@ -445,7 +445,20 @@ export const Admin = ({
       {/* RESEÑAS TAB */}
       {activeTab === "resenas" && (
         <div className="fade-in">
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24, background: "var(--card-bg)", padding: 20, borderRadius: 16, border: "1px solid var(--border-color)" }}>
+          {todasResenas.length === 0 ? (
+            <div className="card" style={{ padding: 48, textAlign: "center" }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>📥</div>
+              <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 8 }}>Cargar Reseñas</h4>
+              <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24, maxWidth: 400, margin: "0 auto 24px" }}>
+                Para optimizar el rendimiento y no saturar la base de datos, las reseñas de los profesores se cargan a petición.
+              </p>
+              <button className="btn btn-blue" onClick={cargarTodasLasResenas} style={{ padding: "12px 24px", fontSize: 15, fontWeight: 700 }}>
+                Cargar todas las reseñas
+              </button>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24, background: "var(--card-bg)", padding: 20, borderRadius: 16, border: "1px solid var(--border-color)" }}>
             <h4 style={{ fontSize: 14, fontWeight: 800, color: "var(--text-dark)", marginBottom: 4 }}>Filtros de Reseñas</h4>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
               <input className="input" value={busquedaResena} onChange={e => setBusquedaResena(e.target.value)} placeholder="Buscar en texto o profe..." style={{ padding: "10px 14px", fontSize: 13 }} />
@@ -504,6 +517,8 @@ export const Admin = ({
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
       )}
 

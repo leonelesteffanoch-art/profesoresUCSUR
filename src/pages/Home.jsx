@@ -29,6 +29,11 @@ export const Home = ({
   const [newsHovered, setNewsHovered] = useState(false);
   const [touchStartX, setTouchStartX] = useState(null);
   const [expandedNews, setExpandedNews] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(15);
+
+  useEffect(() => {
+    setVisibleCount(15);
+  }, [busqueda, facFiltro, sedeFiltro, sortBy]);
 
   // Autoplay para noticias
   useEffect(() => {
@@ -313,7 +318,7 @@ export const Home = ({
               </div>
             </div>
           )}
-          {filtered.map((p, i) => (
+          {filtered.slice(0, visibleCount).map((p, i) => (
             <Link key={p.id} to={`/profesor/${p.id}`} className="card card-hover fade-in" 
               style={{ padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, borderLeft: `5px solid ${FAC_COLOR[p.facultad] || B}`, animationDelay: `${i * .04}s`, textDecoration: "none" }}>
               <Avatar name={p.nombre} fac={p.facultad} size={56} />
@@ -335,6 +340,18 @@ export const Home = ({
             </Link>
           ))}
         </div>
+        
+        {visibleCount < filtered.length && (
+          <div style={{ textAlign: "center", marginTop: 32 }}>
+            <button 
+              className="btn btn-blue" 
+              style={{ padding: "12px 24px", fontSize: 15, fontWeight: 700, borderRadius: 20 }}
+              onClick={() => setVisibleCount(v => v + 15)}
+            >
+              ⬇️ Mostrar más profesores
+            </button>
+          </div>
+        )}
       </div>
       
       {/* Modal Manual para Agrandar Noticia */}

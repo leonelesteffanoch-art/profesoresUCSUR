@@ -209,25 +209,37 @@ export default function App() {
     return () => unsub();
   }, []);
 
-  useEffect(() => {
-    if (!adminUser || profesores.length === 0) return;
-    const unsubs = profesores.map(p => {
-      const q = query(collection(db, "profesores", p.id, COL_RESENAS), orderBy("createdAt", "desc"));
-      return onSnapshot(q, snap => {
+  const cargarTodasLasResenas = async () => {
+    if (!adminUser || profesores.length === 0) return false;
+    showToast("Cargando todas las reseñas... esto puede tardar un momento.", 3000);
+    try {
+      const allResenas = [];
+      const resenasMap = {};
+      
+      for (const p of profesores) {
+        const q = query(collection(db, "profesores", p.id, COL_RESENAS));
+        const snap = await getDocs(q);
         const rs = snap.docs.map(d => ({ id: d.id, profId: p.id, profNombre: p.nombre, profFac: p.facultad, ...d.data() }));
-        setTodasResenas(prev => {
-          const sinEste = prev.filter(r => r.profId !== p.id);
-          return [...sinEste, ...rs].sort((a, b) => {
-            const ta = a.createdAt?.toDate?.()?.getTime() || 0;
-            const tb = b.createdAt?.toDate?.()?.getTime() || 0;
-            return tb - ta;
-          });
-        });
-        setResenas(prev => ({ ...prev, [p.id]: snap.docs.map(d => ({ id: d.id, ...d.data() })) }));
+        allResenas.push(...rs);
+        resenasMap[p.id] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      }
+      
+      allResenas.sort((a, b) => {
+        const ta = a.createdAt?.toDate?.()?.getTime() || 0;
+        const tb = b.createdAt?.toDate?.()?.getTime() || 0;
+        return tb - ta;
       });
-    });
-    return () => unsubs.forEach(u => u());
-  }, [adminUser, profesores.length]);
+      
+      setTodasResenas(allResenas);
+      setResenas(prev => ({ ...prev, ...resenasMap }));
+      showToast("✅ Reseñas cargadas correctamente.");
+      return true;
+    } catch (e) {
+      console.error("Error al cargar reseñas:", e);
+      showToast("❌ Error al cargar reseñas.");
+      return false;
+    }
+  };
 
   useEffect(() => {
     if (!adminUser) {
@@ -770,6 +782,7 @@ export default function App() {
                 adminLoading={adminLoading} setAdminLoading={setAdminLoading}
                 profesores={profesores}
                 todasResenas={todasResenas}
+                cargarTodasLasResenas={cargarTodasLasResenas}
                 reportes={reportes}
                 noticias={noticias}
                 feedbacks={feedbacks}

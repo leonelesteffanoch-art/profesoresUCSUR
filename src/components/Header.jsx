@@ -114,10 +114,15 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
 
       {/* Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav">
-        {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["agregar", "➕", "Agregar"], ["feedback", "💡", "Buzón"]].map(([p, icon, label]) => (
-          <div key={p} className={`bottom-nav-item${page === p ? " active" : ""}`} onClick={() => navigate(p === "home" ? "/" : `/${p}`)}>
+        {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["agregar", "➕", "Agregar"], ["feedback", "💡", "Sugerencias"]].map(([p, icon, label]) => (
+          <div 
+            key={p} 
+            className={`bottom-nav-item${page === p ? " active" : ""}`} 
+            onClick={() => navigate(p === "home" ? "/" : `/${p}`)}
+            style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", borderRadius: 12 } : {}}
+          >
             <span style={{ fontSize: 20, marginBottom: 2 }}>{icon}</span>
-            <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: p === "feedback" ? "#fff" : "inherit" }}>{label}</span>
           </div>
         ))}
       </nav>
