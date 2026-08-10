@@ -18,7 +18,7 @@ import { Admin } from "./pages/Admin.jsx";
 import { Feedback } from "./pages/Feedback.jsx";
 
 // Wrapper that resolves profesor from URL param
-function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, votados, setVotados, formRef, navigate }) {
+function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, votados, setVotados, formRef, recomendarFacultad, navigate }) {
   const { profId } = useParams();
   const nav = useNavigate();
   const [form, setForm] = useState(FORM_EMPTY);
@@ -102,6 +102,11 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
       <Perfil
         profesores={profesores}
         selProf={selProf}
+        navigate={(p, prof) => {
+          if (p === "home") nav("/");
+          else if (p === "perfil" && prof) nav(`/profesor/${prof.id}`);
+          else nav(`/${p}`);
+        }}
         allR={allR}
         globalRating={globalRating}
         critAvg={critAvg}
