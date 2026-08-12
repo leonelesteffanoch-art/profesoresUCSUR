@@ -138,7 +138,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
         className="mobile-bottom-nav"
         style={{
           transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          transform: hidden ? "translateY(100%)" : "translateY(0)"
+          transform: hidden ? "translateY(calc(100% + 32px))" : "translateY(0)"
         }}
       >
         {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["agregar", "➕", "Agregar"], ["feedback", "💡", "Sugerencias"]].map(([p, icon, label]) => (
