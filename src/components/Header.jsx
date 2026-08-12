@@ -1,9 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { B, BD, OR } from "../constants.js";
 import { ThemeToggle } from "./UI/ThemeToggle.jsx";
 
 export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    let lastScroll = window.scrollY;
+    
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+      
+      if (currentScroll <= 60) {
+        setHidden(false);
+      } else if (currentScroll > lastScroll) {
+        setHidden(true);
+      } else {
+        setHidden(false);
+      }
+      lastScroll = currentScroll;
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const links = [
     ["home", "🏠", "Inicio"], 
@@ -30,7 +51,9 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
         boxShadow: "0 4px 24px rgba(12,68,124,.4)", 
         position: "sticky", 
         top: 0, 
-        zIndex: 100 
+        zIndex: 100,
+        transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: hidden ? "translateY(-100%)" : "translateY(0)"
       }}>
         <span onClick={() => handleNav("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }} aria-label="Ir a inicio">
           <div style={{ 
@@ -113,7 +136,13 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="mobile-bottom-nav">
+      <nav 
+        className="mobile-bottom-nav"
+        style={{
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          transform: hidden ? "translateY(100%)" : "translateY(0)"
+        }}
+      >
         {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["agregar", "➕", "Agregar"], ["feedback", "💡", "Sugerencias"]].map(([p, icon, label]) => (
           <div 
             key={p} 
