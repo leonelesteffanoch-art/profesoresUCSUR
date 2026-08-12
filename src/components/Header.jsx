@@ -52,8 +52,6 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
         position: "sticky", 
         top: 0, 
         zIndex: 100,
-        transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        transform: hidden ? "translateY(-100%)" : "translateY(0)"
       }}>
         <span onClick={() => handleNav("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }} aria-label="Ir a inicio">
           <div style={{ 
