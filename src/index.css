@@ -511,7 +511,8 @@ body {
 .mobile-bottom-nav {
   display: none;
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  bottom: 16px;
+  margin-bottom: env(safe-area-inset-bottom, 0px);
   left: 16px;
   right: 16px;
   background: var(--card-bg);
