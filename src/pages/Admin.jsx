@@ -675,16 +675,18 @@ export default function Admin({
                         <button 
                           className="btn btn-red" 
                           onClick={async () => {
-                            if (window.confirm("¿Seguro que deseas eliminar esta solicitud?")) {
+                            if (window.confirm("¿Seguro que deseas eliminar/marcar como resuelta esta solicitud?")) {
                               try {
                                 await deleteDoc(doc(db, "solicitudes", sol.id));
-                                showToast("🗑️ Solicitud eliminada.");
+                                showToast("✅ Solicitud resuelta/eliminada.");
                               } catch (e) { showToast("❌ Error al eliminar."); }
                             }
                           }}
-                          style={{ padding: "6px 10px", fontSize: 12 }}
+                          style={{ padding: "6px 12px", fontSize: 13, background: "rgba(16,185,129,0.1)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(16,185,129,0.2)"}
+                          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(16,185,129,0.1)"}
                         >
-                          Eliminar
+                          ✅ Resuelta / Eliminar
                         </button>
                       </div>
                     </div>

@@ -23,7 +23,8 @@ export const Home = ({
   loading,
   navigate,
   noticias,
-  feedbacks
+  feedbacks,
+  solicitudes
 }) => {
   const [currentNewsIdx, setCurrentNewsIdx] = useState(0);
   const [newsHovered, setNewsHovered] = useState(false);
@@ -84,9 +85,28 @@ export const Home = ({
             {[
               { n: profesores.length, l: "profesores", i: "👨‍🏫" }, 
               { n: totalResenas, l: "reseñas", i: "💬" }, 
-              { n: FACULTADES.length - 1, l: "facultades", i: "🏫" }
+              { n: FACULTADES.length - 1, l: "facultades", i: "🏫" },
+              { n: solicitudes?.length || 0, l: "secciones pedidas", i: "🗳️", action: () => navigate("/solicitudes") }
             ].map(s => (
-              <div key={s.l} style={{ background: "rgba(255,255,255,.12)", borderRadius: 12, padding: "8px 16px", display: "flex", gap: 8, alignItems: "center", border: "1px solid rgba(255,255,255,.08)" }}>
+              <div 
+                key={s.l} 
+                onClick={s.action}
+                style={{ 
+                  background: "rgba(255,255,255,.12)", 
+                  borderRadius: 12, 
+                  padding: "8px 16px", 
+                  display: "flex", 
+                  gap: 8, 
+                  alignItems: "center", 
+                  border: "1px solid rgba(255,255,255,.08)",
+                  cursor: s.action ? "pointer" : "default",
+                  transition: "transform 0.2s, background 0.2s"
+                }}
+                onMouseEnter={(e) => s.action && (e.currentTarget.style.background = "rgba(255,255,255,.2)")}
+                onMouseLeave={(e) => s.action && (e.currentTarget.style.background = "rgba(255,255,255,.12)")}
+                onMouseDown={(e) => s.action && (e.currentTarget.style.transform = "scale(0.95)")}
+                onMouseUp={(e) => s.action && (e.currentTarget.style.transform = "scale(1)")}
+              >
                 <span style={{ fontSize: 18 }}>{s.i}</span>
                 <span style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>
                   <AnimatedCounter end={s.n} duration={1200} />

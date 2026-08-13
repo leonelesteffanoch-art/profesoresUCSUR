@@ -18,6 +18,7 @@ export const Solicitudes = ({
   const [nombreContacto, setNombreContacto] = useState("");
   const [correoContacto, setCorreoContacto] = useState("");
   const [filtroSedeVista, setFiltroSedeVista] = useState("Todas");
+  const [filtroTextoActivas, setFiltroTextoActivas] = useState("");
   
   const formRef = useRef(null);
 
@@ -49,6 +50,7 @@ export const Solicitudes = ({
 
   const solMostradas = (solicitudes || [])
     .filter(s => filtroSedeVista === "Todas" || s.sede === filtroSedeVista)
+    .filter(s => s.curso.toLowerCase().includes(filtroTextoActivas.toLowerCase()))
     .sort((a, b) => b.votos - a.votos);
 
   return (
@@ -66,9 +68,12 @@ export const Solicitudes = ({
         <div style={{ position: "absolute", top: -40, right: -40, width: 150, height: 150, borderRadius: "50%", background: "rgba(255,255,255,.05)" }} />
         <div style={{ fontSize: 40, marginBottom: 16 }}>🗳️</div>
         <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Solicita apertura de cursos</h1>
-        <p style={{ fontSize: 15, opacity: 0.9, maxWidth: 600, lineHeight: 1.5 }}>
-          ¿Tu curso se cruzó o ya no hay cupos? Busca tu curso y suma tu voto. 
-          Dejando tus datos podemos avisarte si se abre una nueva sección, o compartiremos la lista con la universidad para evidenciar la demanda.
+        <p style={{ fontSize: 15, opacity: 0.9, maxWidth: 650, lineHeight: 1.6 }}>
+          ¿Tu curso se cruzó o ya no hay cupos? Busca tu curso y suma tu voto. Puedes dejar tus datos opcionalmente para que alumnos se comuniquen contigo apoyando tu solicitud; comparte la lista para evidenciar la demanda.
+          <br /><br />
+          <span style={{ fontSize: 13, opacity: 0.85 }}>
+            <strong>Nota:</strong> Cualquier persona puede votar, así que es probable que la información no sea 100% precisa. ¡Usa tus datos bajo tu propio riesgo!
+          </span>
         </p>
       </div>
 
@@ -190,21 +195,30 @@ export const Solicitudes = ({
       {/* Filters and List */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-dark)" }}>Solicitudes Activas</h2>
-        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
-          {["Todas", ...SEDES].map(s => (
-            <button
-              key={s}
-              onClick={() => setFiltroSedeVista(s)}
-              className="tab"
-              style={{
-                background: filtroSedeVista === s ? "var(--text-dark)" : "var(--ghost-bg)",
-                color: filtroSedeVista === s ? "#fff" : "var(--ghost-text)",
-                border: "none", whiteSpace: "nowrap"
-              }}
-            >
-              {s}
-            </button>
-          ))}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", flex: 1, justifyContent: "flex-end", minWidth: 280 }}>
+          <input
+            className="input"
+            placeholder="Buscar en activas..."
+            value={filtroTextoActivas}
+            onChange={(e) => setFiltroTextoActivas(e.target.value)}
+            style={{ padding: "8px 12px", fontSize: 14, maxWidth: 220, borderRadius: 10 }}
+          />
+          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
+            {["Todas", ...SEDES].map(s => (
+              <button
+                key={s}
+                onClick={() => setFiltroSedeVista(s)}
+                className="tab"
+                style={{
+                  background: filtroSedeVista === s ? "var(--text-dark)" : "var(--ghost-bg)",
+                  color: filtroSedeVista === s ? "#fff" : "var(--ghost-text)",
+                  border: "none", whiteSpace: "nowrap"
+                }}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

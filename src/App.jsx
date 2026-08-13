@@ -823,6 +823,7 @@ export default function App() {
                 navigate={navigate}
                 noticias={noticias}
                 feedbacks={feedbacks}
+                solicitudes={solicitudes}
               />
             </div>
           } />
