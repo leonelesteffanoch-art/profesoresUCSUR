@@ -29,9 +29,9 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
   const links = [
     ["home", "🏠", "Inicio"], 
     ["ranking", "🏆", "Ranking"], 
+    ["solicitudes", "🗳️", "Secciones Adicionales"],
     ["agregar", "➕", "Agregar profe"], 
     ["feedback", "💡", "Sugerencias"],
-    ["solicitudes", "🗳️", "Secciones Adicionales"],
     ["admin", "⚙️", "Admin"]
   ];
 
@@ -142,12 +142,12 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
           transform: hidden ? "translateY(150%)" : "translateY(0)"
         }}
       >
-        {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["agregar", "➕", "Agregar"], ["solicitudes", "🗳️", "Secciones\nAdicionales"], ["feedback", "💡", "Sugerencias"]].map(([p, icon, label]) => (
+        {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["solicitudes", "🗳️", "Secciones\nAdicionales"], ["agregar", "➕", "Agregar"], ["feedback", "💡", "Sugerencias"]].map(([p, icon, label]) => (
           <div 
             key={p} 
             className={`bottom-nav-item${page === p ? " active" : ""}`} 
             onClick={() => navigate(p === "home" ? "/" : `/${p}`)}
-            style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", borderRadius: 12, padding: "6px 8px" } : { padding: "6px 4px" }}
+            style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", borderRadius: 12 } : {}}
           >
             <span style={{ fontSize: 18, marginBottom: 0 }}>{icon}</span>
             <span style={{ fontSize: 9, fontWeight: 700, color: p === "feedback" ? "#fff" : "inherit", whiteSpace: "pre-line", textAlign: "center", lineHeight: 1 }}>{label}</span>

@@ -12,6 +12,7 @@ export const Solicitudes = ({
   navigate
 }) => {
   const [busqueda, setBusqueda] = useState("");
+  const [cursoSeleccionado, setCursoSeleccionado] = useState("");
   const [sedeSeleccionada, setSedeSeleccionada] = useState(SEDES[0]);
   const [contactoVisible, setContactoVisible] = useState(false);
   const [nombreContacto, setNombreContacto] = useState("");
@@ -30,9 +31,11 @@ export const Solicitudes = ({
     ? todosLosCursos.filter(c => normalizeText(c).includes(normalizeText(busqueda))).slice(0, 5)
     : [];
 
-  const handleCrear = async (curso) => {
-    await crearSolicitud(curso, sedeSeleccionada, { nombre: nombreContacto, correo: correoContacto });
+  const handleCrear = async () => {
+    if (!cursoSeleccionado) return;
+    await crearSolicitud(cursoSeleccionado, sedeSeleccionada, { nombre: nombreContacto, correo: correoContacto });
     setBusqueda("");
+    setCursoSeleccionado("");
     setNombreContacto("");
     setCorreoContacto("");
     setContactoVisible(false);
@@ -77,42 +80,42 @@ export const Solicitudes = ({
           <input
             className="input"
             placeholder="Ej: Cálculo II, Ética..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            style={{ fontSize: 16, padding: "14px 16px" }}
+            value={cursoSeleccionado || busqueda}
+            onChange={(e) => {
+              setBusqueda(e.target.value);
+              setCursoSeleccionado("");
+            }}
+            style={{ fontSize: 16, padding: "14px 16px", borderColor: cursoSeleccionado ? "var(--primary-blue)" : "var(--border-color)", background: cursoSeleccionado ? "var(--light-blue)" : "var(--input-bg)" }}
           />
           
-          {busqueda.trim() && (
+          {!cursoSeleccionado && busqueda.trim() && (
             <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: 12, marginTop: 8, zIndex: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.1)", overflow: "hidden" }}>
               {cursosFiltrados.length > 0 ? (
-                cursosFiltrados.map(curso => {
-                  const existeSede = solicitudes.find(s => s.curso === curso && s.sede === sedeSeleccionada);
-                  return (
-                    <div 
-                      key={curso} 
-                      style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                    >
-                      <span style={{ fontWeight: 600, fontSize: 14 }}>{curso}</span>
-                      {existeSede ? (
-                        <span style={{ fontSize: 12, color: OR, fontWeight: 700 }}>Ya solicitado ({existeSede.votos} votos)</span>
-                      ) : (
-                        <button 
-                          className="btn btn-blue" 
-                          style={{ padding: "6px 12px", fontSize: 12 }}
-                          onClick={() => handleCrear(curso)}
-                        >
-                          Crear solicitud
-                        </button>
-                      )}
-                    </div>
-                  );
-                })
+                cursosFiltrados.map(curso => (
+                  <div 
+                    key={curso} 
+                    style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", transition: "background 0.2s" }}
+                    onClick={() => {
+                      setCursoSeleccionado(curso);
+                      setBusqueda("");
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "var(--ghost-bg)"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  >
+                    <span style={{ fontWeight: 600, fontSize: 14 }}>{curso}</span>
+                    <span style={{ fontSize: 12, color: "var(--primary-blue)", fontWeight: 700 }}>Seleccionar →</span>
+                  </div>
+                ))
               ) : (
-                <div style={{ padding: "16px", color: "var(--text-muted)", fontSize: 14, textAlign: "center" }}>No se encontraron cursos con ese nombre en la base de datos.</div>
+                <div style={{ padding: "16px", color: "var(--text-muted)", fontSize: 14, textAlign: "center" }}>No se encontraron cursos con ese nombre.</div>
               )}
             </div>
           )}
         </div>
+
+        {cursoSeleccionado && (
+          <div className="fade-in" style={{ marginTop: 24, padding: 20, border: "1.5px solid var(--border-color)", borderRadius: 16 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>Configura tu solicitud</h3>
 
         <div style={{ display: "flex", gap: 16, marginTop: 16, flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ flex: 1, minWidth: 200 }}>
@@ -158,6 +161,28 @@ export const Solicitudes = ({
             <div style={{ width: "100%", fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
               * Tus datos serán visibles públicamente para que otros puedan organizarse, úsalos bajo tu propio riesgo.
             </div>
+          </div>
+        )}
+
+            {(() => {
+              const existeSede = solicitudes.find(s => s.curso === cursoSeleccionado && s.sede === sedeSeleccionada);
+              if (existeSede) {
+                return (
+                  <div style={{ marginTop: 24, padding: 16, background: "rgba(232,119,34,.1)", borderRadius: 12, color: OR, fontWeight: 600, fontSize: 14, textAlign: "center" }}>
+                    ⚠️ Este curso ya está solicitado en la sede {sedeSeleccionada}. Búscalo abajo para sumar tu voto.
+                  </div>
+                );
+              }
+              return (
+                <button 
+                  className="btn btn-blue fade-in" 
+                  style={{ width: "100%", padding: 16, fontSize: 15, marginTop: 24 }}
+                  onClick={handleCrear}
+                >
+                  🚀 Crear Solicitud para {sedeSeleccionada}
+                </button>
+              );
+            })()}
           </div>
         )}
       </div>
