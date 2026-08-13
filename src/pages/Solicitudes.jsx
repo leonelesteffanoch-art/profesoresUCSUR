@@ -211,7 +211,7 @@ export const Solicitudes = ({
                 className="tab"
                 style={{
                   background: filtroSedeVista === s ? "var(--text-dark)" : "var(--ghost-bg)",
-                  color: filtroSedeVista === s ? "#fff" : "var(--ghost-text)",
+                  color: filtroSedeVista === s ? "var(--bg-main)" : "var(--ghost-text)",
                   border: "none", whiteSpace: "nowrap"
                 }}
               >
