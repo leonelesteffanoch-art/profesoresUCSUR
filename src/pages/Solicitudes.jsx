@@ -20,6 +20,10 @@ export const Solicitudes = ({
   const [filtroSedeVista, setFiltroSedeVista] = useState("Todas");
   const [filtroTextoActivas, setFiltroTextoActivas] = useState("");
   
+  const [votandoId, setVotandoId] = useState(null);
+  const [votoNombre, setVotoNombre] = useState("");
+  const [votoCorreo, setVotoCorreo] = useState("");
+  
   const formRef = useRef(null);
 
   // Derive unique courses from all professors
@@ -43,9 +47,10 @@ export const Solicitudes = ({
   };
 
   const handleVotar = async (solId) => {
-    await votarSolicitud(solId, { nombre: nombreContacto, correo: correoContacto });
-    setNombreContacto("");
-    setCorreoContacto("");
+    await votarSolicitud(solId, { nombre: votoNombre, correo: votoCorreo });
+    setVotandoId(null);
+    setVotoNombre("");
+    setVotoCorreo("");
   };
 
   const solMostradas = (solicitudes || [])
@@ -246,23 +251,35 @@ export const Solicitudes = ({
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center", minWidth: 100 }}>
-                <button
-                  className={`btn ${yaVoto ? "pop-animation" : ""}`}
-                  style={{
-                    background: yaVoto ? "var(--light-blue)" : "var(--ghost-bg)",
-                    color: yaVoto ? B : "var(--ghost-text)",
-                    border: `1.5px solid ${yaVoto ? B : "var(--border-color)"}`,
-                    padding: "10px 20px",
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 4
-                  }}
-                  onClick={() => {
-                    if (!yaVoto) handleVotar(sol.id);
-                  }}
-                  disabled={yaVoto}
-                >
-                  <span style={{ fontSize: 20 }}>🔥</span>
-                  <span style={{ fontWeight: 800, fontSize: 14 }}>{yaVoto ? "Votado" : "¡Lo necesito!"}</span>
-                </button>
+                {votandoId === sol.id ? (
+                  <div className="fade-in" style={{ background: "var(--ghost-bg)", padding: 12, borderRadius: 12, border: `1.5px solid ${B}`, minWidth: 220, position: "relative", zIndex: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8, color: B }}>Opcional: Deja tus datos</div>
+                    <input className="input" placeholder="Tu nombre" value={votoNombre} onChange={(e) => setVotoNombre(e.target.value)} style={{ padding: "8px 12px", fontSize: 13, marginBottom: 6, width: "100%", boxSizing: "border-box" }} />
+                    <input className="input" placeholder="Tu correo" value={votoCorreo} onChange={(e) => setVotoCorreo(e.target.value)} style={{ padding: "8px 12px", fontSize: 13, marginBottom: 8, width: "100%", boxSizing: "border-box" }} />
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button className="btn btn-ghost" style={{ flex: 1, padding: "6px", fontSize: 12 }} onClick={() => setVotandoId(null)}>Cerrar</button>
+                      <button className="btn btn-blue" style={{ flex: 1, padding: "6px", fontSize: 12 }} onClick={() => handleVotar(sol.id)}>🔥 Votar</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    className={`btn ${yaVoto ? "pop-animation" : ""}`}
+                    style={{
+                      background: yaVoto ? "var(--light-blue)" : "var(--ghost-bg)",
+                      color: yaVoto ? B : "var(--ghost-text)",
+                      border: `1.5px solid ${yaVoto ? B : "var(--border-color)"}`,
+                      padding: "10px 20px",
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: 4
+                    }}
+                    onClick={() => {
+                      if (!yaVoto) setVotandoId(sol.id);
+                    }}
+                    disabled={yaVoto}
+                  >
+                    <span style={{ fontSize: 20 }}>🔥</span>
+                    <span style={{ fontWeight: 800, fontSize: 14 }}>{yaVoto ? "Votado" : "¡Lo necesito!"}</span>
+                  </button>
+                )}
               </div>
               
               {/* Contactos */}
