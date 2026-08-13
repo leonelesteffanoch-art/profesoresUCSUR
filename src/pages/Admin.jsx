@@ -18,6 +18,7 @@ export default function Admin({
   reportes,
   noticias,
   feedbacks,
+  solicitudes,
   navigate,
   showToast,
   eliminarResena,
@@ -214,6 +215,7 @@ export default function Admin({
           { id: "resenas", label: "💬 Reseñas" },
           { id: "reportes", label: `🚨 Reportes (${pendingReportes.length})`, alert: pendingReportes.length > 0 },
           { id: "feedbacks", label: `💡 Sugerencias (${pendingFeedbacks.length})`, alert: pendingFeedbacks.some(f => !f.respuesta) },
+          { id: "solicitudes", label: `🗳️ Solicitudes (${solicitudes?.length || 0})` },
           { id: "noticias", label: "📰 Noticias" },
           { id: "mantenimiento", label: "🛠️ Mantenimiento" },
           { id: "archivo", label: "🗃️ Historial" }
@@ -645,6 +647,66 @@ export default function Admin({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* SOLICITUDES TAB */}
+      {activeTab === "solicitudes" && (
+        <div className="fade-in">
+          <div style={{ background: "var(--card-bg)", padding: 24, borderRadius: 16, border: "1px solid var(--border-color)", marginBottom: 24 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>Solicitudes de Apertura de Cursos</h3>
+            
+            {(!solicitudes || solicitudes.length === 0) ? (
+              <div style={{ padding: 32, textAlign: "center", color: "var(--text-light)" }}>No hay solicitudes de cursos.</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {solicitudes.sort((a, b) => b.votos - a.votos).map(sol => (
+                  <div key={sol.id} style={{ padding: 20, border: "1px solid var(--border-color)", borderRadius: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontSize: 11, fontWeight: 800, background: "var(--ghost-bg)", padding: "4px 8px", borderRadius: 6, color: "var(--text-muted)", textTransform: "uppercase" }}>{sol.sede}</span>
+                          <span style={{ fontSize: 12, color: "var(--text-light)" }}>Último voto: {formatFecha(sol.ultimoVoto || sol.createdAt)}</span>
+                        </div>
+                        <h4 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)" }}>{sol.curso}</h4>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontWeight: 800, color: OR }}>{sol.votos} votos</span>
+                        <button 
+                          className="btn btn-red" 
+                          onClick={async () => {
+                            if (window.confirm("¿Seguro que deseas eliminar esta solicitud?")) {
+                              try {
+                                await deleteDoc(doc(db, "solicitudes", sol.id));
+                                showToast("🗑️ Solicitud eliminada.");
+                              } catch (e) { showToast("❌ Error al eliminar."); }
+                            }
+                          }}
+                          style={{ padding: "6px 10px", fontSize: 12 }}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {sol.contactos && sol.contactos.length > 0 && (
+                      <div style={{ background: "var(--ghost-bg)", padding: 12, borderRadius: 8, borderLeft: `2px solid ${BD}` }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 8 }}>CONTACTOS:</div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          {sol.contactos.map((c, i) => (
+                            <div key={i} style={{ fontSize: 12, color: "var(--text-dark)", display: "flex", justifyContent: "space-between" }}>
+                              <span><span style={{ fontWeight: 600 }}>{c.nombre || "Estudiante"}</span> {c.correo ? `(${c.correo})` : ""}</span>
+                              <span style={{ color: "var(--text-light)" }}>{formatFecha(c.fecha)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

@@ -14,8 +14,9 @@ import { Home } from "./pages/Home.jsx";
 import { Ranking } from "./pages/Ranking.jsx";
 import { Agregar } from "./pages/Agregar.jsx";
 import { Perfil } from "./pages/Perfil.jsx";
-const Admin = lazy(() => import("./pages/Admin.jsx"));
 import { Feedback } from "./pages/Feedback.jsx";
+import { Solicitudes } from "./pages/Solicitudes.jsx";
+const Admin = lazy(() => import("./pages/Admin.jsx"));
 
 // Wrapper that resolves profesor from URL param
 function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, votados, setVotados, formRef, recomendarFacultad, navigate }) {
@@ -155,6 +156,7 @@ export default function App() {
   const [editCursoProf, setEditCursoProf] = useState(null);
   const [editCursoVal, setEditCursoVal] = useState("");
   const [todasResenas, setTodasResenas] = useState([]);
+  const [solicitudes, setSolicitudes] = useState([]);
   
   // Dark mode
   const [darkMode, setDarkMode] = useState(() => {
@@ -167,9 +169,13 @@ export default function App() {
     localStorage.setItem("rmp_theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
-  // votados persiste en localStorage
   const [votados, setVotados] = useState(() => {
     try { return JSON.parse(localStorage.getItem("rmp_votes") || "{}"); }
+    catch { return {}; }
+  });
+
+  const [votadosSol, setVotadosSol] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("rmp_votes_sol") || "{}"); }
     catch { return {}; }
   });
   
@@ -261,6 +267,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const unsub = onSnapshot(collection(db, "solicitudes"), snap => {
+      setSolicitudes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
     if (!adminUser) {
       // Usuarios normales solo ven respuestas públicas
       const q = query(collection(db, "feedbacks"), where("esPublico", "==", true));
@@ -321,6 +334,7 @@ export default function App() {
       nav("/agregar");
     }
     else if (p === "feedback") nav("/feedback");
+    else if (p === "solicitudes") nav("/solicitudes");
     else if (p === "admin") nav("/admin");
     else nav(`/${p}`);
   }, [nav]);
@@ -332,6 +346,7 @@ export default function App() {
     if (p.startsWith("/ranking")) return "ranking";
     if (p.startsWith("/agregar")) return "agregar";
     if (p.startsWith("/feedback")) return "feedback";
+    if (p.startsWith("/solicitudes")) return "solicitudes";
     if (p.startsWith("/profesor")) return "perfil";
     if (p.startsWith("/admin")) return "admin";
     return "home";
@@ -740,6 +755,55 @@ export default function App() {
     } catch (e) { showToast("❌ Error al publicar."); }
   };
 
+  const crearSolicitud = async (curso, sede, contactoData) => {
+    const existe = solicitudes.find(s => s.curso === curso && s.sede === sede);
+    if (existe) {
+      showToast("⚠️ Este curso ya tiene una solicitud activa.");
+      return;
+    }
+    try {
+      const contactos = [];
+      if (contactoData.nombre || contactoData.correo) {
+        contactos.push({ ...contactoData, fecha: new Date().toISOString() });
+      }
+      const ref = await addDoc(collection(db, "solicitudes"), {
+        curso,
+        sede,
+        votos: 1,
+        contactos,
+        createdAt: serverTimestamp(),
+        ultimoVoto: serverTimestamp()
+      });
+      const nuevos = { ...votadosSol, [ref.id]: true };
+      setVotadosSol(nuevos);
+      localStorage.setItem("rmp_votes_sol", JSON.stringify(nuevos));
+      showToast(`✅ Solicitud para ${curso} creada con tu voto.`);
+    } catch (e) { showToast("❌ Error al crear solicitud."); }
+  };
+
+  const votarSolicitud = async (id, contactoData) => {
+    if (votadosSol[id]) return;
+    try {
+      const sol = solicitudes.find(s => s.id === id);
+      const updates = { 
+        votos: increment(1),
+        ultimoVoto: serverTimestamp() 
+      };
+      
+      if (contactoData.nombre || contactoData.correo) {
+        const nuevosContactos = [...(sol.contactos || []), { ...contactoData, fecha: new Date().toISOString() }];
+        updates.contactos = nuevosContactos;
+      }
+      
+      await updateDoc(doc(db, "solicitudes", id), updates);
+      
+      const nuevos = { ...votadosSol, [id]: true };
+      setVotadosSol(nuevos);
+      localStorage.setItem("rmp_votes_sol", JSON.stringify(nuevos));
+      showToast("🔥 ¡Voto registrado!");
+    } catch (e) { showToast("❌ Error al votar."); }
+  };
+
   return (
     <div style={{ fontFamily: "Plus Jakarta Sans, sans-serif", minHeight: "100vh", background: "var(--bg-main)", display: "flex", flexDirection: "column" }}>
       <Header page={currentPage} navigate={navigate} darkMode={darkMode} setDarkMode={setDarkMode} />
@@ -801,6 +865,19 @@ export default function App() {
             </div>
           } />
 
+          <Route path="/solicitudes" element={
+            <div className="page-transition">
+              <Solicitudes
+                profesores={profesores}
+                solicitudes={solicitudes}
+                votadosSol={votadosSol}
+                votarSolicitud={votarSolicitud}
+                crearSolicitud={crearSolicitud}
+                navigate={navigate}
+              />
+            </div>
+          } />
+
           <Route path="/profesor/:profId" element={
             <PerfilRoute 
               profesores={profesores}
@@ -828,6 +905,7 @@ export default function App() {
                 reportes={reportes}
                 noticias={noticias}
                 feedbacks={feedbacks}
+                solicitudes={solicitudes}
                 navigate={navigate}
                 showToast={showToast}
                 eliminarResena={eliminarResena}

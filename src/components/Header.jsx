@@ -31,6 +31,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
     ["ranking", "🏆", "Ranking"], 
     ["agregar", "➕", "Agregar profe"], 
     ["feedback", "💡", "Sugerencias"],
+    ["solicitudes", "🗳️", "Solicitudes"],
     ["admin", "⚙️", "Admin"]
   ];
 
@@ -141,7 +142,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
           transform: hidden ? "translateY(150%)" : "translateY(0)"
         }}
       >
-        {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["agregar", "➕", "Agregar"], ["feedback", "💡", "Sugerencias"]].map(([p, icon, label]) => (
+        {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["agregar", "➕", "Agregar"], ["solicitudes", "🗳️", "Solicitar"], ["feedback", "💡", "Sugerencias"]].map(([p, icon, label]) => (
           <div 
             key={p} 
             className={`bottom-nav-item${page === p ? " active" : ""}`} 
