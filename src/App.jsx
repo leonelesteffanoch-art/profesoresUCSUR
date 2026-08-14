@@ -355,8 +355,8 @@ export default function App() {
   const submitAddProf = async () => {
     if (!addProf.nombre.trim()) { showToast("⚠️ Escribe el nombre del profesor."); return; }
     if (!addProf.curso.trim()) { showToast("⚠️ Escribe al menos un curso."); return; }
-    if (addProf.curso.includes(",") || / y /i.test(addProf.curso)) {
-      showToast("⚠️ Por favor ingresa UN solo curso a la vez (sin comas ni 'y').");
+    if (addProf.curso.includes(",")) {
+      showToast("⚠️ Por favor ingresa UN solo curso a la vez (no uses comas para separar).");
       return;
     }
     if (addProf.incluirResena && (CRIT.some(c => addProf[c] === 0) || !addProf.texto.trim())) {
@@ -416,8 +416,8 @@ export default function App() {
     if (!addProfSel) return;
     let newCurso = capitalizeName(addCurso.trim());
     if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if (newCurso.includes(",") || / y /i.test(newCurso)) {
-      showToast("⚠️ Por favor ingresa UN solo curso a la vez (sin comas ni 'y').");
+    if (newCurso.includes(",")) {
+      showToast("⚠️ Por favor ingresa UN solo curso a la vez (no uses comas para separar).");
       return;
     }
 
