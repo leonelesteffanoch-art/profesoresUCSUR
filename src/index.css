@@ -669,9 +669,24 @@ body {
   }
 }
 
+.hero-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.site-footer {
+  padding: 48px 24px 28px;
+}
+
 @media (max-width: 720px) {
   .mobile-bottom-nav { display: flex; }
-  body { padding-bottom: 82px; }
+  .hero-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .site-footer {
+    padding: 40px 20px calc(96px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @keyframes pop {

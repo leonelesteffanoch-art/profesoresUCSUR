@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { B, BD, OR } from "../constants.js";
+import { B, BD } from "../constants.js";
 import { ThemeToggle } from "./UI/ThemeToggle.jsx";
+import { BrandLogo } from "./UI/BrandLogo.jsx";
 
 export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -48,28 +49,20 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
         display: "flex", 
         alignItems: "center", 
         gap: 10, 
-        height: 64, 
+        height: 66, 
         boxShadow: "0 4px 24px rgba(12,68,124,.35)", 
         position: "sticky", 
         top: 0, 
         zIndex: 100,
       }}>
-        <span onClick={() => handleNav("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }} aria-label="Ir a inicio">
-          <div style={{ 
-            background: OR, 
-            borderRadius: 14, 
-            width: 40, 
-            height: 40, 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
-            fontSize: 22, 
-            boxShadow: "0 4px 12px rgba(232,119,34,.4)" 
-          }}>★</div>
-          <div>
-            <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, lineHeight: 1.1 }}>ProfesoresUCSUR</div>
-            <div style={{ color: "rgba(255,255,255,.65)", fontSize: 10, letterSpacing: 1.5, fontWeight: 700 }}>CIENTÍFICA DEL SUR</div>
-          </div>
+        <span
+          onClick={() => handleNav("home")}
+          style={{ cursor: "pointer", display: "flex", alignItems: "center", flexShrink: 0, transition: "transform 0.15s ease" }}
+          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
+          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          aria-label="Ir a inicio"
+        >
+          <BrandLogo size="md" variant="light" showSubtitle={true} />
         </span>
         <span style={{ flex: 1 }} />
         
@@ -99,10 +92,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
       <div className={`mobile-menu-overlay${menuOpen ? " open" : ""}`} onClick={() => setMenuOpen(false)} />
       <div className={`mobile-drawer${menuOpen ? " open" : ""}`}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ background: OR, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: "#fff" }}>★</div>
-            <span style={{ fontWeight: 800, fontSize: 15, color: "var(--text-dark)" }}>ProfesoresUCSUR</span>
-          </div>
+          <BrandLogo size="sm" variant="dark" showSubtitle={false} />
           <button 
             onClick={() => setMenuOpen(false)} 
             style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "var(--text-muted)", padding: 4 }}

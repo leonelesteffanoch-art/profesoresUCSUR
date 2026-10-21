@@ -88,7 +88,7 @@ export const Home = ({
           </p>
 
           {/* Animated Stats bar */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(135px, 1fr))", gap: 10, maxWidth: 620, margin: "0 auto" }}>
+          <div className="hero-stats-grid" style={{ maxWidth: 640, margin: "0 auto" }}>
             {[
               { n: profesores.length, l: "profesores", i: "👨‍🏫" }, 
               { n: totalResenas, l: "reseñas", i: "💬" }, 
@@ -101,25 +101,29 @@ export const Home = ({
                 style={{ 
                   background: "rgba(255,255,255,.11)", 
                   backdropFilter: "blur(6px)",
-                  borderRadius: 14, 
-                  padding: "10px 12px", 
+                  borderRadius: 16, 
+                  padding: "12px 10px", 
                   display: "flex", 
-                  gap: 8, 
+                  flexDirection: "column",
+                  gap: 4, 
                   alignItems: "center", 
                   justifyContent: "center",
-                  border: "1px solid rgba(255,255,255,.12)",
+                  textAlign: "center",
+                  border: "1px solid rgba(255,255,255,.14)",
                   cursor: s.action ? "pointer" : "default",
                   transition: "transform 0.2s, background 0.2s"
                 }}
                 onMouseEnter={(e) => s.action && (e.currentTarget.style.background = "rgba(255,255,255,.2)")}
                 onMouseLeave={(e) => s.action && (e.currentTarget.style.background = "rgba(255,255,255,.11)")}
               >
-                <span style={{ fontSize: 18 }}>{s.i}</span>
-                <div style={{ textAlign: "left" }}>
-                  <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, lineHeight: 1.1 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>{s.i}</span>
+                  <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, lineHeight: 1 }}>
                     <AnimatedCounter end={s.n} duration={1100} />
-                  </div>
-                  <div style={{ color: "rgba(255,255,255,.7)", fontSize: 11.5, fontWeight: 600 }}>{s.l}</div>
+                  </span>
+                </div>
+                <div style={{ color: "rgba(255,255,255,.78)", fontSize: 11.5, fontWeight: 600, lineHeight: 1.2, textAlign: "center" }}>
+                  {s.l}
                 </div>
               </div>
             ))}
