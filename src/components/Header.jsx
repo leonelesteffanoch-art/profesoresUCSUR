@@ -30,7 +30,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
     ["home", "🏠", "Inicio"], 
     ["ranking", "🏆", "Ranking"], 
     ["solicitudes", "🗳️", "Secciones Adicionales"],
-    ["agregar", "➕", "Agregar profe"], 
+    ["agregar", "➕", "Agregar Profesor"], 
     ["feedback", "💡", "Sugerencias"],
     ["admin", "⚙️", "Admin"]
   ];
@@ -49,7 +49,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
         alignItems: "center", 
         gap: 10, 
         height: 64, 
-        boxShadow: "0 4px 24px rgba(12,68,124,.4)", 
+        boxShadow: "0 4px 24px rgba(12,68,124,.35)", 
         position: "sticky", 
         top: 0, 
         zIndex: 100,
@@ -68,7 +68,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
           }}>★</div>
           <div>
             <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, lineHeight: 1.1 }}>ProfesoresUCSUR</div>
-            <div style={{ color: "rgba(255,255,255,.6)", fontSize: 10, letterSpacing: 1.5, fontWeight: 700 }}>CIENTÍFICA DEL SUR</div>
+            <div style={{ color: "rgba(255,255,255,.65)", fontSize: 10, letterSpacing: 1.5, fontWeight: 700 }}>CIENTÍFICA DEL SUR</div>
           </div>
         </span>
         <span style={{ flex: 1 }} />
@@ -82,7 +82,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
               key={p} 
               className={`nav-link${page === p ? " active" : ""}`} 
               onClick={() => handleNav(p)}
-              style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", padding: "6px 12px", borderRadius: 20, fontWeight: 800 } : {}}
+              style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", padding: "6px 13px", borderRadius: 20, fontWeight: 800 } : {}}
             >
               {icon} {label}
             </span>
@@ -100,7 +100,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
       <div className={`mobile-drawer${menuOpen ? " open" : ""}`}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ background: OR, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>★</div>
+            <div style={{ background: OR, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: "#fff" }}>★</div>
             <span style={{ fontWeight: 800, fontSize: 15, color: "var(--text-dark)" }}>ProfesoresUCSUR</span>
           </div>
           <button 
@@ -142,15 +142,21 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
           transform: hidden ? "translateY(150%)" : "translateY(0)"
         }}
       >
-        {[["home", "🏠", "Inicio"], ["ranking", "🏆", "Ranking"], ["solicitudes", "🗳️", "Secciones\nAdicionales"], ["agregar", "➕", "Agregar"], ["feedback", "💡", "Sugerencias"]].map(([p, icon, label]) => (
+        {[
+          ["home", "🏠", "Inicio"],
+          ["ranking", "🏆", "Ranking"],
+          ["solicitudes", "🗳️", "Secciones\nAdicionales"],
+          ["agregar", "➕", "Agregar\nProfesor"],
+          ["feedback", "💡", "Sugerencias"]
+        ].map(([p, icon, label]) => (
           <div 
             key={p} 
             className={`bottom-nav-item${page === p ? " active" : ""}`} 
             onClick={() => navigate(p === "home" ? "/" : `/${p}`)}
-            style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", borderRadius: 12 } : {}}
+            style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", borderRadius: 14 } : {}}
           >
             <span style={{ fontSize: 18, marginBottom: 0 }}>{icon}</span>
-            <span style={{ fontSize: 9, fontWeight: 700, color: p === "feedback" ? "#fff" : "inherit", whiteSpace: "pre-line", textAlign: "center", lineHeight: 1 }}>{label}</span>
+            <span style={{ fontSize: 9.5, fontWeight: 800, color: p === "feedback" ? "#fff" : "inherit", whiteSpace: "pre-line", textAlign: "center", lineHeight: 1.05 }}>{label}</span>
           </div>
         ))}
       </nav>
