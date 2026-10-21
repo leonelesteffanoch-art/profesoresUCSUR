@@ -669,6 +669,10 @@ body {
   }
 }
 
+.hero-section {
+  padding: 36px 16px 42px;
+}
+
 .hero-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -681,8 +685,12 @@ body {
 
 @media (max-width: 720px) {
   .mobile-bottom-nav { display: flex; }
+  .hero-section {
+    padding: 18px 14px 20px;
+  }
   .hero-stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
   .site-footer {
     padding: 40px 20px calc(96px + env(safe-area-inset-bottom, 0px));

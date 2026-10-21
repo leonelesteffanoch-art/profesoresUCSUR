@@ -31,7 +31,7 @@ export const Home = ({
   const [touchStartX, setTouchStartX] = useState(null);
   const [expandedNews, setExpandedNews] = useState(null);
   const [visibleCount, setVisibleCount] = useState(15);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
 
   useEffect(() => {
     document.title = "Profesores UCSUR | Califica y descubre a tus profesores";
@@ -73,17 +73,17 @@ export const Home = ({
   return (
     <>
       {/* Hero */}
-      <div style={{ background: `linear-gradient(145deg, #093563 0%, ${BD} 40%, ${B} 85%, #1d70c4 100%)`, padding: "44px 16px 56px", position: "relative", overflow: "hidden" }}>
+      <div className="hero-section" style={{ background: `linear-gradient(145deg, #093563 0%, ${BD} 40%, ${B} 85%, #1d70c4 100%)`, position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -70, right: -60, width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle, rgba(232,119,34,.22) 0%, transparent 70%)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -50, left: -40, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,.1) 0%, transparent 70%)", pointerEvents: "none" }} />
         <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center", position: "relative" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,.12)", backdropFilter: "blur(8px)", borderRadius: 999, padding: "6px 16px", marginBottom: 16, border: "1px solid rgba(255,255,255,.18)" }}>
-            <span style={{ fontSize: 12, color: "#fff", fontWeight: 700, letterSpacing: 0.2 }}>🔒 100% anónimo · Comunidad estudiantil UCSUR</span>
+          <div className="hero-badge" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,.12)", backdropFilter: "blur(8px)", borderRadius: 999, padding: "5px 14px", marginBottom: 10, border: "1px solid rgba(255,255,255,.18)" }}>
+            <span style={{ fontSize: 11.5, color: "#fff", fontWeight: 700, letterSpacing: 0.2 }}>🔒 100% anónimo · Comunidad estudiantil UCSUR</span>
           </div>
-          <h1 style={{ color: "#fff", fontSize: "clamp(26px, 5vw, 36px)", fontWeight: 800, marginBottom: 10, lineHeight: 1.2, letterSpacing: "-.6px" }}>
+          <h1 className="hero-title" style={{ color: "#fff", fontSize: "clamp(22px, 4.5vw, 34px)", fontWeight: 800, marginBottom: 6, lineHeight: 1.18, letterSpacing: "-.5px" }}>
             ¿Qué profesor te tocó este ciclo?
           </h1>
-          <p style={{ color: "rgba(255,255,255,.78)", fontSize: "clamp(14px, 2.5vw, 16px)", marginBottom: 24, fontWeight: 500 }}>
+          <p className="hero-subtitle" style={{ color: "rgba(255,255,255,.78)", fontSize: "clamp(13px, 2.2vw, 15.5px)", marginBottom: 16, fontWeight: 500 }}>
             {fraseInicio}
           </p>
 
@@ -98,14 +98,15 @@ export const Home = ({
               <div 
                 key={s.l} 
                 onClick={s.action}
+                className="hero-stat-card"
                 style={{ 
                   background: "rgba(255,255,255,.11)", 
                   backdropFilter: "blur(6px)",
-                  borderRadius: 16, 
-                  padding: "12px 10px", 
+                  borderRadius: 14, 
+                  padding: "9px 8px", 
                   display: "flex", 
                   flexDirection: "column",
-                  gap: 4, 
+                  gap: 3, 
                   alignItems: "center", 
                   justifyContent: "center",
                   textAlign: "center",
@@ -116,13 +117,13 @@ export const Home = ({
                 onMouseEnter={(e) => s.action && (e.currentTarget.style.background = "rgba(255,255,255,.2)")}
                 onMouseLeave={(e) => s.action && (e.currentTarget.style.background = "rgba(255,255,255,.11)")}
               >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                  <span style={{ fontSize: 18, lineHeight: 1 }}>{s.i}</span>
-                  <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, lineHeight: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                  <span style={{ fontSize: 16, lineHeight: 1 }}>{s.i}</span>
+                  <span style={{ color: "#fff", fontWeight: 800, fontSize: 16, lineHeight: 1 }}>
                     <AnimatedCounter end={s.n} duration={1100} />
                   </span>
                 </div>
-                <div style={{ color: "rgba(255,255,255,.78)", fontSize: 11.5, fontWeight: 600, lineHeight: 1.2, textAlign: "center" }}>
+                <div style={{ color: "rgba(255,255,255,.8)", fontSize: 11, fontWeight: 600, lineHeight: 1.15, textAlign: "center" }}>
                   {s.l}
                 </div>
               </div>
@@ -131,50 +132,50 @@ export const Home = ({
         </div>
       </div>
 
-      {/* 🔍 BARRA DE BÚSQUEDA FLOTANTE COMPACTA E INTUITIVA */}
+      {/* 🔍 BARRA DE BÚSQUEDA Y FILTROS (Visibles por defecto con opción de ocultar) */}
       <div style={{ 
-        position: "sticky", top: 64, zIndex: 90, 
+        position: "sticky", top: 66, zIndex: 90, 
         background: "var(--card-bg)", 
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
         borderBottom: "1px solid var(--border-color)", 
-        padding: "12px 0",
+        padding: "10px 0",
         boxShadow: "var(--shadow-md)",
         transition: "all 0.25s ease"
       }}>
-        <div style={{ maxWidth: 840, margin: "0 auto", padding: "0 16px" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ maxWidth: 840, margin: "0 auto", padding: "0 14px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div className="search-bar-row">
               {/* Buscador con botón de limpiar rápido */}
               <div className="search-input" style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                <span style={{ position: "absolute", left: 14, fontSize: 16, pointerEvents: "none", opacity: 0.7 }}>🔍</span>
+                <span style={{ position: "absolute", left: 12, fontSize: 15, pointerEvents: "none", opacity: 0.7 }}>🔍</span>
                 <input
                   className="input"
                   value={busqueda}
                   onChange={e => setBusqueda(e.target.value)}
-                  placeholder="Buscar profesor o curso (ej. Cálculo, Biología)..."
+                  placeholder="Buscar profesor o curso..."
                   aria-label="Buscar"
-                  style={{ fontSize: 15, padding: "12px 38px 12px 40px", borderRadius: 14, fontWeight: 600, border: "2px solid var(--primary-blue)" }}
+                  style={{ fontSize: 14, padding: "10px 34px 10px 36px", borderRadius: 12, fontWeight: 600, border: "2px solid var(--primary-blue)" }}
                 />
                 {busqueda && (
                   <button
                     onClick={() => setBusqueda("")}
                     aria-label="Limpiar búsqueda"
-                    style={{ position: "absolute", right: 10, background: "var(--ghost-bg)", border: "none", borderRadius: "50%", width: 24, height: 24, cursor: "pointer", fontSize: 12, color: "var(--text-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}
+                    style={{ position: "absolute", right: 8, background: "var(--ghost-bg)", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer", fontSize: 11, color: "var(--text-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}
                   >
                     ✕
                   </button>
                 )}
               </div>
 
-              {/* Botón de Filtros (Facultad y Sede) */}
+              {/* Botón para Mostrar / Ocultar Filtros */}
               <button
                 onClick={() => setShowFilters(f => !f)}
                 className="btn"
                 style={{
-                  padding: "11px 16px",
-                  borderRadius: 14,
-                  fontSize: 13.5,
+                  padding: "9px 13px",
+                  borderRadius: 12,
+                  fontSize: 12.5,
                   fontWeight: 800,
                   background: showFilters || activeFilterCount > 0 ? "var(--light-blue)" : "var(--ghost-bg)",
                   color: showFilters || activeFilterCount > 0 ? "var(--primary-blue)" : "var(--text-dark)",
@@ -182,19 +183,19 @@ export const Home = ({
                   flexShrink: 0
                 }}
               >
-                <span>🎛️ Filtros</span>
+                <span>🎛️ {showFilters ? "Ocultar filtros" : "Filtros"}</span>
                 {activeFilterCount > 0 && (
-                  <span style={{ background: "var(--primary-blue)", color: "#fff", borderRadius: 999, padding: "1px 7px", fontSize: 11, fontWeight: 800 }}>
+                  <span style={{ background: "var(--primary-blue)", color: "#fff", borderRadius: 999, padding: "1px 6px", fontSize: 10.5, fontWeight: 800 }}>
                     {activeFilterCount}
                   </span>
                 )}
-                <span style={{ fontSize: 10, opacity: 0.7 }}>{showFilters ? "▲" : "▼"}</span>
+                <span style={{ fontSize: 9.5, opacity: 0.75 }}>{showFilters ? "▲" : "▼"}</span>
               </button>
 
               {/* Ordenamiento */}
               <select
                 className="input search-select"
-                style={{ padding: "11px 14px", borderRadius: 14, fontWeight: 700, cursor: "pointer", fontSize: 13.5 }}
+                style={{ padding: "9px 12px", borderRadius: 12, fontWeight: 700, cursor: "pointer", fontSize: 12.5 }}
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
               >
@@ -205,84 +206,80 @@ export const Home = ({
               </select>
             </div>
 
-            {/* Chips de filtros activos cuando el panel está cerrado */}
+            {/* Chips de filtros activos cuando el panel está oculto */}
             {!showFilters && activeFilterCount > 0 && (
-              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", paddingTop: 2 }}>
-                <span style={{ fontSize: 11.5, color: "var(--text-light)", fontWeight: 700 }}>Activos:</span>
+              <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", paddingTop: 2 }}>
+                <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 700 }}>Activos:</span>
                 {facFiltro !== "Todas" && (
-                  <span onClick={() => setFacFiltro("Todas")} className="pill" style={{ background: FAC_COLOR[facFiltro] || B, color: "#fff", cursor: "pointer", padding: "4px 10px", fontSize: 11.5 }}>
+                  <span onClick={() => setFacFiltro("Todas")} className="pill" style={{ background: FAC_COLOR[facFiltro] || B, color: "#fff", cursor: "pointer", padding: "3px 9px", fontSize: 11 }}>
                     {FAC_EMOJI[facFiltro] || ""} {facFiltro} ✕
                   </span>
                 )}
                 {sedeFiltro.map(s => (
-                  <span key={s} onClick={() => setSedeFiltro(sedeFiltro.filter(x => x !== s))} className="pill" style={{ background: sedeColors[s] || B, color: "#fff", cursor: "pointer", padding: "4px 10px", fontSize: 11.5 }}>
-                    📍 Sede {s} ✕
+                  <span key={s} onClick={() => setSedeFiltro(sedeFiltro.filter(x => x !== s))} className="pill" style={{ background: sedeColors[s] || B, color: "#fff", cursor: "pointer", padding: "3px 9px", fontSize: 11 }}>
+                    📍 {s} ✕
                   </span>
                 ))}
-                <button onClick={() => { setFacFiltro("Todas"); setSedeFiltro([]); }} style={{ background: "none", border: "none", color: "var(--text-light)", fontSize: 11.5, fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}>
-                  Limpiar todo
+                <button onClick={() => { setFacFiltro("Todas"); setSedeFiltro([]); }} style={{ background: "none", border: "none", color: "var(--text-light)", fontSize: 11, fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}>
+                  Limpiar
                 </button>
               </div>
             )}
 
-            {/* Panel desplegable de Facultades y Sedes */}
+            {/* Panel de Facultades y Sedes (Abierto por defecto, compacto en 1 línea por filtro) */}
             {showFilters && (
-              <div className="fade-in" style={{ paddingTop: 6, borderTop: "1px solid var(--border-color)", display: "flex", flexDirection: "column", gap: 10 }}>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: "var(--text-light)", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>🏫 Facultad</div>
-                  <div className="custom-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 6, alignItems: "center", WebkitOverflowScrolling: "touch" }}>
-                    {FACULTADES.map(f => (
-                      <button key={f} onClick={() => setFacFiltro(f)}
-                        aria-pressed={facFiltro === f}
-                        style={{ 
-                          padding: "6px 13px", borderRadius: 20, fontSize: 12.5, cursor: "pointer", fontWeight: 700, 
-                          border: "1.5px solid", transition: "all .2s", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
-                          background: facFiltro === f ? (FAC_COLOR[f] || B) : "transparent", 
-                          color: facFiltro === f ? "#fff" : (FAC_COLOR[f] || "var(--text-muted)"), 
-                          borderColor: facFiltro === f ? (FAC_COLOR[f] || B) : (FAC_BG[f] || "var(--border-color)") 
-                        }}>
-                        {f === "Todas" ? "Todas las Facultades" : `${FAC_EMOJI[f] || ""} ${f}`}
-                      </button>
-                    ))}
-                  </div>
+              <div className="fade-in" style={{ paddingTop: 6, borderTop: "1px solid var(--border-color)", display: "flex", flexDirection: "column", gap: 6 }}>
+                <div className="custom-scrollbar" style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2, alignItems: "center", WebkitOverflowScrolling: "touch" }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", marginRight: 2, flexShrink: 0 }}>🏫 Fac:</span>
+                  {FACULTADES.map(f => (
+                    <button key={f} onClick={() => setFacFiltro(f)}
+                      aria-pressed={facFiltro === f}
+                      style={{ 
+                        padding: "5px 11px", borderRadius: 99, fontSize: 11.5, cursor: "pointer", fontWeight: 700, 
+                        border: "1.5px solid", transition: "all .15s", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
+                        background: facFiltro === f ? (FAC_COLOR[f] || B) : "transparent", 
+                        color: facFiltro === f ? "#fff" : (FAC_COLOR[f] || "var(--text-muted)"), 
+                        borderColor: facFiltro === f ? (FAC_COLOR[f] || B) : (FAC_BG[f] || "var(--border-color)") 
+                      }}>
+                      {f === "Todas" ? "Todas" : `${FAC_EMOJI[f] || ""} ${f}`}
+                    </button>
+                  ))}
                 </div>
 
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: "var(--text-light)", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>📍 Sede (puedes elegir varias)</div>
-                  <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, alignItems: "center", flexWrap: "wrap" }}>
-                    <button onClick={() => setSedeFiltro([])}
-                      aria-pressed={sedeFiltro.length === 0}
-                      style={{ 
-                        padding: "5px 12px", borderRadius: 20, fontSize: 12.5, cursor: "pointer", fontWeight: 700, 
-                        border: "1.5px solid", transition: "all .2s", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
-                        background: sedeFiltro.length === 0 ? "var(--text-dark)" : "transparent", 
-                        color: sedeFiltro.length === 0 ? "var(--bg-main)" : "var(--text-dark)", 
-                        borderColor: sedeFiltro.length === 0 ? "var(--text-dark)" : "var(--border-color)" 
-                      }}>
-                      🌍 Todas
-                    </button>
+                <div className="custom-scrollbar" style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2, alignItems: "center", WebkitOverflowScrolling: "touch" }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", marginRight: 2, flexShrink: 0 }}>📍 Sede:</span>
+                  <button onClick={() => setSedeFiltro([])}
+                    aria-pressed={sedeFiltro.length === 0}
+                    style={{ 
+                      padding: "4px 11px", borderRadius: 99, fontSize: 11.5, cursor: "pointer", fontWeight: 700, 
+                      border: "1.5px solid", transition: "all .15s", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
+                      background: sedeFiltro.length === 0 ? "var(--text-dark)" : "transparent", 
+                      color: sedeFiltro.length === 0 ? "var(--bg-main)" : "var(--text-dark)", 
+                      borderColor: sedeFiltro.length === 0 ? "var(--text-dark)" : "var(--border-color)" 
+                    }}>
+                    🌍 Todas
+                  </button>
 
-                    {SEDES.map(s => {
-                      const isSelected = sedeFiltro.includes(s);
-                      const c = sedeColors[s] || B;
-                      return (
-                        <button key={s} onClick={() => {
-                            if (isSelected) setSedeFiltro(sedeFiltro.filter(x => x !== s));
-                            else setSedeFiltro([...sedeFiltro, s]);
-                          }}
-                          aria-pressed={isSelected}
-                          style={{ 
-                            padding: "5px 12px", borderRadius: 20, fontSize: 12.5, cursor: "pointer", fontWeight: 700, 
-                            border: "1.5px solid", transition: "all .2s", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
-                            background: isSelected ? c : "transparent", 
-                            color: isSelected ? "#fff" : "var(--text-muted)", 
-                            borderColor: isSelected ? c : "var(--border-color)" 
-                          }}>
-                          📍 Sede {s}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {SEDES.map(s => {
+                    const isSelected = sedeFiltro.includes(s);
+                    const c = sedeColors[s] || B;
+                    return (
+                      <button key={s} onClick={() => {
+                          if (isSelected) setSedeFiltro(sedeFiltro.filter(x => x !== s));
+                          else setSedeFiltro([...sedeFiltro, s]);
+                        }}
+                        aria-pressed={isSelected}
+                        style={{ 
+                          padding: "4px 11px", borderRadius: 99, fontSize: 11.5, cursor: "pointer", fontWeight: 700, 
+                          border: "1.5px solid", transition: "all .15s", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit",
+                          background: isSelected ? c : "transparent", 
+                          color: isSelected ? "#fff" : "var(--text-muted)", 
+                          borderColor: isSelected ? c : "var(--border-color)" 
+                        }}>
+                        📍 {s}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -290,128 +287,114 @@ export const Home = ({
         </div>
       </div>
 
-      {/* Feed de Noticias (Slider Automático) */}
-      {noticias && noticias.length > 0 && (
-        <div style={{ maxWidth: 840, margin: "24px auto 0", padding: "0 16px" }}
-             onMouseEnter={() => setNewsHovered(true)}
-             onMouseLeave={() => setNewsHovered(false)}
-             onTouchStart={e => setTouchStartX(e.touches[0].clientX)}
-             onTouchEnd={e => {
-               if (touchStartX === null) return;
-               const touchEndX = e.changedTouches[0].clientX;
-               const diff = touchStartX - touchEndX;
-               if (diff > 50) setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1));
-               else if (diff < -50) setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1));
-               setTouchStartX(null);
-             }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 8, margin: 0 }}>
-              <span>📢</span> Novedades de la plataforma
-            </h3>
-            
-            {noticias.length > 1 && (
-              <div style={{ display: "flex", gap: 5 }}>
-                {noticias.map((_, idx) => (
-                  <div key={idx} onClick={() => setCurrentNewsIdx(idx)} style={{
-                    width: currentNewsIdx === idx ? 18 : 8,
-                    height: 8,
-                    borderRadius: 4,
-                    background: currentNewsIdx === idx ? "var(--primary-blue)" : "var(--border-color)",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease"
-                  }} />
-                ))}
-              </div>
-            )}
+      {/* Contenido superior compacto para llegar rápido a los profesores */}
+      <div style={{ maxWidth: 840, margin: "14px auto 0", padding: "0 16px" }}>
+        {/* Banner compacto "¿No encuentras a tu profe?" */}
+        <div
+          style={{
+            background: `linear-gradient(135deg, var(--primary-blue), var(--dark-blue))`,
+            borderRadius: 14,
+            padding: "11px 16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+            flexWrap: "wrap",
+            boxShadow: "0 6px 18px rgba(21, 96, 170, 0.18)"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+            <span style={{ fontSize: 22, flexShrink: 0 }}>👨‍🏫</span>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ color: "#fff", fontWeight: 800, fontSize: 13.5, lineHeight: 1.2 }}>¿No encuentras a tu profesor?</div>
+              <div style={{ color: "rgba(255,255,255,.8)", fontSize: 11.5, fontWeight: 500 }}>Agrégalo o súmale un curso en segundos</div>
+            </div>
           </div>
-          
-          <div style={{ position: "relative" }}>
-            {noticias.length > 1 && (
-              <>
-                <button className="btn btn-ghost desktop-only" onClick={() => setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1))}
-                  style={{ position: "absolute", left: -48, top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "var(--card-bg)", border: "1px solid var(--border-color)", width: 40, height: 40, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-sm)" }}>
-                  ←
-                </button>
-                <button className="btn btn-ghost desktop-only" onClick={() => setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1))}
-                  style={{ position: "absolute", right: -48, top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "var(--card-bg)", border: "1px solid var(--border-color)", width: 40, height: 40, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-sm)" }}>
-                  →
-                </button>
-              </>
-            )}
-            {(() => {
-              const n = noticias[currentNewsIdx];
-              if (!n) return null;
-              const isNew = n.createdAt && (new Date() - n.createdAt.toDate()) < 3 * 24 * 60 * 60 * 1000;
-              return (
-                <div key={n.id} className="card fade-in" style={{ borderLeft: `4px solid ${B}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                  {n.imagenUrl && (
-                    <div style={{ width: "100%", height: 180, overflow: "hidden", flexShrink: 0 }}>
-                      <img src={n.imagenUrl} alt={n.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    </div>
-                  )}
-                  <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", flex: 1 }}>{n.titulo}</div>
-                      {isNew && <span style={{ background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 10, letterSpacing: 0.5, flexShrink: 0 }}>NUEVO</span>}
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--text-light)", marginBottom: 12, fontWeight: 500 }}>🗓️ {formatFechaExacta(n.createdAt)}</div>
-                    <p className="custom-scrollbar" style={{ 
-                      fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: 0, 
-                      whiteSpace: "pre-wrap", maxHeight: 140, overflowY: "auto", paddingRight: 4 
-                    }}>{n.contenido}</p>
-                    <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      {n.link && (
-                        <a href={n.link.startsWith("http") ? n.link : `https://${n.link}`} target="_blank" rel="noopener noreferrer" className="btn btn-blue" style={{ display: "inline-flex", alignItems: "center", fontSize: 13, padding: "8px 16px", textDecoration: "none" }}>📲 Únete al Canal de Difusión</a>
-                      )}
-                      <button onClick={() => setExpandedNews(n)} className="btn btn-ghost" style={{ display: "inline-flex", alignItems: "center", fontSize: 13, padding: "8px 16px" }}>🔍 Leer completo</button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      )}
-
-      {/* BANNER de "¿No encuentras a tu profe?" */}
-      <div style={{ maxWidth: 840, margin: "18px auto 0", padding: "0 16px" }}>
-        <div className="add-banner" style={{ marginBottom: 0 }}>
-          <div style={{ fontSize: 32, flexShrink: 0 }}>👨‍🏫</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 3 }}>¿No encuentras a tu profesor?</div>
-            <div style={{ color: "rgba(255,255,255,.8)", fontSize: 13, fontWeight: 500 }}>Agrégalo en segundos o súmale un curso para ayudar a toda la UCSUR.</div>
-          </div>
-          <button className="btn-cta" style={{ fontSize: 13.5, padding: "11px 20px", flexShrink: 0 }} onClick={() => navigate("agregar")}>
-            ➕ Agregar profe
+          <button
+            className="btn-cta"
+            style={{ fontSize: 12, padding: "8px 14px", borderRadius: 10, flexShrink: 0 }}
+            onClick={() => navigate("agregar")}
+          >
+            ➕ Agregar Profesor
           </button>
         </div>
+
+        {/* Noticia / Aviso en formato compacto (para no empujar la lista de profesores en celular) */}
+        {noticias && noticias.length > 0 && (() => {
+          const n = noticias[currentNewsIdx];
+          if (!n) return null;
+          const isNew = n.createdAt && (new Date() - n.createdAt.toDate()) < 3 * 24 * 60 * 60 * 1000;
+          return (
+            <div
+              key={n.id}
+              className="card fade-in"
+              style={{ marginTop: 10, padding: "12px 14px", borderLeft: `4px solid ${B}`, display: "flex", alignItems: "center", gap: 12 }}
+              onTouchStart={e => setTouchStartX(e.touches[0].clientX)}
+              onTouchEnd={e => {
+                if (touchStartX === null) return;
+                const diff = touchStartX - e.changedTouches[0].clientX;
+                if (diff > 50) setCurrentNewsIdx(prev => (prev === noticias.length - 1 ? 0 : prev + 1));
+                else if (diff < -50) setCurrentNewsIdx(prev => (prev === 0 ? noticias.length - 1 : prev - 1));
+                setTouchStartX(null);
+              }}
+            >
+              {n.imagenUrl && (
+                <img
+                  src={n.imagenUrl}
+                  alt={n.titulo}
+                  onClick={() => setExpandedNews(n)}
+                  style={{ width: 52, height: 52, borderRadius: 10, objectFit: "cover", flexShrink: 0, cursor: "pointer" }}
+                />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "var(--primary-blue)", textTransform: "uppercase" }}>📢 Aviso</span>
+                  {isNew && <span style={{ background: "#EF4444", color: "#fff", fontSize: 9.5, fontWeight: 800, padding: "1px 6px", borderRadius: 99 }}>NUEVO</span>}
+                  {noticias.length > 1 && (
+                    <span style={{ fontSize: 10.5, color: "var(--text-light)", marginLeft: "auto" }}>
+                      {currentNewsIdx + 1}/{noticias.length}
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: "var(--text-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {n.titulo}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {n.contenido}
+                </div>
+              </div>
+              <button
+                onClick={() => setExpandedNews(n)}
+                className="btn btn-ghost"
+                style={{ padding: "7px 11px", fontSize: 11.5, borderRadius: 10, flexShrink: 0 }}
+              >
+                Ver →
+              </button>
+            </div>
+          );
+        })()}
       </div>
 
-      <div style={{ maxWidth: 840, margin: "22px auto 0", padding: "0 16px 64px" }}>
+      <div style={{ maxWidth: 840, margin: "14px auto 0", padding: "0 16px 64px" }}>
         
-        {/* Carrusel de Nuevos Profesores */}
+        {/* Carrusel compacto de Nuevos Profesores */}
         {isSearchEmpty && profesoresNuevos.length > 0 && (
-          <div style={{ marginBottom: 32 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 8, margin: "0 0 14px 0" }}>
-              <span>✨</span> Recién agregados <span style={{ color: "var(--text-light)", fontSize: 12.5, fontWeight: 600 }}>(¡Sé el primero en calificarlos!)</span>
-            </h3>
-            <div className="custom-scrollbar" style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 14, scrollSnapType: "x mandatory" }}>
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <h3 style={{ fontSize: 13.5, fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 6, margin: 0 }}>
+                <span>✨</span> Recién agregados <span style={{ color: "var(--text-light)", fontSize: 11.5, fontWeight: 600 }}>(¡Sé el primero en calificarlos!)</span>
+              </h3>
+            </div>
+            <div className="custom-scrollbar" style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8, scrollSnapType: "x mandatory" }}>
               {profesoresNuevos.map(p => (
                 <Link key={p.id} to={`/profesor/${p.id}`} className="card card-hover fade-in" 
-                  style={{ width: 270, flexShrink: 0, padding: "16px", display: "flex", flexDirection: "column", gap: 12, borderTop: `4px solid ${FAC_COLOR[p.facultad] || B}`, textDecoration: "none", scrollSnapAlign: "start" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <Avatar name={p.nombre} fac={p.facultad} size={46} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: 14.5, color: "var(--text-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nombre}</div>
-                      <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.facultad}</div>
+                  style={{ width: 225, flexShrink: 0, padding: "10px 12px", display: "flex", alignItems: "center", gap: 10, borderLeft: `3.5px solid ${FAC_COLOR[p.facultad] || B}`, textDecoration: "none", scrollSnapAlign: "start" }}>
+                  <Avatar name={p.nombre} fac={p.facultad} size={36} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: "var(--text-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nombre}</div>
+                    <div style={{ fontSize: 11, color: "var(--primary-blue)", fontWeight: 700, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {(p.cursos || [])[0] || p.facultad} · Calificar →
                     </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {(p.cursos || []).slice(0, 2).map(c => <span key={c} className="pill" style={{ background: "var(--ghost-bg)", color: "var(--text-muted)", fontSize: 11, padding: "4px 9px" }}>📚 {c}</span>)}
-                    {(p.cursos || []).length > 2 && <span className="pill" style={{ background: "transparent", color: "var(--text-light)", fontSize: 11, padding: "4px 8px", border: "1px solid var(--border-color)" }}>+{p.cursos.length - 2}</span>}
-                  </div>
-                  <div style={{ marginTop: "auto", paddingTop: 8, borderTop: "1px dashed var(--border-color)", textAlign: "center" }}>
-                    <span style={{ color: "var(--primary-blue)", fontSize: 12.5, fontWeight: 800 }}>Dejar primera reseña →</span>
                   </div>
                 </Link>
               ))}
