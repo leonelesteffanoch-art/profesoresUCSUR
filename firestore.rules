@@ -19,9 +19,14 @@ service cloud.firestore {
                     && request.resource.data.nombre is string 
                     && request.resource.data.nombre.size() > 0;
       
-      // Permitir actualizar solo si es admin, o si solo se cambian rating/totalReseñas o cursos
+      // Permitir actualizar solo si es admin, o si solo se cambian campos permitidos por alumnos (rating, totalReseñas, cursos, sede/sedes, facultad/facultades, recomendacionesFacultad)
       allow update: if isAdmin() 
-                    || (isLogged() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rating', 'totalReseñas', 'cursos']));
+                    || (isLogged() 
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                          'rating', 'totalReseñas', 'cursos', 'sede', 'sedes', 'facultad', 'facultades', 'recomendacionesFacultad'
+                        ])
+                        && (!('rating' in request.resource.data) || (request.resource.data.rating is number && request.resource.data.rating >= 0 && request.resource.data.rating <= 5))
+                        && (!('totalReseñas' in request.resource.data) || (request.resource.data.totalReseñas is number && request.resource.data.totalReseñas >= 0)));
       
       allow delete: if isAdmin();
 

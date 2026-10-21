@@ -91,12 +91,12 @@ export const Ranking = ({ profesores, rankTab, setRankTab, rankCursoFiltro: curs
         <div className="card" style={{ padding: "8px 0" }}>
           {top.slice(3).map((p, i) => (
             <Link key={p.id} to={`/profesor/${p.id}`}
-              style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none" }}
-              onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+              style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
+              onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
               <span style={{ fontSize: 14, color: "var(--text-light)", fontWeight: 800, width: 32 }}>#{i + 4}</span>
               <Avatar name={p.nombre} fac={p.facultad} size={42} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{p.nombre}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-dark)" }}>{p.nombre}</div>
                 <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2 }}>{p.facultad}</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
@@ -117,12 +117,12 @@ export const Ranking = ({ profesores, rankTab, setRankTab, rankCursoFiltro: curs
       {rankTab === "worst" && <div className="card" style={{ padding: "8px 0" }}>
         {worst.map((p, i) => (
           <Link key={p.id} to={`/profesor/${p.id}`}
-            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none" }}
-            onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
+            onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
             <span style={{ fontSize: 24, width: 32, textAlign: "center" }}>{i === 0 ? "💀" : i === 1 ? "😬" : "😕"}</span>
             <Avatar name={p.nombre} fac={p.facultad} size={42} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700 }}>{p.nombre}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-dark)" }}>{p.nombre}</div>
               <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2 }}>{p.facultad}</div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
@@ -136,16 +136,16 @@ export const Ranking = ({ profesores, rankTab, setRankTab, rankCursoFiltro: curs
       {rankTab === "popular" && <div className="card" style={{ padding: "8px 0" }}>
         {popular.map((p, i) => (
           <Link key={p.id} to={`/profesor/${p.id}`}
-            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none" }}
-            onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 22px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
+            onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
             <span style={{ fontSize: 14, color: "var(--text-light)", fontWeight: 800, width: 32 }}>#{i + 1}</span>
             <Avatar name={p.nombre} fac={p.facultad} size={42} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700 }}>{p.nombre}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-dark)" }}>{p.nombre}</div>
               <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2 }}>{p.totalReseñas || 0} reseñas · {p.facultad}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 90, background: "#edf1f7", borderRadius: 8, height: 10, overflow: "hidden" }}>
+              <div style={{ width: 90, background: "var(--ghost-bg)", borderRadius: 8, height: 10, overflow: "hidden" }}>
                 <div style={{ width: `${((p.totalReseñas || 0) / maxR) * 100}%`, background: `linear-gradient(90deg,${B},${OR})`, height: "100%", borderRadius: 8 }} />
               </div>
               <span style={{ fontSize: 14, fontWeight: 800, color: B }}>{p.totalReseñas || 0}</span>

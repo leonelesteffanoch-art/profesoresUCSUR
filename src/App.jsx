@@ -4,7 +4,7 @@ import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, onSnapshot, que
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { db, auth, COL_RESENAS } from "./services/firebase.js";
 import { FORM_EMPTY, ADD_EMPTY, FRASES_INICIO, CRIT } from "./constants.js";
-import { calcRating, similarity, capitalizeName, normalizeText } from "./utils/helpers.js";
+import { calcRating, similarity, capitalizeName, normalizeText, formatCourseName, normalizeCourseKey, resolveCanonicalCourse } from "./utils/helpers.js";
 
 import "./index.css";
 import { Header } from "./components/Header.jsx";
@@ -19,7 +19,7 @@ import { Solicitudes } from "./pages/Solicitudes.jsx";
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 
 // Wrapper that resolves profesor from URL param
-function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, votados, setVotados, formRef, recomendarFacultad, navigate }) {
+function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, reportadosLocal, setReportadosLocal, votados, setVotados, formRef, recomendarFacultad, navigate }) {
   const { profId } = useParams();
   const nav = useNavigate();
   const [form, setForm] = useState(FORM_EMPTY);
@@ -69,7 +69,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
     if (votados[resId]) return;
     const r = resenas[pId]?.find(x => x.id === resId); if (!r) return;
     try {
-      await updateDoc(doc(db, "profesores", pId, COL_RESENAS, resId), { [tipo]: (r[tipo] || 0) + 1 });
+      await updateDoc(doc(db, "profesores", pId, COL_RESENAS, resId), { [tipo]: increment(1) });
       const nuevos = { ...votados, [resId]: tipo };
       setVotados(nuevos);
       localStorage.setItem("rmp_votes", JSON.stringify(nuevos));
@@ -77,10 +77,16 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
   };
 
   const reportarResena = async (pId, resId, texto, profNombre) => {
+    if (reportadosLocal[resId] || reportes.some(r => r.resId === resId)) {
+      showToast("⚠️ Esta reseña ya fue reportada.");
+      return;
+    }
     if (!window.confirm("¿Reportar esta reseña como inapropiada o falsa?")) return;
-    if (reportes.some(r => r.resId === resId)) { showToast("⚠️ Esta reseña ya fue reportada."); return; }
     try {
       await addDoc(collection(db, "reportes"), { profId: pId, resId, texto, profNombre, fecha: serverTimestamp(), estado: "pendiente" });
+      const nuevosRep = { ...reportadosLocal, [resId]: true };
+      setReportadosLocal(nuevosRep);
+      localStorage.setItem("rmp_reported", JSON.stringify(nuevosRep));
       showToast("⚠️ Reseña reportada. La revisaremos pronto.");
     } catch (e) { showToast("❌ Error al enviar el reporte. Verifica tu conexión."); }
   };
@@ -117,7 +123,7 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
         carrerasForm={carrerasForm}
         carreras={carreras}
         votados={votados} toggleUtil={toggleUtil}
-        reportes={reportes} reportarResena={reportarResena}
+        reportes={reportes} reportadosLocal={reportadosLocal} reportarResena={reportarResena}
         formRef={formRef}
         recomendarFacultad={recomendarFacultad}
       />
@@ -178,6 +184,11 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem("rmp_votes_sol") || "{}"); }
     catch { return {}; }
   });
+
+  const [reportadosLocal, setReportadosLocal] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("rmp_reported") || "{}"); }
+    catch { return {}; }
+  });
   
   const formRef = useRef();
 
@@ -217,18 +228,22 @@ export default function App() {
 
   const cargarTodasLasResenas = async () => {
     if (!adminUser || profesores.length === 0) return false;
-    showToast("Cargando todas las reseñas... esto puede tardar un momento.", 3000);
+    showToast("Cargando todas las reseñas...", 2500);
     try {
       const allResenas = [];
       const resenasMap = {};
       
-      for (const p of profesores) {
-        const q = query(collection(db, "profesores", p.id, COL_RESENAS));
-        const snap = await getDocs(q);
+      // Carga en paralelo (Promise.all) para máxima velocidad sin bloquear la red
+      const snaps = await Promise.all(
+        profesores.map(p => getDocs(query(collection(db, "profesores", p.id, COL_RESENAS))))
+      );
+      
+      snaps.forEach((snap, idx) => {
+        const p = profesores[idx];
         const rs = snap.docs.map(d => ({ id: d.id, profId: p.id, profNombre: p.nombre, profFac: p.facultad, ...d.data() }));
         allResenas.push(...rs);
         resenasMap[p.id] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      }
+      });
       
       allResenas.sort((a, b) => {
         const ta = a.createdAt?.toDate?.()?.getTime() || 0;
@@ -377,10 +392,14 @@ export default function App() {
       const avgReview = hasReview ? (addProf.claridad + addProf.puntualidad + addProf.trato + addProf.examenes) / 4 : 0;
       const initialRating = hasReview ? parseFloat(avgReview.toFixed(1)) : 0;
 
+      // Resolver curso canónico contra el catálogo existente para evitar duplicados desde la creación
+      const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
+      const canonicalCurso = resolveCanonicalCourse(addProf.curso, allGlobal);
+
       const profRef = await addDoc(collection(db, "profesores"), { 
         nombre: capitalizeName(addProf.nombre.trim()), 
         facultad: addProf.facultades ? addProf.facultades : [addProf.facultad], 
-        cursos: [capitalizeName(addProf.curso.trim())], 
+        cursos: [canonicalCurso], 
         sede: addProf.sedes ? addProf.sedes[0] : addProf.sede,
         sedes: addProf.sedes ? addProf.sedes : [addProf.sede].filter(Boolean),
         bio: addProf.bio.trim() || "Profesor de la Universidad Científica del Sur.", 
@@ -414,28 +433,20 @@ export default function App() {
 
   const submitAgregarCurso = async (nuevaSede, nuevaFac) => {
     if (!addProfSel) return;
-    let newCurso = capitalizeName(addCurso.trim());
-    if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
-    if (newCurso.includes(",")) {
+    if (!addCurso.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
+    if (addCurso.includes(",")) {
       showToast("⚠️ Por favor ingresa UN solo curso a la vez (no uses comas para separar).");
       return;
     }
 
     const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
-    const normInput = normalizeText(newCurso);
-    const existingMatch = allGlobal.find(c => normalizeText(c) === normInput);
-    
-    // Auto-correction: Si existe pero el usuario escribió una versión CON tilde y el existente NO tiene, preferimos el del usuario.
-    if (existingMatch) {
-      if (newCurso !== normInput && existingMatch === normInput) {
-        // El usuario escribió con tildes (newCurso !== normInput), pero la BD tiene la versión sin tildes (existingMatch === normInput).
-        // Nos quedamos con newCurso.
-      } else {
-        newCurso = existingMatch;
-      }
-    }
+    const newCurso = resolveCanonicalCourse(addCurso, allGlobal);
+    const newCursoKey = normalizeCourseKey(newCurso);
 
-    if ((addProfSel.cursos || []).includes(newCurso)) { showToast("⚠️ Ese curso ya está registrado."); return; }
+    if ((addProfSel.cursos || []).some(c => normalizeCourseKey(c) === newCursoKey)) {
+      showToast("⚠️ Ese curso ya está registrado en este profesor.");
+      return;
+    }
     try {
       const updates = { cursos: [...(addProfSel.cursos || []), newCurso] };
       if (nuevaSede && nuevaSede.length > 0) {
@@ -533,26 +544,20 @@ export default function App() {
   };
 
   const adminAgregarCurso = async (prof) => {
-    let newCurso = capitalizeName(editCursoVal.trim());
-    if (!newCurso) { showToast("⚠️ Escribe el nombre del curso."); return; }
+    if (!editCursoVal.trim()) { showToast("⚠️ Escribe el nombre del curso."); return; }
 
     const allGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))];
-    const normInput = normalizeText(newCurso);
-    const existingMatch = allGlobal.find(c => normalizeText(c) === normInput);
-    
-    if (existingMatch) {
-      if (newCurso !== normInput && existingMatch === normInput) {
-        // Preferir el del usuario si tiene tildes
-      } else {
-        newCurso = existingMatch;
-      }
-    }
+    const newCurso = resolveCanonicalCourse(editCursoVal, allGlobal);
+    const newCursoKey = normalizeCourseKey(newCurso);
 
-    if ((prof.cursos || []).includes(newCurso)) { showToast("⚠️ Ese curso ya existe."); return; }
+    if ((prof.cursos || []).some(c => normalizeCourseKey(c) === newCursoKey)) {
+      showToast("⚠️ Ese curso ya existe en este profesor.");
+      return;
+    }
     try {
       await updateDoc(doc(db, "profesores", prof.id), { cursos: [...(prof.cursos || []), newCurso] });
       setEditCursoProf(null); setEditCursoVal("");
-      showToast("✅ Curso agregado.");
+      showToast(`✅ Curso "${newCurso}" agregado.`);
     } catch (e) { showToast("❌ Error al agregar el curso."); }
   };
 
@@ -566,14 +571,11 @@ export default function App() {
     } catch (e) { showToast("❌ Error al eliminar."); }
   };
 
-  const fusionarCursosGlobal = async (cursoMalo, cursoBueno) => {
+  const fusionarCursosGlobal = async (cursoMalo, cursoBueno, skipConfirm = false) => {
     if (!cursoMalo || !cursoBueno) {
       showToast("⚠️ Debes seleccionar un curso incorrecto y escribir el correcto.");
       return false;
     }
-    // Comparar sin tildes para detectar duplicados por acentuación
-    const normMalo = normalizeText(cursoMalo);
-    const normBueno = normalizeText(cursoBueno);
     
     if (cursoMalo === cursoBueno) {
       showToast("⚠️ El curso incorrecto y el correcto son exactamente iguales.");
@@ -586,14 +588,18 @@ export default function App() {
       return false;
     }
 
-    if (!window.confirm(`¿Reemplazar "${cursoMalo}" por "${cursoBueno}" en ${profesAfectados.length} profesor(es)?`)) return false;
+    if (!skipConfirm && !window.confirm(`¿Reemplazar "${cursoMalo}" por "${cursoBueno}" en ${profesAfectados.length} profesor(es)?`)) return false;
     
     try {
-      // Usar writeBatch para hacer todas las escrituras en una sola operación de red
       const batch = writeBatch(db);
       for (const p of profesAfectados) {
-        const nuevosCursos = [...new Set([...(p.cursos || []).filter(c => c !== cursoMalo), cursoBueno])];
+        const nuevosCursos = [...new Set((p.cursos || []).map(c => c === cursoMalo ? cursoBueno : c))];
         batch.update(doc(db, "profesores", p.id), { cursos: nuevosCursos });
+      }
+      // También actualizar solicitudes activas que tengan ese nombre de curso
+      const solAfectadas = (solicitudes || []).filter(s => s.curso === cursoMalo);
+      for (const s of solAfectadas) {
+        batch.update(doc(db, "solicitudes", s.id), { curso: cursoBueno });
       }
       await batch.commit();
       showToast(`✅ "${cursoMalo}" → "${cursoBueno}" en ${profesAfectados.length} profesor(es).`);
@@ -601,6 +607,67 @@ export default function App() {
     } catch (e) {
       console.error("Error fusionando cursos:", e);
       showToast("❌ Error al fusionar cursos.");
+      return false;
+    }
+  };
+
+  // Unifica múltiples variaciones de cursos en una sola operación Batch (1-Click Magic)
+  const autoUnificarCursosGlobal = async (reemplazosMap, mensajeConfirm) => {
+    const entries = Object.entries(reemplazosMap || {}).filter(([malo, bueno]) => malo && bueno && malo !== bueno);
+    if (entries.length === 0) {
+      showToast("✅ No hay cursos duplicados o mal formateados por unificar.");
+      return false;
+    }
+
+    const profesAfectados = profesores.filter(p => {
+      const orig = p.cursos || [];
+      const mapped = [...new Set(orig.map(c => reemplazosMap[c] || c))];
+      return orig.length !== mapped.length || orig.some((c, i) => c !== mapped[i]);
+    });
+
+    if (profesAfectados.length === 0) {
+      showToast("✅ Todos los profesores ya tienen sus cursos limpios.");
+      return false;
+    }
+
+    if (mensajeConfirm && !window.confirm(mensajeConfirm)) return false;
+
+    try {
+      const batch = writeBatch(db);
+      for (const p of profesAfectados) {
+        const nuevosCursos = [...new Set((p.cursos || []).map(c => reemplazosMap[c] || c))];
+        batch.update(doc(db, "profesores", p.id), { cursos: nuevosCursos });
+      }
+      const solAfectadas = (solicitudes || []).filter(s => reemplazosMap[s.curso] && reemplazosMap[s.curso] !== s.curso);
+      for (const s of solAfectadas) {
+        batch.update(doc(db, "solicitudes", s.id), { curso: reemplazosMap[s.curso] });
+      }
+      await batch.commit();
+      showToast(`🪄 ¡Magia completada! Cursos unificados en ${profesAfectados.length} profesor(es).`);
+      return true;
+    } catch (e) {
+      console.error("Error en auto-unificación:", e);
+      showToast("❌ Error al unificar cursos.");
+      return false;
+    }
+  };
+
+  const eliminarCursoGlobal = async (cursoBorrar) => {
+    if (!cursoBorrar) return false;
+    const profesAfectados = profesores.filter(p => (p.cursos || []).includes(cursoBorrar));
+    if (profesAfectados.length === 0) return false;
+    if (!window.confirm(`¿Eliminar el curso "${cursoBorrar}" de los ${profesAfectados.length} profesor(es) que lo tienen?`)) return false;
+    try {
+      const batch = writeBatch(db);
+      for (const p of profesAfectados) {
+        batch.update(doc(db, "profesores", p.id), { cursos: (p.cursos || []).filter(c => c !== cursoBorrar) });
+      }
+      await batch.commit();
+      showToast(`🗑️ Curso "${cursoBorrar}" eliminado de ${profesAfectados.length} profesor(es).`);
+      return true;
+    } catch (e) {
+      console.error("Error eliminando curso global:", e);
+      showToast("❌ Error al eliminar el curso globalmente.");
       return false;
     }
   };
@@ -690,10 +757,9 @@ export default function App() {
       await batch.commit();
       
       // 5. Recalcular el rating del profesor destino con sus nuevas reseñas consolidadas
-      // Instead of relying on a non-existent actualizarRatingYResenas, we calculate it here
-      const remainingOld = resenas[profDestino.id] || [];
-      const movedNew = resenasSnapshot.docs.map(d => d.data());
-      const mergedReviews = [...remainingOld, ...movedNew];
+      const destQuery = query(collection(db, "profesores", profDestino.id, COL_RESENAS));
+      const destSnap = await getDocs(destQuery);
+      const mergedReviews = destSnap.docs.map(d => d.data());
       const newRating = calcRating(mergedReviews);
       await updateDoc(doc(db, "profesores", profDestino.id), { rating: newRating, totalReseñas: mergedReviews.length });
       
@@ -756,7 +822,7 @@ export default function App() {
   };
 
   const crearSolicitud = async (curso, sede, contactoData) => {
-    const existe = solicitudes.find(s => s.curso === curso && s.sede === sede);
+    const existe = solicitudes.find(s => normalizeCourseKey(s.curso) === normalizeCourseKey(curso) && s.sede === sede);
     if (existe) {
       showToast("⚠️ Este curso ya tiene una solicitud activa.");
       return;
@@ -886,6 +952,7 @@ export default function App() {
               carreras={carreras}
               showToast={showToast}
               reportes={reportes}
+              reportadosLocal={reportadosLocal} setReportadosLocal={setReportadosLocal}
               votados={votados} setVotados={setVotados}
               formRef={formRef} recomendarFacultad={recomendarFacultad}
               navigate={navigate}
@@ -914,6 +981,8 @@ export default function App() {
                 eliminarCurso={eliminarCurso}
                 adminAgregarCurso={adminAgregarCurso}
                 fusionarCursosGlobal={fusionarCursosGlobal}
+                autoUnificarCursosGlobal={autoUnificarCursosGlobal}
+                eliminarCursoGlobal={eliminarCursoGlobal}
                 fusionarProfesores={fusionarProfesores}
                 dividirCursoGlobal={dividirCursoGlobal}
                 crearNoticia={crearNoticia} eliminarNoticia={eliminarNoticia}

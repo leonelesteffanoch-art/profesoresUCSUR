@@ -1,7 +1,7 @@
 import { FACULTADES, FAC_COLOR, FAC_BG, B, BD, BL, OR, CRIT, CRIT_LABEL, CRIT_ICON, FACULTADES_FORM, SEMESTRES, SEDES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { Stars } from "../components/UI/Stars.jsx";
-import { similarity, ratingColor, ratingLabel } from "../utils/helpers.js";
+import { similarity, ratingColor, ratingLabel, normalizeText, resolveCanonicalCourse } from "../utils/helpers.js";
 
 export const Agregar = ({
   profesores,
@@ -20,8 +20,10 @@ export const Agregar = ({
     : [];
   const cursosGlobal = [...new Set(profesores.flatMap(p => p.cursos || []))].sort((a, b) => a.localeCompare(b));
   const cursosExistentes = addProf.curso.trim() 
-    ? cursosGlobal.filter(c => c.toLowerCase().includes(addProf.curso.toLowerCase())).slice(0, 25)
+    ? cursosGlobal.filter(c => normalizeText(c).includes(normalizeText(addProf.curso))).slice(0, 25)
     : cursosGlobal.slice(0, 25);
+  const canonicalPreviewNuevo = addProf.curso.trim() ? resolveCanonicalCourse(addProf.curso, cursosGlobal) : "";
+  const canonicalPreviewExistente = addCurso.trim() ? resolveCanonicalCourse(addCurso, cursosGlobal) : "";
   const carrerasForm = addProf.facultadAlumno ? (carreras[addProf.facultadAlumno] || []) : [...new Set(Object.values(carreras || {}).flat())].sort();
 
   return (
@@ -69,7 +71,7 @@ export const Agregar = ({
                   <div style={{ fontSize: 12, color: OR, fontWeight: 800, marginBottom: 10, letterSpacing: 0.5 }}>⚠️ PROFESORES SIMILARES — ¿Ya existe?</div>
                   {sugerencias.map(p => (
                     <div key={p.id} onClick={() => { setAddProfSel(p); setAddMode("curso"); }}
-                      style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderTop: "1px solid #fde8d0", cursor: "pointer", transition: "opacity .2s" }}
+                      style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderTop: "1px solid var(--border-color)", cursor: "pointer", transition: "opacity .2s" }}
                       onMouseEnter={e => e.currentTarget.style.opacity = "0.7"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
                       <Avatar name={p.nombre} fac={p.facultad} size={36} />
                       <div style={{ flex: 1 }}>
@@ -149,12 +151,18 @@ export const Agregar = ({
             <div>
               <label style={{ fontSize: 13, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>Curso que enseña</label>
               <input className="input" value={addProf.curso} onChange={e => setAddProf(p => ({ ...p, curso: e.target.value }))} placeholder="Ej. Cálculo III" autoComplete="off" />
+              {canonicalPreviewNuevo && canonicalPreviewNuevo !== addProf.curso.trim() && (
+                <div style={{ marginTop: 6, fontSize: 12, color: "var(--primary-blue)", fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>✨ Se guardará normalizado como:</span>
+                  <span style={{ background: "var(--light-blue)", padding: "2px 8px", borderRadius: 8 }}>{canonicalPreviewNuevo}</span>
+                </div>
+              )}
               <div style={{ fontSize: 11, color: "var(--text-light)", marginTop: 6, fontWeight: 500, lineHeight: 1.4 }}>
-                <span style={{ color: OR, fontWeight: 800 }}>Nota:</span> Por favor ingresar cursos 1 por 1 si no se encuentran asignados al docente y con buena ortografía.
+                <span style={{ color: OR, fontWeight: 800 }}>Nota:</span> Ingresa un solo curso a la vez o haz clic en uno de los sugeridos abajo.
               </div>
               {cursosExistentes.length > 0 && (
                 <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 11, color: "var(--text-light)", marginBottom: 8, fontWeight: 700, letterSpacing: 0.5 }}>CURSOS SUGERIDOS (TODAS LAS FACULTADES)</div>
+                  <div style={{ fontSize: 11, color: "var(--text-light)", marginBottom: 8, fontWeight: 700, letterSpacing: 0.5 }}>CURSOS SUGERIDOS (HAZ CLIC PARA SELECCIONAR)</div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {cursosExistentes.map(c => (
                       <span key={c} onClick={() => setAddProf(p => ({ ...p, curso: c }))}
@@ -180,13 +188,13 @@ export const Agregar = ({
               <input className="input" value={addProf.bio} onChange={e => setAddProf(p => ({ ...p, bio: e.target.value }))} placeholder="Ej. Doctor con 10 años de experiencia." />
             </div>
             {addProf.nombre && (
-              <div style={{ background: "#f7f9fc", borderRadius: 14, padding: "16px 18px", border: "1px dashed #c8d5e8", marginTop: 8 }}>
+              <div style={{ background: "var(--ghost-bg)", borderRadius: 14, padding: "16px 18px", border: "1px dashed var(--border-color)", marginTop: 8 }}>
                 <div style={{ fontSize: 11, color: "var(--text-light)", marginBottom: 10, fontWeight: 700, letterSpacing: 0.5 }}>VISTA PREVIA</div>
                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                   <Avatar name={addProf.nombre} fac={addProf.facultad} size={48} />
                   <div>
                     <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)" }}>{addProf.nombre}</div>
-                    <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2, fontWeight: 500 }}>{addProf.facultad}{addProf.curso && ` · ${addProf.curso}`}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2, fontWeight: 500 }}>{addProf.facultad}{canonicalPreviewNuevo && ` · ${canonicalPreviewNuevo}`}</div>
                   </div>
                 </div>
               </div>
@@ -309,14 +317,14 @@ export const Agregar = ({
                 {profesores.filter(p => similarity(p.nombre, addProf.nombre) > 0.3).sort((a, b) => similarity(b.nombre, addProf.nombre) - similarity(a.nombre, addProf.nombre)).slice(0, 6).map((p, i) => (
                   <div key={p.id} onClick={() => setAddProfSel(p)}
                     style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "#f7f9fc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                    onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                     <Avatar name={p.nombre} fac={p.facultad} size={40} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, fontWeight: 700 }}>{p.nombre}</div>
                       <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2 }}>{p.facultad}</div>
                     </div>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap", maxWidth: 160 }}>
-                      {(p.cursos || []).slice(0, 2).map(c => <span key={c} style={{ fontSize: 11, background: "#f3f6fb", padding: "3px 8px", borderRadius: 12, color: "#5a6a80", fontWeight: 500 }}>{c}</span>)}
+                      {(p.cursos || []).slice(0, 2).map(c => <span key={c} style={{ fontSize: 11, background: "var(--ghost-bg)", padding: "3px 8px", borderRadius: 12, color: "var(--text-muted)", fontWeight: 500 }}>{c}</span>)}
                       {(p.cursos || []).length > 2 && <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 700 }}>+{p.cursos.length - 2}</span>}
                     </div>
                   </div>
@@ -330,12 +338,12 @@ export const Agregar = ({
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
                   <Avatar name={addProfSel.nombre} fac={addProfSel.facultad} size={52} />
                   <div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text-dark)" }}>{addProfSel.nombre}</div>
-                    <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 2, fontWeight: 500 }}>{addProfSel.facultad}</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "#1a2540" }}>{addProfSel.nombre}</div>
+                    <div style={{ fontSize: 13, color: "#5a6a80", marginTop: 2, fontWeight: 500 }}>{addProfSel.facultad}</div>
                   </div>
                   <button className="btn btn-ghost" style={{ marginLeft: "auto", fontSize: 12, padding: "6px 12px" }} onClick={() => { setAddProfSel(null); setAddProf(p => ({ ...p, nombre: "" })); }}>✕ Cambiar</button>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, fontWeight: 700, letterSpacing: 0.5 }}>CURSOS ACTUALES</div>
+                <div style={{ fontSize: 11, color: "#5a6a80", marginBottom: 8, fontWeight: 700, letterSpacing: 0.5 }}>CURSOS ACTUALES</div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {(addProfSel.cursos || []).map(c => (
                     <span key={c} style={{ background: "var(--card-bg)", padding: "4px 12px", borderRadius: 20, fontSize: 13, color: (FAC_COLOR[addProfSel.facultad] || BD), fontWeight: 700, border: `1px solid ${FAC_COLOR[addProfSel.facultad] || B}30`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>📚 {c}</span>
@@ -348,6 +356,12 @@ export const Agregar = ({
                 <datalist id="cursosGlobalList">
                   {cursosGlobal.map(c => <option key={c} value={c} />)}
                 </datalist>
+                {canonicalPreviewExistente && canonicalPreviewExistente !== addCurso.trim() && (
+                  <div style={{ marginTop: 6, fontSize: 12, color: "var(--primary-blue)", fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span>✨ Se guardará normalizado como:</span>
+                    <span style={{ background: "var(--light-blue)", padding: "2px 8px", borderRadius: 8 }}>{canonicalPreviewExistente}</span>
+                  </div>
+                )}
                 <div style={{ fontSize: 11, color: "var(--text-light)", marginTop: 6, fontWeight: 500, lineHeight: 1.4, marginBottom: 12 }}>
                   <span style={{ color: OR, fontWeight: 800 }}>Nota:</span> Por favor ingresar cursos 1 por 1 si no se encuentran asignados al docente y con buena ortografía.
                 </div>

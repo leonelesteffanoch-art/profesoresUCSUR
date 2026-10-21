@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../services/firebase.js";
 import { B, BD, OR, CRIT, SEDES, FACULTADES } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
-import { formatFecha, avg, ratingColor, normalizeText, capitalizeName } from "../utils/helpers.js";
+import { formatFecha, avg, ratingColor, normalizeText, capitalizeName, formatCourseName, normalizeCourseKey, scoreCourseQuality, similarity } from "../utils/helpers.js";
+
+// Extrae el número o número romano de un curso (si tiene) para nunca agrupar "Cálculo I" con "Cálculo II"
+const extractCourseNumber = (course) => {
+  const key = normalizeCourseKey(course);
+  const nums = key.match(/\b([1-9]|10)\b/g);
+  return nums ? nums.join("-") : "";
+};
 
 export default function Admin({
   adminUser,
@@ -34,6 +41,8 @@ export default function Admin({
   editCursoProf, setEditCursoProf,
   editCursoVal, setEditCursoVal,
   fusionarCursosGlobal,
+  autoUnificarCursosGlobal,
+  eliminarCursoGlobal,
   dividirCursoGlobal,
   fusionarProfesores,
   aplicarSugerenciaFacultad,
@@ -69,22 +78,37 @@ export default function Admin({
   const [busquedaResena, setBusquedaResena] = useState("");
   const [facFiltroResena, setFacFiltroResena] = useState("Todas");
   const [ordenResena, setOrdenResena] = useState("recientes");
-  const [cursoFiltroResena, setCursoFiltroResena] = useState("");
 
-  // Fusión de cursos
+  // Fusión y división de cursos
   const [fusionarCursoMalo, setFusionarCursoMalo] = useState("");
   const [fusionarCursoBueno, setFusionarCursoBueno] = useState("");
-
-  // División de cursos
   const [dividirCursoSel, setDividirCursoSel] = useState("");
   const [dividirCursosNuevos, setDividirCursosNuevos] = useState("");
+
+  // Catálogo Maestro de Cursos en Mantenimiento
+  const [busquedaCatalogoCurso, setBusquedaCatalogoCurso] = useState("");
+  const [renombrandoCurso, setRenombrandoCurso] = useState(null);
+  const [nuevoNombreCurso, setNuevoNombreCurso] = useState("");
 
   const pendingReportes = reportes.filter(r => r.estado === "pendiente");
   const archivedReportes = reportes.filter(r => r.estado !== "pendiente");
   const pendingFeedbacks = feedbacks?.filter(f => f.estado !== "archivado") || [];
   const archivedFeedbacks = feedbacks?.filter(f => f.estado === "archivado") || [];
 
-  const allCursosAdmin = [...new Set(profesores.flatMap(p => p.cursos || []))].sort();
+  const allCursosAdmin = useMemo(() => {
+    return [...new Set(profesores.flatMap(p => p.cursos || []))].sort((a, b) => a.localeCompare(b));
+  }, [profesores]);
+
+  // Conteo de cuántos profesores dictan cada curso
+  const conteoCursos = useMemo(() => {
+    const map = {};
+    profesores.forEach(p => {
+      (p.cursos || []).forEach(c => {
+        map[c] = (map[c] || 0) + 1;
+      });
+    });
+    return map;
+  }, [profesores]);
 
   const filteredProfesores = profesores
     .filter(p => normalizeText(p.nombre).includes(normalizeText(busquedaAdmin)) || p.cursos?.some(c => normalizeText(c).includes(normalizeText(busquedaAdmin))))
@@ -141,7 +165,6 @@ export default function Admin({
   const handleEliminarReporte = async (rep, resena, prof) => {
     try {
       if (resena && prof) await eliminarResena(prof, resena);
-      // Archive ALL pending reports that target this same review
       const relatedReports = reportes.filter(r => r.resId === rep.resId && r.estado === "pendiente");
       for (const r of relatedReports) {
         await updateDoc(doc(db, "reportes", r.id), { estado: "borrada" });
@@ -156,7 +179,6 @@ export default function Admin({
 
   const handleIgnorarReporte = async (rep) => {
     try {
-      // Archive ALL pending reports that target this same review
       const relatedReports = reportes.filter(r => r.resId === rep.resId && r.estado === "pendiente");
       for (const r of relatedReports) {
         await updateDoc(doc(db, "reportes", r.id), { estado: "ignorada" });
@@ -217,7 +239,7 @@ export default function Admin({
           { id: "feedbacks", label: `💡 Sugerencias (${pendingFeedbacks.length})`, alert: pendingFeedbacks.some(f => !f.respuesta) },
           { id: "solicitudes", label: `🗳️ Solicitudes (${solicitudes?.length || 0})` },
           { id: "noticias", label: "📰 Noticias" },
-          { id: "mantenimiento", label: "🛠️ Mantenimiento" },
+          { id: "mantenimiento", label: "🛠️ Cursos y Mantenimiento" },
           { id: "archivo", label: "🗃️ Historial" }
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} className="tab" style={{ 
@@ -240,7 +262,8 @@ export default function Admin({
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 32 }}>
             {[
               { label: "Profesores", n: profesores.length, icon: "👨‍🏫", color: B }, 
-              { label: "Reseñas totales", n: todasResenas.length, icon: "💬", color: OR }, 
+              { label: "Cursos únicos", n: allCursosAdmin.length, icon: "📚", color: "#8B5CF6" },
+              { label: "Reseñas cargadas", n: todasResenas.length, icon: "💬", color: OR }, 
               { label: "Noticias", n: noticias?.length || 0, icon: "📰", color: "#059669" },
               { label: "Sugerencias Fac.", n: profesores.filter(p => p.recomendacionesFacultad && Object.keys(p.recomendacionesFacultad).length > 0).length, icon: "💡", color: "#F59E0B" },
               { label: "Feedbacks", n: feedbacks?.length || 0, icon: "🗣️", color: "#EAB308" },
@@ -259,6 +282,9 @@ export default function Admin({
       {/* PROFESORES TAB */}
       {activeTab === "profesores" && (
         <div className="fade-in">
+          <datalist id="admin-cursos-list">
+            {allCursosAdmin.map(c => <option key={c} value={c} />)}
+          </datalist>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24, background: "var(--card-bg)", padding: 20, borderRadius: 16, border: "1px solid var(--border-color)" }}>
             <h4 style={{ fontSize: 14, fontWeight: 800, color: "var(--text-dark)", marginBottom: 4 }}>Filtros de Profesores</h4>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
@@ -444,7 +470,7 @@ export default function Admin({
                     )}
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {(p.cursos || []).map(c => (
-                        <span key={c} style={{ background: "#f3f6fb", padding: "4px 10px", borderRadius: 20, fontSize: 12, color: "#5a6a80", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+                        <span key={c} style={{ background: "var(--ghost-bg)", padding: "4px 10px", borderRadius: 20, fontSize: 12, color: "var(--text-muted)", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600, border: "1px solid var(--border-color)" }}>
                           📚 {c}
                           <span onClick={() => eliminarCurso(p, c)} style={{ cursor: "pointer", color: "#DC2626", fontWeight: 800, fontSize: 14, lineHeight: 1, padding: "0 2px" }} title="Eliminar curso">✕</span>
                         </span>
@@ -454,7 +480,7 @@ export default function Admin({
                     </div>
                     {editCursoProf === p.id && (
                       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                        <input className="input" value={editCursoVal} onChange={e => setEditCursoVal(e.target.value)} placeholder="Nombre del curso..." style={{ fontSize: 13, padding: "8px 12px" }} onKeyDown={e => { if (e.key === "Enter") adminAgregarCurso(p); }} />
+                        <input list="admin-cursos-list" className="input" value={editCursoVal} onChange={e => setEditCursoVal(e.target.value)} placeholder="Nombre del curso..." style={{ fontSize: 13, padding: "8px 12px" }} onKeyDown={e => { if (e.key === "Enter") adminAgregarCurso(p); }} />
                         <button className="btn btn-green" style={{ fontSize: 13, padding: "8px 16px", flexShrink: 0 }} onClick={() => adminAgregarCurso(p)}>Guardar</button>
                         <button className="btn btn-ghost" style={{ fontSize: 13, padding: "8px 16px", flexShrink: 0 }} onClick={() => setEditCursoProf(null)}>Cancelar</button>
                       </div>
@@ -484,10 +510,10 @@ export default function Admin({
               <div style={{ fontSize: 40, marginBottom: 16 }}>📥</div>
               <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 8 }}>Cargar Reseñas</h4>
               <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24, maxWidth: 400, margin: "0 auto 24px" }}>
-                Para optimizar el rendimiento y no saturar la base de datos, las reseñas de los profesores se cargan a petición.
+                Para optimizar el rendimiento y no saturar la base de datos, las reseñas de los profesores se cargan a petición en paralelo.
               </p>
               <button className="btn btn-blue" onClick={cargarTodasLasResenas} style={{ padding: "12px 24px", fontSize: 15, fontWeight: 700 }}>
-                Cargar todas las reseñas
+                ⚡ Cargar todas las reseñas
               </button>
             </div>
           ) : (
@@ -538,7 +564,7 @@ export default function Admin({
                       {r.carrera && <span style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500 }}>🎓 {r.carrera}</span>}
                       {r.ciclo && <span style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500 }}>Ciclo {r.ciclo}</span>}
                     </div>
-                    <p style={{ fontSize: 14, color: "#2d3a50", lineHeight: 1.6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", marginBottom: 6 }}>{r.texto}</p>
+                    <p style={{ fontSize: 14, color: "var(--text-dark)", lineHeight: 1.6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", marginBottom: 6 }}>{r.texto}</p>
                     <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500 }}>🕐 {formatFecha(r.createdAt)}</div>
                   </div>
                   <button className="btn btn-red" style={{ fontSize: 14, padding: "8px 16px", flexShrink: 0 }} onClick={() => eliminarResena(prof || r.profId, r)}>🗑️</button>
@@ -611,7 +637,7 @@ export default function Admin({
               {(busquedaAdmin === "archived" ? archivedFeedbacks : pendingFeedbacks).map(f => (
                 <div key={f.id} className="card" style={{ padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, borderLeft: f.respuesta ? "4px solid #cbd5e1" : "4px solid #fef08a", opacity: f.respuesta ? 0.7 : 1, flexWrap: "wrap" }}>
                   <div style={{ flex: "1 1 250px", minWidth: 0 }}>
-                    <p style={{ fontSize: 15, color: "#2d3a50", lineHeight: 1.6, marginBottom: 8, whiteSpace: "pre-wrap", background: "#f8fafc", padding: "12px 16px", borderRadius: 12, border: "1px solid #e2e8f0" }}>{f.mensaje}</p>
+                    <p style={{ fontSize: 15, color: "var(--text-dark)", lineHeight: 1.6, marginBottom: 8, whiteSpace: "pre-wrap", background: "var(--ghost-bg)", padding: "12px 16px", borderRadius: 12, border: "1px solid var(--border-color)" }}>{f.mensaje}</p>
                     {f.contacto && <div style={{ fontSize: 13, color: "var(--text-dark)", fontWeight: 600, marginBottom: 4 }}>Contacto: {f.contacto}</div>}
                     <div style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 500, marginBottom: f.respuesta ? 8 : 0 }}>🕐 {formatFecha(f.createdAt)}</div>
                     {f.respuesta && (
@@ -744,220 +770,389 @@ export default function Admin({
         </div>
       )}
 
-      {/* MANTENIMIENTO TAB */}
+      {/* MANTENIMIENTO Y CURSOS TAB */}
       {activeTab === "mantenimiento" && (
         <div className="fade-in">
-          <div className="card" style={{ padding: 24, marginBottom: 32 }}>
-            <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>🔗 Fusionar Cursos Globalmente</h4>
-            <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 24 }}>Reemplaza una versión incorrecta de un curso por la correcta en <b>todos</b> los profesores a la vez (ej. cambiar "bioquimica" por "Bioquímica").</p>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-              <input 
-                list="cursos-incorrectos-list"
-                className="input" 
-                placeholder="Selecciona el curso INCORRECTO..." 
-                value={fusionarCursoMalo} 
-                onChange={e => setFusionarCursoMalo(e.target.value)} 
-                style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} 
-              />
-              <datalist id="cursos-incorrectos-list">
-                {[...new Set(profesores.flatMap(p => p.cursos || []))].sort().map(c => <option key={`malo-${c}`} value={c} />)}
-              </datalist>
-              <span style={{ color: "var(--text-muted)" }}>👉</span>
-              
-              <input 
-                list="cursos-correctos-list"
-                className="input" 
-                placeholder="Nombre correcto (ej: Bioquímica)" 
-                value={fusionarCursoBueno} 
-                onChange={e => setFusionarCursoBueno(e.target.value)} 
-                style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} 
-              />
-              <datalist id="cursos-correctos-list">
-                {[...new Set(profesores.flatMap(p => p.cursos || []))].sort().map(c => <option key={`bueno-${c}`} value={c} />)}
-              </datalist>
-              
-              <button className="btn btn-blue" disabled={!fusionarCursoMalo || !fusionarCursoBueno.trim()} onClick={async () => {
-                const malo = fusionarCursoMalo;
-                const bueno = fusionarCursoBueno.trim();
-                const ok = await fusionarCursosGlobal(malo, bueno);
-                if (ok) { setFusionarCursoMalo(""); setFusionarCursoBueno(""); }
-              }} style={{ padding: "12px 24px" }}>Fusionar</button>
-            </div>
-          </div>
+          {(() => {
+            // 1. Agrupar cursos por clave canónica (detecta diferencias de tildes, mayúsculas, conectores y "I" vs "1")
+            const keyMap = {};
+            allCursosAdmin.forEach(c => {
+              const k = normalizeCourseKey(c);
+              if (!k) return;
+              if (!keyMap[k]) keyMap[k] = [];
+              keyMap[k].push(c);
+            });
 
-          <div className="card" style={{ padding: 24, marginBottom: 32 }}>
-            <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>✂️ Dividir Curso</h4>
-            <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 24 }}>Separa un curso mal escrito en <b>varios cursos correctos</b> (ej. "Matematica I y Matematica II" → "Matemática 1" + "Matemática 2").</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <select className="input" value={dividirCursoSel} onChange={e => setDividirCursoSel(e.target.value)} style={{ padding: "12px 16px" }}>
-                <option value="">Selecciona el curso a dividir...</option>
-                {[...new Set(profesores.flatMap(p => p.cursos || []))].sort().map(c => <option key={`div-${c}`} value={c}>{c}</option>)}
-              </select>
-              <input className="input" placeholder='Cursos correctos separados por coma (ej: Matemática 1, Matemática 2)' value={dividirCursosNuevos} onChange={e => setDividirCursosNuevos(e.target.value)} style={{ padding: "12px 16px" }} />
-              {dividirCursosNuevos.trim() && (
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {dividirCursosNuevos.split(",").map(c => c.trim()).filter(Boolean).map((c, i) => (
-                    <span key={i} style={{ background: "#dbeafe", color: "#1e40af", padding: "4px 12px", borderRadius: 20, fontSize: 13, fontWeight: 700 }}>📚 {capitalizeName(c)}</span>
-                  ))}
-                </div>
-              )}
-              <button className="btn btn-blue" disabled={!dividirCursoSel || !dividirCursosNuevos.trim()} onClick={async () => {
-                const malo = dividirCursoSel;
-                const nuevos = dividirCursosNuevos.split(",").map(c => capitalizeName(c.trim())).filter(Boolean);
-                if (nuevos.length < 2) { showToast("⚠️ Escribe al menos 2 cursos separados por coma."); return; }
-                const ok = await dividirCursoGlobal(malo, nuevos);
-                if (ok) { setDividirCursoSel(""); setDividirCursosNuevos(""); }
-              }} style={{ padding: "12px 24px", alignSelf: "flex-start" }}>Dividir</button>
-            </div>
-          </div>
+            // 2. Construir mapa automático de limpieza 1-Clic (reemplazos seguros)
+            const autoReemplazos = {};
+            const autoCambiosLista = [];
 
-          <div className="card" style={{ padding: 24, marginBottom: 32 }}>
-            <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>🛠️ Análisis de Base de Datos</h4>
-            <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 24 }}>Aquí puedes detectar si hay profesores duplicados por diferencias de tildes o mayúsculas, y cursos duplicados en un mismo profesor.</p>
-            
-            {(() => {
-              const profDuplicates = [];
-              const normProfs = profesores.map(p => ({ ...p, normName: normalizeText(p.nombre) }));
-              const getWordSet = name => new Set(name.split(" ").filter(w => w.length > 2));
+            Object.values(keyMap).forEach(variantes => {
+              // Ordenar por calidad de escritura + frecuencia
+              const candidatos = [...variantes].sort((a, b) => {
+                const diffScore = scoreCourseQuality(b) - scoreCourseQuality(a);
+                if (diffScore !== 0) return diffScore;
+                return (conteoCursos[b] || 0) - (conteoCursos[a] || 0);
+              });
+              // También evaluar si formatCourseName mejora aún más al mejor candidato
+              const mejorExistente = candidatos[0];
+              const formateado = formatCourseName(mejorExistente);
+              const ganador = scoreCourseQuality(formateado) > scoreCourseQuality(mejorExistente) ? formateado : mejorExistente;
 
-              for (let i = 0; i < normProfs.length; i++) {
-                for (let j = i + 1; j < normProfs.length; j++) {
-                  const set1 = getWordSet(normProfs[i].normName);
-                  const set2 = getWordSet(normProfs[j].normName);
-                  let common = 0;
-                  set1.forEach(w => { if (set2.has(w)) common++; });
-                  
-                  if (normProfs[i].normName === normProfs[j].normName || (common >= 2 && (common === set1.size || common === set2.size))) {
-                    profDuplicates.push({ p1: normProfs[i], p2: normProfs[j] });
-                  }
+              variantes.forEach(v => {
+                if (v !== ganador) {
+                  autoReemplazos[v] = ganador;
+                  autoCambiosLista.push({ de: v, a: ganador, profes: conteoCursos[v] || 0 });
+                }
+              });
+            });
+
+            // 3. Agrupar cursos duplicados o muy similares (incluyendo typos con similarity >= 0.84 y mismo número de curso)
+            const exactDuplicateGroups = Object.values(keyMap).filter(arr => arr.length > 1);
+            const fuzzySimilarGroups = [];
+            const keys = Object.keys(keyMap);
+            for (let i = 0; i < keys.length; i++) {
+              for (let j = i + 1; j < keys.length; j++) {
+                const repA = keyMap[keys[i]][0];
+                const repB = keyMap[keys[j]][0];
+                const numA = extractCourseNumber(repA);
+                const numB = extractCourseNumber(repB);
+                // Nunca agrupar cursos con distinto número (ej. Cálculo I vs Cálculo II)
+                if (numA !== numB) continue;
+                const sim = similarity(keys[i], keys[j]);
+                if (sim >= 0.84 && sim < 1) {
+                  fuzzySimilarGroups.push([...keyMap[keys[i]], ...keyMap[keys[j]]]);
                 }
               }
+            }
 
-              const courseDuplicates = [];
-              profesores.forEach(p => {
-                const cMap = {};
-                (p.cursos || []).forEach(c => {
-                  const nc = normalizeText(c);
-                  if (!cMap[nc]) cMap[nc] = [];
-                  cMap[nc].push(c);
-                });
-                Object.values(cMap).forEach(arr => {
-                  if (arr.length > 1) {
-                    courseDuplicates.push({ prof: p, courses: arr });
-                  }
-                });
-              });
+            // 4. Profesores duplicados y cursos duplicados dentro de un mismo profesor
+            const profDuplicates = [];
+            const normProfs = profesores.map(p => ({ ...p, normName: normalizeText(p.nombre) }));
+            const getWordSet = name => new Set(name.split(" ").filter(w => w.length > 2));
 
-              const globalCourseDuplicates = [];
-              const globalCMap = {};
-              profesores.forEach(p => {
-                (p.cursos || []).forEach(c => {
-                  const nc = normalizeText(c).replace(/\s+/g, ' '); // quitar multiples espacios
-                  if (!globalCMap[nc]) globalCMap[nc] = new Set();
-                  globalCMap[nc].add(c);
-                });
+            for (let i = 0; i < normProfs.length; i++) {
+              for (let j = i + 1; j < normProfs.length; j++) {
+                const set1 = getWordSet(normProfs[i].normName);
+                const set2 = getWordSet(normProfs[j].normName);
+                let common = 0;
+                set1.forEach(w => { if (set2.has(w)) common++; });
+                
+                if (normProfs[i].normName === normProfs[j].normName || (common >= 2 && (common === set1.size || common === set2.size))) {
+                  profDuplicates.push({ p1: normProfs[i], p2: normProfs[j] });
+                }
+              }
+            }
+
+            const courseDuplicatesInProf = [];
+            profesores.forEach(p => {
+              const cMap = {};
+              (p.cursos || []).forEach(c => {
+                const nc = normalizeCourseKey(c);
+                if (!cMap[nc]) cMap[nc] = [];
+                cMap[nc].push(c);
               });
-              Object.values(globalCMap).forEach(set => {
-                if (set.size > 1) {
-                  globalCourseDuplicates.push(Array.from(set));
+              Object.values(cMap).forEach(arr => {
+                if (arr.length > 1) {
+                  courseDuplicatesInProf.push({ prof: p, courses: arr });
                 }
               });
+            });
 
-              const uppercaseProfs = profesores.filter(p => p.nombre && p.nombre.trim().length > 0 && p.nombre.toUpperCase() === p.nombre && /[A-Z]/.test(p.nombre));
+            const uppercaseProfs = profesores.filter(p => p.nombre && p.nombre.trim().length > 0 && p.nombre.toUpperCase() === p.nombre && /[A-Z]/.test(p.nombre));
 
-              return (
-                <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-                  <div>
-                    <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>👨‍🏫 Profesores duplicados ({profDuplicates.length})</h5>
-                    {profDuplicates.length === 0 ? (
-                      <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No se encontraron profesores duplicados.</div>
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {profDuplicates.map((d, i) => (
-                          <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <div>
-                              <div style={{ fontSize: 14, fontWeight: 600 }}>1. {d.p1.nombre} <span style={{ color: "var(--text-light)", fontWeight: 400, fontSize: 12 }}>({d.p1.totalReseñas || 0} reseñas)</span></div>
-                              <div style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>2. {d.p2.nombre} <span style={{ color: "var(--text-light)", fontWeight: 400, fontSize: 12 }}>({d.p2.totalReseñas || 0} reseñas)</span></div>
-                            </div>
-                            <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
-                              <button className="btn btn-blue" onClick={() => fusionarProfesores(d.p2, d.p1)} style={{ padding: "6px 12px", fontSize: 12 }}>Fusionar hacia el 1</button>
-                              <button className="btn btn-blue" onClick={() => fusionarProfesores(d.p1, d.p2)} style={{ padding: "6px 12px", fontSize: 12 }}>Fusionar hacia el 2</button>
-                            </div>
-                          </div>
-                        ))}
+            const catalogoFiltrado = allCursosAdmin.filter(c => normalizeText(c).includes(normalizeText(busquedaCatalogoCurso)));
+
+            return (
+              <>
+                {/* 🪄 MAGIA 1-CLIC: AUTO-LIMPIEZA INTELIGENTE */}
+                <div className="card" style={{ padding: 24, marginBottom: 28, border: `2px solid ${OR}`, background: "var(--card-bg)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
+                    <div>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: `${OR}20`, color: OR, padding: "4px 10px", borderRadius: 12, fontSize: 11, fontWeight: 800, marginBottom: 8 }}>
+                        🪄 ASISTENTE INTELIGENTE DE CURSOS
                       </div>
-                    )}
+                      <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)" }}>
+                        Auto-Unificar y Corregir Cursos en 1 Clic
+                      </h4>
+                      <p style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 4, lineHeight: 1.5 }}>
+                        Detecta automáticamente cursos repetidos por tildes (`Bioquimica` → `Bioquímica`), números romanos mal escritos (`Calculo Ii` o `Cálculo 2` → `Cálculo II`) y duplicados dentro de un mismo profesor.
+                      </p>
+                    </div>
+                    <button
+                      className="btn btn-orange"
+                      disabled={autoCambiosLista.length === 0 && courseDuplicatesInProf.length === 0}
+                      onClick={() => {
+                        const mapFinal = { ...autoReemplazos };
+                        courseDuplicatesInProf.forEach(d => {
+                          const best = [...d.courses].sort((a, b) => scoreCourseQuality(b) - scoreCourseQuality(a))[0];
+                          d.courses.forEach(c => { if (c !== best) mapFinal[c] = best; });
+                        });
+                        autoUnificarCursosGlobal(
+                          mapFinal,
+                          `¿Aplicar ${autoCambiosLista.length} correcciones automáticas de cursos en toda la base de datos en una sola operación?`
+                        );
+                      }}
+                      style={{ padding: "12px 22px", fontSize: 14, flexShrink: 0 }}
+                    >
+                      🪄 Limpiar Todo ({autoCambiosLista.length})
+                    </button>
                   </div>
 
-                  <div>
-                    <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>🌍 Cursos duplicados GLOBALMENTE ({globalCourseDuplicates.length})</h5>
-                    {globalCourseDuplicates.length === 0 ? (
-                      <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No hay variaciones de escritura del mismo curso.</div>
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {globalCourseDuplicates.map((arr, i) => (
-                          <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12 }}>
-                            <div style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 8, fontWeight: 600 }}>Variaciones encontradas:</div>
-                            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                              {arr.map((c, j) => (
-                                <span key={j} style={{ background: "#f3f6fb", color: "#1e40af", padding: "4px 10px", borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: "pointer" }} onClick={() => { setFusionarCursoMalo(c); window.scrollTo(0,0); }}>
-                                  {c}
-                                </span>
-                              ))}
-                            </div>
+                  {autoCambiosLista.length === 0 && courseDuplicatesInProf.length === 0 ? (
+                    <div style={{ padding: "14px 16px", background: "var(--ghost-bg)", borderRadius: 12, fontSize: 13, color: "#059669", fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+                      <span>✨</span> ¡Todos los cursos tienen formato limpio, tildes correctas y números romanos estandarizados!
+                    </div>
+                  ) : (
+                    <div style={{ maxHeight: 220, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, paddingRight: 4 }} className="custom-scrollbar">
+                      {autoCambiosLista.map((item, idx) => (
+                        <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "8px 12px", background: "var(--ghost-bg)", borderRadius: 10, fontSize: 13, flexWrap: "wrap" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                            <span style={{ color: "#DC2626", textDecoration: "line-through", fontWeight: 600 }}>{item.de}</span>
+                            <span style={{ color: "var(--text-light)" }}>→</span>
+                            <span style={{ color: "#059669", fontWeight: 800 }}>{item.a}</span>
+                            <span style={{ fontSize: 11, color: "var(--text-light)" }}>({item.profes} profe{item.profes === 1 ? "" : "s"})</span>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                          <button
+                            className="btn btn-blue"
+                            style={{ padding: "4px 10px", fontSize: 11 }}
+                            onClick={() => fusionarCursosGlobal(item.de, item.a, true)}
+                          >
+                            Aplicar solo este
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-                  <div>
-                    <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>📚 Cursos duplicados ({courseDuplicates.length})</h5>
-                    {courseDuplicates.length === 0 ? (
-                      <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No se encontraron cursos duplicados en los profesores.</div>
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {courseDuplicates.map((d, i) => (
-                          <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <div>
-                              <div style={{ fontSize: 14, fontWeight: 800 }}>{d.prof.nombre}</div>
-                              <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>Duplicados: {d.courses.join(" / ")}</div>
-                            </div>
-                            <button className="btn btn-red" onClick={() => eliminarCurso(d.prof, d.courses[1])} style={{ padding: "6px 12px", fontSize: 12 }}>
-                              Borrar "{d.courses[1]}"
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                {/* 🌍 DUPLICADOS DETECTADOS CON RESOLUCIÓN EN 1 CLIC */}
+                <div className="card" style={{ padding: 24, marginBottom: 28 }}>
+                  <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 6 }}>
+                    🔍 Grupos de Cursos Duplicados o Similares ({exactDuplicateGroups.length + fuzzySimilarGroups.length})
+                  </h4>
+                  <p style={{ color: "var(--text-light)", fontSize: 13, marginBottom: 20 }}>
+                    Haz clic en <b>"✅ Dejar este"</b> sobre la versión correcta y todas las demás variaciones del grupo se fusionarán hacia ella al instante.
+                  </p>
 
-                  <div>
-                    <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>🔠 Nombres en Mayúsculas ({uppercaseProfs.length})</h5>
-                    {uppercaseProfs.length === 0 ? (
-                      <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No se encontraron profesores con nombres en mayúsculas.</div>
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {uppercaseProfs.map((p, i) => (
-                          <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <div>
-                              <div style={{ fontSize: 14, fontWeight: 800 }}>{p.nombre}</div>
-                            </div>
-                            <button className="btn btn-blue" onClick={() => {
-                              const capitalized = p.nombre.toLowerCase().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-                              editarProfesor(p.id, capitalized, p.bio || "", p.sede || "", p.alerta || "");
-                            }} style={{ padding: "6px 12px", fontSize: 12 }}>
-                              Corregir a Título
-                            </button>
+                  {exactDuplicateGroups.length === 0 && fuzzySimilarGroups.length === 0 ? (
+                    <div style={{ padding: 14, background: "var(--ghost-bg)", borderRadius: 10, fontSize: 13, color: "var(--text-muted)" }}>
+                      No se detectaron grupos de cursos duplicados ni variaciones sospechosas.
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      {[...exactDuplicateGroups.map(g => ({ group: g, tipo: "exacto" })), ...fuzzySimilarGroups.map(g => ({ group: g, tipo: "similar" }))].map(({ group, tipo }, i) => (
+                        <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, background: "var(--ghost-bg)" }}>
+                          <div style={{ fontSize: 12, color: tipo === "exacto" ? "#DC2626" : OR, marginBottom: 10, fontWeight: 800, textTransform: "uppercase" }}>
+                            {tipo === "exacto" ? "⚡ Mismo curso con distinta escritura:" : "🤔 Cursos muy parecidos (posible typo):"}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            {group.map((c, j) => (
+                              <div key={j} style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--card-bg)", border: "1px solid var(--border-color)", padding: "6px 12px", borderRadius: 12 }}>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-dark)" }}>📚 {c}</span>
+                                <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 600 }}>({conteoCursos[c] || 0})</span>
+                                <button
+                                  className="btn btn-green"
+                                  style={{ padding: "4px 8px", fontSize: 11, borderRadius: 8 }}
+                                  onClick={() => {
+                                    const map = {};
+                                    group.forEach(other => { if (other !== c) map[other] = c; });
+                                    autoUnificarCursosGlobal(map, `¿Unificar [${group.filter(x => x !== c).join(", ")}] hacia "${c}"?`);
+                                  }}
+                                >
+                                  ✅ Dejar este
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 🔗 FUSIÓN Y DIVISIÓN MANUAL */}
+                <div className="card" style={{ padding: 24, marginBottom: 28 }}>
+                  <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>🔗 Fusionar dos Cursos Manualmente</h4>
+                  <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 20 }}>Reemplaza cualquier curso por otro en <b>todos</b> los profesores y solicitudes a la vez.</p>
+                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                    <input 
+                      list="cursos-incorrectos-list"
+                      className="input" 
+                      placeholder="Selecciona el curso a reemplazar..." 
+                      value={fusionarCursoMalo} 
+                      onChange={e => setFusionarCursoMalo(e.target.value)} 
+                      style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} 
+                    />
+                    <datalist id="cursos-incorrectos-list">
+                      {allCursosAdmin.map(c => <option key={`malo-${c}`} value={c} />)}
+                    </datalist>
+                    <span style={{ color: "var(--text-muted)" }}>👉</span>
+                    
+                    <input 
+                      list="cursos-correctos-list"
+                      className="input" 
+                      placeholder="Nombre correcto (ej: Bioquímica)" 
+                      value={fusionarCursoBueno} 
+                      onChange={e => setFusionarCursoBueno(e.target.value)} 
+                      style={{ flex: 1, minWidth: 200, padding: "12px 16px" }} 
+                    />
+                    <datalist id="cursos-correctos-list">
+                      {allCursosAdmin.map(c => <option key={`bueno-${c}`} value={c} />)}
+                    </datalist>
+                    
+                    <button className="btn btn-blue" disabled={!fusionarCursoMalo || !fusionarCursoBueno.trim()} onClick={async () => {
+                      const malo = fusionarCursoMalo;
+                      const bueno = fusionarCursoBueno.trim();
+                      const ok = await fusionarCursosGlobal(malo, bueno);
+                      if (ok) { setFusionarCursoMalo(""); setFusionarCursoBueno(""); }
+                    }} style={{ padding: "12px 24px" }}>Fusionar</button>
                   </div>
                 </div>
-              );
-            })()}
-          </div>
+
+                <div className="card" style={{ padding: 24, marginBottom: 28 }}>
+                  <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>✂️ Dividir Curso Compuesto</h4>
+                  <p style={{ color: "var(--text-light)", fontSize: 14, marginBottom: 20 }}>Separa un curso donde pusieron varios juntos (ej. "Matematica I y II" → "Matemática I" + "Matemática II").</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <select className="input" value={dividirCursoSel} onChange={e => setDividirCursoSel(e.target.value)} style={{ padding: "12px 16px" }}>
+                      <option value="">Selecciona el curso a dividir...</option>
+                      {allCursosAdmin.map(c => <option key={`div-${c}`} value={c}>{c}</option>)}
+                    </select>
+                    <input className="input" placeholder='Cursos correctos separados por coma (ej: Matemática I, Matemática II)' value={dividirCursosNuevos} onChange={e => setDividirCursosNuevos(e.target.value)} style={{ padding: "12px 16px" }} />
+                    {dividirCursosNuevos.trim() && (
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        {dividirCursosNuevos.split(",").map(c => c.trim()).filter(Boolean).map((c, i) => (
+                          <span key={i} style={{ background: "var(--light-blue)", color: "var(--primary-blue)", padding: "4px 12px", borderRadius: 20, fontSize: 13, fontWeight: 700 }}>📚 {formatCourseName(c)}</span>
+                        ))}
+                      </div>
+                    )}
+                    <button className="btn btn-blue" disabled={!dividirCursoSel || !dividirCursosNuevos.trim()} onClick={async () => {
+                      const malo = dividirCursoSel;
+                      const nuevos = dividirCursosNuevos.split(",").map(c => formatCourseName(c.trim())).filter(Boolean);
+                      if (nuevos.length < 2) { showToast("⚠️ Escribe al menos 2 cursos separados por coma."); return; }
+                      const ok = await dividirCursoGlobal(malo, nuevos);
+                      if (ok) { setDividirCursoSel(""); setDividirCursosNuevos(""); }
+                    }} style={{ padding: "12px 24px", alignSelf: "flex-start" }}>Dividir</button>
+                  </div>
+                </div>
+
+                {/* 📚 CATÁLOGO MAESTRO DE CURSOS (RENOMBRAR / BORRAR EN 1 CLIC) */}
+                <div className="card" style={{ padding: 24, marginBottom: 28 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+                    <div>
+                      <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)" }}>📚 Catálogo Maestro de Cursos ({allCursosAdmin.length})</h4>
+                      <p style={{ color: "var(--text-light)", fontSize: 13, marginTop: 2 }}>Edita el nombre de cualquier curso o elimínalo de todos los profesores directamente desde aquí.</p>
+                    </div>
+                    <input
+                      className="input"
+                      placeholder="🔍 Filtrar curso..."
+                      value={busquedaCatalogoCurso}
+                      onChange={e => setBusquedaCatalogoCurso(e.target.value)}
+                      style={{ maxWidth: 260, padding: "10px 14px", fontSize: 13 }}
+                    />
+                  </div>
+
+                  <div className="custom-scrollbar" style={{ maxHeight: 340, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, paddingRight: 4 }}>
+                    {catalogoFiltrado.map(c => (
+                      <div key={c} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "10px 14px", background: "var(--ghost-bg)", borderRadius: 10, flexWrap: "wrap" }}>
+                        {renombrandoCurso === c ? (
+                          <div style={{ display: "flex", gap: 8, flex: 1, alignItems: "center", flexWrap: "wrap" }}>
+                            <input
+                              className="input"
+                              value={nuevoNombreCurso}
+                              onChange={e => setNuevoNombreCurso(e.target.value)}
+                              style={{ flex: 1, minWidth: 180, padding: "6px 12px", fontSize: 13 }}
+                              autoFocus
+                              onKeyDown={async e => {
+                                if (e.key === "Enter" && nuevoNombreCurso.trim()) {
+                                  const ok = await fusionarCursosGlobal(c, nuevoNombreCurso.trim(), true);
+                                  if (ok) setRenombrandoCurso(null);
+                                }
+                              }}
+                            />
+                            <button className="btn btn-green" style={{ padding: "6px 12px", fontSize: 12 }} onClick={async () => {
+                              if (!nuevoNombreCurso.trim()) return;
+                              const ok = await fusionarCursosGlobal(c, nuevoNombreCurso.trim(), true);
+                              if (ok) setRenombrandoCurso(null);
+                            }}>Guardar</button>
+                            <button className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 12 }} onClick={() => setRenombrandoCurso(null)}>Cancelar</button>
+                          </div>
+                        ) : (
+                          <>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <span style={{ fontWeight: 700, fontSize: 14, color: "var(--text-dark)" }}>📚 {c}</span>
+                              <span style={{ fontSize: 11, background: "var(--card-bg)", padding: "2px 8px", borderRadius: 10, color: "var(--text-light)", fontWeight: 700, border: "1px solid var(--border-color)" }}>
+                                {conteoCursos[c] || 0} profe{(conteoCursos[c] || 0) === 1 ? "" : "s"}
+                              </span>
+                            </div>
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <button className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 12 }} onClick={() => { setRenombrandoCurso(c); setNuevoNombreCurso(c); }}>
+                                ✏️ Renombrar
+                              </button>
+                              <button className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 12 }} onClick={() => { setDividirCursoSel(c); }}>
+                                ✂️ Dividir
+                              </button>
+                              <button className="btn btn-red" style={{ padding: "5px 10px", fontSize: 12 }} onClick={() => eliminarCursoGlobal(c)} title="Eliminar este curso de todos los profesores">
+                                🗑️
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 👨‍🏫 OTROS DIAGNÓSTICOS (PROFESORES DUPLICADOS Y MAYÚSCULAS) */}
+                <div className="card" style={{ padding: 24, marginBottom: 32 }}>
+                  <h4 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-dark)", marginBottom: 16 }}>👨‍🏫 Diagnóstico de Profesores</h4>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                    <div>
+                      <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>Profesores duplicados ({profDuplicates.length})</h5>
+                      {profDuplicates.length === 0 ? (
+                        <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No se encontraron profesores duplicados.</div>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          {profDuplicates.map((d, i) => (
+                            <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                              <div>
+                                <div style={{ fontSize: 14, fontWeight: 600 }}>1. {d.p1.nombre} <span style={{ color: "var(--text-light)", fontWeight: 400, fontSize: 12 }}>({d.p1.totalReseñas || 0} reseñas)</span></div>
+                                <div style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>2. {d.p2.nombre} <span style={{ color: "var(--text-light)", fontWeight: 400, fontSize: 12 }}>({d.p2.totalReseñas || 0} reseñas)</span></div>
+                              </div>
+                              <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
+                                <button className="btn btn-blue" onClick={() => fusionarProfesores(d.p2, d.p1)} style={{ padding: "6px 12px", fontSize: 12 }}>Fusionar hacia el 1</button>
+                                <button className="btn btn-blue" onClick={() => fusionarProfesores(d.p1, d.p2)} style={{ padding: "6px 12px", fontSize: 12 }}>Fusionar hacia el 2</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <h5 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-dark)", marginBottom: 12 }}>🔠 Nombres en Mayúsculas ({uppercaseProfs.length})</h5>
+                      {uppercaseProfs.length === 0 ? (
+                        <div style={{ padding: 12, background: "var(--ghost-bg)", borderRadius: 8, fontSize: 13, color: "var(--text-muted)" }}>No se encontraron profesores con nombres en mayúsculas.</div>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          {uppercaseProfs.map((p, i) => (
+                            <div key={i} style={{ padding: 16, border: "1px solid var(--border-color)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <div style={{ fontSize: 14, fontWeight: 800 }}>{p.nombre}</div>
+                              <button className="btn btn-blue" onClick={() => {
+                               editarProfesor(p.id, capitalizeName(p.nombre), p.bio || "", p.sede || "", p.alerta || "");
+                              }} style={{ padding: "6px 12px", fontSize: 12 }}>
+                                Corregir a Título
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       )}
 
@@ -1022,4 +1217,4 @@ export default function Admin({
 
     </div>
   );
-};
+}

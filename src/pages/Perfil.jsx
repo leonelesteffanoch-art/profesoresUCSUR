@@ -24,6 +24,7 @@ export const Perfil = ({
   votados,
   toggleUtil,
   reportes,
+  reportadosLocal = {},
   reportarResena,
   formRef,
   recomendarFacultad
@@ -107,7 +108,7 @@ export const Perfil = ({
               {(selProf.cursos || []).map(c => {
                 const rank = getCourseRank(c);
                 return (
-                  <span key={c} className="pill" style={{ background: "#f3f6fb", color: "#5a6a80", fontSize: 13, padding: "6px 14px" }}>
+                  <span key={c} className="pill" style={{ background: "var(--ghost-bg)", color: "var(--text-muted)", fontSize: 13, padding: "6px 14px", border: "1px solid var(--border-color)" }}>
                     📚 {c} 
                     {rank && <span style={{ color: rank === 1 ? "#d97706" : rank === 2 ? "#64748b" : rank === 3 ? "#92400e" : B, fontWeight: 800, marginLeft: 4 }} title={`Top #${rank} en ${c}`}>#{rank}</span>}
                   </span>
@@ -299,7 +300,10 @@ export const Perfil = ({
         <div className="card" style={{ padding: 48, textAlign: "center" }}>
           <div style={{ fontSize: 52, marginBottom: 16 }}>📝</div>
           <div style={{ color: "var(--text-muted)", fontSize: 15, marginBottom: 20, fontWeight: 500 }}>¡Sé el primero en dejar una reseña!</div>
-          <button className="btn-cta" style={{ fontSize: 14, padding: "12px 24px" }} onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}>
+          <button className="btn-cta" style={{ fontSize: 14, padding: "12px 24px" }} onClick={() => {
+            setShowReviewForm(true);
+            setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+          }}>
             ✍️ Dejar la primera reseña
           </button>
         </div>
@@ -307,11 +311,12 @@ export const Perfil = ({
       
       {allR.map((r, idx) => {
         const rAvg = avg(CRIT.map(c => r.criterios[c]));
+        const yaReportada = !!reportadosLocal[r.id] || reportes.some(x => x.resId === r.id);
         return (
           <div key={r.id} className="card fade-in" style={{ padding: "20px 24px", marginBottom: 14, animationDelay: `${idx * .05}s` }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#edf1f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0, marginTop: 2 }}>🎓</div>
+                <div style={{ width: 42, height: 42, borderRadius: "50%", background: "var(--ghost-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0, marginTop: 2 }}>🎓</div>
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-dark)" }}>
                     Estudiante anónimo
@@ -329,7 +334,7 @@ export const Perfil = ({
             </div>
             
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-              {CRIT.map(c => <span key={c} style={{ background: "var(--card-bg-alt, #f3f6fb)", borderRadius: 8, padding: "4px 12px", fontSize: 12, color: "var(--text-muted, #5a6a80)", fontWeight: 600, border: "1px solid var(--border-color)" }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}: <strong style={{ color: ratingColor(r.criterios[c]) }}>{r.criterios[c]}</strong></span>)}
+              {CRIT.map(c => <span key={c} style={{ background: "var(--ghost-bg)", borderRadius: 8, padding: "4px 12px", fontSize: 12, color: "var(--text-muted)", fontWeight: 600, border: "1px solid var(--border-color)" }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}: <strong style={{ color: ratingColor(r.criterios[c]) }}>{r.criterios[c]}</strong></span>)}
             </div>
             
             <p style={{ fontSize: 15, color: "var(--text-dark)", lineHeight: 1.75 }}>{r.texto}</p>
@@ -365,9 +370,9 @@ export const Perfil = ({
                 </>);
               })()}
               <button className="util-btn" onClick={() => reportarResena(selProf.id, r.id, r.texto, selProf.nombre)}
-                style={{ marginLeft: "auto", color: "#DC2626", borderColor: "#fecaca", opacity: reportes.some(x => x.resId === r.id) ? 0.5 : 1, background: reportes.some(x => x.resId === r.id) ? "#fef2f2" : "transparent" }}
-                disabled={reportes.some(x => x.resId === r.id)}>
-                🚨 {reportes.some(x => x.resId === r.id) ? "Reportada" : "Reportar"}
+                style={{ marginLeft: "auto", color: "#DC2626", borderColor: "#fecaca", opacity: yaReportada ? 0.5 : 1, background: yaReportada ? "#fef2f2" : "transparent" }}
+                disabled={yaReportada}>
+                🚨 {yaReportada ? "Reportada" : "Reportar"}
               </button>
             </div>
           </div>
