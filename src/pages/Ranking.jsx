@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { B, BD, OR, FACULTADES, FAC_EMOJI } from "../constants.js";
 import { Avatar } from "../components/UI/Avatar.jsx";
 import { RatingChip } from "../components/UI/RatingChip.jsx";
@@ -6,6 +6,11 @@ import { Link } from "react-router-dom";
 
 export const Ranking = ({ profesores, rankTab, setRankTab, rankCursoFiltro: cursoFiltro, setRankCursoFiltro: setCursoFiltro }) => {
   const [facFiltro, setFacFiltro] = useState("Todas");
+  const [visibleCount, setVisibleCount] = useState(15);
+
+  useEffect(() => {
+    setVisibleCount(15);
+  }, [facFiltro, cursoFiltro, rankTab]);
 
   const todosLosCursos = useMemo(() => {
     const cursos = new Set();
@@ -134,26 +139,40 @@ export const Ranking = ({ profesores, rankTab, setRankTab, rankCursoFiltro: curs
         </div>
 
         {top.length > 3 && (
-          <div className="card" style={{ padding: "6px 0" }}>
-            {top.slice(3).map((p, i) => (
-              <Link key={p.id} to={`/profesor/${p.id}`}
-                style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
-                onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                <span style={{ fontSize: 13.5, color: "var(--text-light)", fontWeight: 800, width: 32, textAlign: "center" }}>#{i + 4}</span>
-                <Avatar name={p.nombre} fac={p.facultad} size={44} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text-dark)" }}>{p.nombre}</div>
-                  <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {p.facultad} {(p.cursos && p.cursos.length > 0) ? `· 📚 ${p.cursos.slice(0, 2).join(", ")}` : ""}
+          <>
+            <div className="card" style={{ padding: "6px 0" }}>
+              {top.slice(3, 3 + visibleCount).map((p, i) => (
+                <Link key={p.id} to={`/profesor/${p.id}`}
+                  style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <span style={{ fontSize: 13.5, color: "var(--text-light)", fontWeight: 800, width: 32, textAlign: "center" }}>#{i + 4}</span>
+                  <Avatar name={p.nombre} fac={p.facultad} size={44} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text-dark)" }}>{p.nombre}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {p.facultad} {(p.cursos && p.cursos.length > 0) ? `· 📚 ${p.cursos.slice(0, 2).join(", ")}` : ""}
+                    </div>
                   </div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
-                  <RatingChip r={p.rating} />
-                  <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 700 }}>{p.totalReseñas || 0} reseñas</span>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
+                    <RatingChip r={p.rating} />
+                    <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 700 }}>{p.totalReseñas || 0} reseñas</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {visibleCount < (top.length - 3) && (
+              <div style={{ textAlign: "center", marginTop: 24 }}>
+                <button 
+                  className="btn btn-blue" 
+                  style={{ padding: "12px 26px", fontSize: 14, fontWeight: 800, borderRadius: 999 }}
+                  onClick={() => setVisibleCount(v => v + 15)}
+                >
+                  ⬇️ Mostrar más profesores ({top.length - 3 - visibleCount} restantes)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </>}
 
@@ -164,49 +183,93 @@ export const Ranking = ({ profesores, rankTab, setRankTab, rankCursoFiltro: curs
       )}
 
       {rankTab === "worst" && (
-        <div className="card" style={{ padding: "6px 0" }}>
-          {worst.map((p, i) => (
-            <Link key={p.id} to={`/profesor/${p.id}`}
-              style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
-              onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-              <span style={{ fontSize: 22, width: 32, textAlign: "center" }}>{i === 0 ? "💀" : i === 1 ? "😬" : "😕"}</span>
-              <Avatar name={p.nombre} fac={p.facultad} size={44} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text-dark)" }}>{p.nombre}</div>
-                <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {p.facultad} {(p.cursos && p.cursos.length > 0) ? `· 📚 ${p.cursos.slice(0, 2).join(", ")}` : ""}
+        <>
+          {worst.length === 0 ? (
+            <div className="card" style={{ textAlign: "center", padding: "56px 20px", color: "var(--text-light)", fontSize: 15, fontWeight: 600 }}>
+              No hay profesores con reseñas para este filtro.
+            </div>
+          ) : (
+            <>
+              <div className="card" style={{ padding: "6px 0" }}>
+                {worst.slice(0, visibleCount).map((p, i) => (
+                  <Link key={p.id} to={`/profesor/${p.id}`}
+                    style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                    <span style={{ fontSize: 20, width: 32, textAlign: "center" }}>{i === 0 ? "💀" : i === 1 ? "😬" : i === 2 ? "😕" : `#${i + 1}`}</span>
+                    <Avatar name={p.nombre} fac={p.facultad} size={44} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text-dark)" }}>{p.nombre}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {p.facultad} {(p.cursos && p.cursos.length > 0) ? `· 📚 ${p.cursos.slice(0, 2).join(", ")}` : ""}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
+                      <RatingChip r={p.rating} />
+                      <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 700 }}>{p.totalReseñas || 0} reseñas</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {visibleCount < worst.length && (
+                <div style={{ textAlign: "center", marginTop: 24 }}>
+                  <button 
+                    className="btn btn-blue" 
+                    style={{ padding: "12px 26px", fontSize: 14, fontWeight: 800, borderRadius: 999 }}
+                    onClick={() => setVisibleCount(v => v + 15)}
+                  >
+                    ⬇️ Mostrar más profesores ({worst.length - visibleCount} restantes)
+                  </button>
                 </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
-                <RatingChip r={p.rating} />
-                <span style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 700 }}>{p.totalReseñas || 0} reseñas</span>
-              </div>
-            </Link>
-          ))}
-        </div>
+              )}
+            </>
+          )}
+        </>
       )}
 
       {rankTab === "popular" && (
-        <div className="card" style={{ padding: "6px 0" }}>
-          {popular.map((p, i) => (
-            <Link key={p.id} to={`/profesor/${p.id}`}
-              style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
-              onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-              <span style={{ fontSize: 13.5, color: "var(--text-light)", fontWeight: 800, width: 32, textAlign: "center" }}>#{i + 1}</span>
-              <Avatar name={p.nombre} fac={p.facultad} size={44} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text-dark)" }}>{p.nombre}</div>
-                <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2 }}>{p.facultad}</div>
+        <>
+          {popular.length === 0 ? (
+            <div className="card" style={{ textAlign: "center", padding: "56px 20px", color: "var(--text-light)", fontSize: 15, fontWeight: 600 }}>
+              No se encontraron profesores para este filtro.
+            </div>
+          ) : (
+            <>
+              <div className="card" style={{ padding: "6px 0" }}>
+                {popular.slice(0, visibleCount).map((p, i) => (
+                  <Link key={p.id} to={`/profesor/${p.id}`}
+                    style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", borderTop: i > 0 ? "1px solid var(--border-color)" : "none", cursor: "pointer", transition: "background .2s", textDecoration: "none", color: "var(--text-dark)" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "var(--ghost-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                    <span style={{ fontSize: 13.5, color: "var(--text-light)", fontWeight: 800, width: 32, textAlign: "center" }}>#{i + 1}</span>
+                    <Avatar name={p.nombre} fac={p.facultad} size={44} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text-dark)" }}>{p.nombre}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 2 }}>{p.facultad}</div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                      <div style={{ width: 85, background: "var(--ghost-bg)", borderRadius: 8, height: 10, overflow: "hidden" }}>
+                        <div style={{ width: `${((p.totalReseñas || 0) / maxR) * 100}%`, background: `linear-gradient(90deg,${B},${OR})`, height: "100%", borderRadius: 8 }} />
+                      </div>
+                      <span style={{ fontSize: 13.5, fontWeight: 800, color: "var(--primary-blue)", minWidth: 28, textAlign: "right" }}>{p.totalReseñas || 0}</span>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                <div style={{ width: 85, background: "var(--ghost-bg)", borderRadius: 8, height: 10, overflow: "hidden" }}>
-                  <div style={{ width: `${((p.totalReseñas || 0) / maxR) * 100}%`, background: `linear-gradient(90deg,${B},${OR})`, height: "100%", borderRadius: 8 }} />
+
+              {visibleCount < popular.length && (
+                <div style={{ textAlign: "center", marginTop: 24 }}>
+                  <button 
+                    className="btn btn-blue" 
+                    style={{ padding: "12px 26px", fontSize: 14, fontWeight: 800, borderRadius: 999 }}
+                    onClick={() => setVisibleCount(v => v + 15)}
+                  >
+                    ⬇️ Mostrar más profesores ({popular.length - visibleCount} restantes)
+                  </button>
                 </div>
-                <span style={{ fontSize: 13.5, fontWeight: 800, color: "var(--primary-blue)", minWidth: 28, textAlign: "right" }}>{p.totalReseñas || 0}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
+              )}
+            </>
+          )}
+        </>
       )}
     </div>
   );

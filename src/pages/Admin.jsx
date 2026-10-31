@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../services/firebase.js";
@@ -79,6 +79,18 @@ export default function Admin({
   const [busquedaResena, setBusquedaResena] = useState("");
   const [facFiltroResena, setFacFiltroResena] = useState("Todas");
   const [ordenResena, setOrdenResena] = useState("recientes");
+
+  // Paginación Admin
+  const [visibleAdminProfCount, setVisibleAdminProfCount] = useState(25);
+  const [visibleResenasCount, setVisibleResenasCount] = useState(25);
+
+  useEffect(() => {
+    setVisibleAdminProfCount(25);
+  }, [busquedaAdmin, facFiltroAdmin, sedeFiltroAdmin, quickFilterProf, ordenProfAdmin]);
+
+  useEffect(() => {
+    setVisibleResenasCount(25);
+  }, [busquedaResena, facFiltroResena, ordenResena]);
 
   // Fusión y división de cursos
   const [fusionarCursoMalo, setFusionarCursoMalo] = useState("");
@@ -968,7 +980,7 @@ export default function Admin({
             </div>
 
             <div className="card" style={{ padding: "6px 0" }}>
-              {filteredProfesores.map((p, i) => (
+              {filteredProfesores.slice(0, visibleAdminProfCount).map((p, i) => (
                 <div key={p.id} style={{ borderTop: i > 0 ? "1px solid var(--border-color)" : "none" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "16px 20px", flexWrap: "wrap" }}>
                     <Avatar name={p.nombre} fac={p.facultad} size={48} />
@@ -1109,6 +1121,18 @@ export default function Admin({
                 </div>
               )}
             </div>
+
+            {visibleAdminProfCount < filteredProfesores.length && (
+              <div style={{ textAlign: "center", marginTop: 24 }}>
+                <button 
+                  className="btn btn-blue" 
+                  style={{ padding: "12px 26px", fontSize: 14, fontWeight: 800, borderRadius: 999 }}
+                  onClick={() => setVisibleAdminProfCount(v => v + 25)}
+                >
+                  ⬇️ Mostrar más profesores ({filteredProfesores.length - visibleAdminProfCount} restantes)
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -1144,8 +1168,14 @@ export default function Admin({
                   </div>
                 </div>
 
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>
+                    Mostrando {Math.min(visibleResenasCount, filteredResenas.length)} de {filteredResenas.length} reseña{filteredResenas.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {filteredResenas.map(r => {
+                  {filteredResenas.slice(0, visibleResenasCount).map(r => {
                     const rAvg = avg(CRIT.map(c => r.criterios[c]));
                     const prof = profesores.find(p => p.id === r.profId);
                     return (
@@ -1163,7 +1193,24 @@ export default function Admin({
                       </div>
                     );
                   })}
+                  {filteredResenas.length === 0 && (
+                    <div className="card" style={{ padding: "40px 20px", textAlign: "center", color: "var(--text-light)", fontWeight: 600, fontSize: 14 }}>
+                      No se encontraron reseñas con esos filtros.
+                    </div>
+                  )}
                 </div>
+
+                {visibleResenasCount < filteredResenas.length && (
+                  <div style={{ textAlign: "center", marginTop: 24 }}>
+                    <button 
+                      className="btn btn-blue" 
+                      style={{ padding: "12px 26px", fontSize: 14, fontWeight: 800, borderRadius: 999 }}
+                      onClick={() => setVisibleResenasCount(v => v + 25)}
+                    >
+                      ⬇️ Mostrar más reseñas ({filteredResenas.length - visibleResenasCount} restantes)
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>
