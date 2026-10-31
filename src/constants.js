@@ -27,7 +27,7 @@ export const FAC_EMOJI = {
 export const FACULTADES = ["Todas", "Ciencias de la Arquitectura", "Ciencias Biológicas", "Ciencias de la Comunicación y Creatividad", "Ciencias Empresariales", "Ciencias de la Ingenieria", "Ciencias de la Salud", "Ciencias Políticas y Derecho", "Ciencias de la Educación", "Cursos Básicos y Generales"];
 export const FACULTADES_FORM = FACULTADES.filter(f => f !== "Todas");
 
-export const SEMESTRES = ["2026-1", "2025-2", "2025-1", "2024-2", "2024-1", "2023-2", "2023-1", "2022-2", "2022-1", "Anterior"];
+export const SEMESTRES = ["2026-2", "2026-1", "2025-2", "2025-1", "2024-2", "2024-1", "2023-2", "2023-1", "2022-2", "2022-1", "Anterior"];
 export const SEDES = ["Villa", "Norte", "Aramburú", "Ate"];
 
 export const CRIT = ["claridad", "puntualidad", "trato", "examenes"];
