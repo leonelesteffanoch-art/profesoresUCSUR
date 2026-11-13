@@ -328,33 +328,32 @@ export const Perfil = ({
           )}
 
           {/* Acciones colaborativas */}
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px dashed var(--border-color)" }}>
             {!showRecommend ? (
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => navigate("agregar", selProf)}
-                  style={{ fontSize: 13, padding: "8px 15px", background: "var(--card-bg)" }}
-                >
-                  ➕ Añadir o sugerir curso
-                </button>
-                {availableFaculties.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  ¿Falta un curso o facultad en este perfil?
+                </div>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <button
                     type="button"
-                    className="btn"
-                    onClick={() => setShowRecommend(true)}
-                    style={{
-                      fontSize: 13,
-                      padding: "8px 15px",
-                      background: "var(--light-blue)",
-                      color: "var(--primary-blue)",
-                      border: "1px solid rgba(59, 130, 246, 0.28)",
-                    }}
+                    className="btn btn-blue"
+                    onClick={() => navigate("agregar", selProf)}
+                    style={{ flex: "1 1 180px", fontSize: 13.5, padding: "11px 16px" }}
                   >
-                    💡 Sugerir otra facultad
+                    ➕ Añadir o sugerir curso
                   </button>
-                )}
+                  {availableFaculties.length > 0 && (
+                    <button
+                      type="button"
+                      className="btn btn-orange"
+                      onClick={() => setShowRecommend(true)}
+                      style={{ flex: "1 1 180px", fontSize: 13.5, padding: "11px 16px" }}
+                    >
+                      💡 Sugerir otra facultad
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <div
@@ -561,6 +560,7 @@ export const Perfil = ({
           </div>
         </div>
         <div
+          className="promo-banner-btn"
           style={{
             background: "#fff",
             color: "#c95c0c",
@@ -568,7 +568,6 @@ export const Perfil = ({
             padding: "10px 18px",
             fontWeight: 800,
             fontSize: 13.5,
-            flexShrink: 0,
             textAlign: "center",
             boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
           }}
@@ -780,15 +779,15 @@ export const Perfil = ({
       )}
 
       {/* Encabezado y controles de reseñas */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+      <div className="reviews-toolbar">
         <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--heading-blue)" }}>
           Reseñas ({filteredReviews.length}
           {filteredReviews.length !== allR.length ? ` de ${allR.length}` : ""})
         </h2>
 
         {allR.length > 1 && (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", flex: "1 1 300px", justifyContent: "flex-end" }}>
-            <div style={{ position: "relative", flex: "1 1 180px", maxWidth: 260 }}>
+          <div className="reviews-controls">
+            <div style={{ position: "relative", flex: "1 1 170px" }}>
               <input
                 className="input"
                 value={revSearch}
@@ -949,55 +948,56 @@ export const Perfil = ({
 
             <Divider />
 
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <span style={{ fontSize: 12.5, color: "var(--text-light)", fontWeight: 600 }}>¿Te fue útil?</span>
-              {(() => {
-                const voto = votados[r.id];
-                const yaVoto = !!voto;
-                return (
-                  <>
-                    <button
-                      className="util-btn tabular-nums"
-                      onClick={(e) => {
-                        e.currentTarget.classList.add("pop-animation");
-                        const btn = e.currentTarget;
-                        setTimeout(() => btn.classList.remove("pop-animation"), 300);
-                        toggleUtil(selProf.id, r.id, "util");
-                      }}
-                      disabled={yaVoto}
-                      style={voto === "util" ? { background: "var(--light-blue)", borderColor: B, color: B, cursor: "default" } : yaVoto ? { opacity: 0.45, cursor: "not-allowed" } : {}}
-                    >
-                      👍 {r.util || 0}
-                      {voto === "util" && <span style={{ fontSize: 11, fontWeight: 800 }}> ✓</span>}
-                    </button>
-                    <button
-                      className="util-btn tabular-nums"
-                      onClick={(e) => {
-                        e.currentTarget.classList.add("pop-animation");
-                        const btn = e.currentTarget;
-                        setTimeout(() => btn.classList.remove("pop-animation"), 300);
-                        toggleUtil(selProf.id, r.id, "noUtil");
-                      }}
-                      disabled={yaVoto}
-                      style={
-                        voto === "noUtil"
-                          ? { background: "var(--danger-bg)", borderColor: "var(--danger-border)", color: "var(--danger-text)", cursor: "default" }
-                          : yaVoto
-                          ? { opacity: 0.45, cursor: "not-allowed" }
-                          : {}
-                      }
-                    >
-                      👎 {r.noUtil || 0}
-                      {voto === "noUtil" && <span style={{ fontSize: 11, fontWeight: 800 }}> ✓</span>}
-                    </button>
-                  </>
-                );
-              })()}
+            <div style={{ display: "flex", gap: 6, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                <span style={{ fontSize: 12, color: "var(--text-light)", fontWeight: 600 }}>¿Te fue útil?</span>
+                {(() => {
+                  const voto = votados[r.id];
+                  const yaVoto = !!voto;
+                  return (
+                    <>
+                      <button
+                        className="util-btn tabular-nums"
+                        onClick={(e) => {
+                          e.currentTarget.classList.add("pop-animation");
+                          const btn = e.currentTarget;
+                          setTimeout(() => btn.classList.remove("pop-animation"), 300);
+                          toggleUtil(selProf.id, r.id, "util");
+                        }}
+                        disabled={yaVoto}
+                        style={voto === "util" ? { background: "var(--light-blue)", borderColor: B, color: B, cursor: "default" } : yaVoto ? { opacity: 0.45, cursor: "not-allowed" } : {}}
+                      >
+                        👍 {r.util || 0}
+                        {voto === "util" && <span style={{ fontSize: 11, fontWeight: 800 }}> ✓</span>}
+                      </button>
+                      <button
+                        className="util-btn tabular-nums"
+                        onClick={(e) => {
+                          e.currentTarget.classList.add("pop-animation");
+                          const btn = e.currentTarget;
+                          setTimeout(() => btn.classList.remove("pop-animation"), 300);
+                          toggleUtil(selProf.id, r.id, "noUtil");
+                        }}
+                        disabled={yaVoto}
+                        style={
+                          voto === "noUtil"
+                            ? { background: "var(--danger-bg)", borderColor: "var(--danger-border)", color: "var(--danger-text)", cursor: "default" }
+                            : yaVoto
+                            ? { opacity: 0.45, cursor: "not-allowed" }
+                            : {}
+                        }
+                      >
+                        👎 {r.noUtil || 0}
+                        {voto === "noUtil" && <span style={{ fontSize: 11, fontWeight: 800 }}> ✓</span>}
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
               <button
                 className="util-btn"
                 onClick={() => reportarResena(selProf.id, r.id, r.texto, selProf.nombre)}
                 style={{
-                  marginLeft: "auto",
                   color: "var(--danger-text)",
                   borderColor: "var(--danger-border)",
                   opacity: yaReportada ? 0.55 : 1,

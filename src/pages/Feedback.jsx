@@ -91,6 +91,8 @@ export const Feedback = ({ navigate, crearFeedback, feedbacks }) => {
               display: "flex",
               gap: 12,
               alignItems: "center",
+              flex: "1 1 230px",
+              maxWidth: "100%",
               background: "rgba(255,255,255,0.1)",
               backdropFilter: "blur(10px)",
               padding: "13px 18px",

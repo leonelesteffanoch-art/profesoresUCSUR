@@ -156,11 +156,11 @@ export const Agregar = ({
                           </div>
                         </div>
 
-                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", flex: "0 1 auto", maxWidth: "100%" }}>
                           <button
                             type="button"
                             className="btn btn-orange"
-                            style={{ padding: "6px 11px", fontSize: 11.5, borderRadius: 9 }}
+                            style={{ padding: "7px 12px", fontSize: 12, borderRadius: 9, flex: "1 1 auto" }}
                             onClick={() => {
                               setAddProfSel(p);
                               setAddMode("curso");
@@ -172,7 +172,7 @@ export const Agregar = ({
                           <Link
                             to={`/profesor/${p.id}`}
                             className="btn btn-ghost"
-                            style={{ padding: "6px 11px", fontSize: 11.5, borderRadius: 9, textDecoration: "none" }}
+                            style={{ padding: "7px 12px", fontSize: 12, borderRadius: 9, textDecoration: "none", flex: "1 1 auto" }}
                           >
                             Ver perfil →
                           </Link>

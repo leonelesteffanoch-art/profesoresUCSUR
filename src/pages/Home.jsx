@@ -9,12 +9,6 @@ import { AnimatedCounter } from "../components/UI/AnimatedCounter.jsx";
 import { SkeletonCard } from "../components/UI/SkeletonCard.jsx";
 import { formatFechaExacta, normalizeText } from "../utils/helpers.js";
 
-const BookmarkIcon = ({ filled }) => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-  </svg>
-);
-
 const WhatsAppIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
@@ -36,8 +30,7 @@ export const Home = ({
   navigate,
   noticias,
   solicitudes,
-  savedIds = [],
-  toggleSaveProf
+  savedIds = []
 }) => {
   const [currentNewsIdx, setCurrentNewsIdx] = useState(0);
   const [newsHovered, setNewsHovered] = useState(false);
@@ -213,41 +206,20 @@ export const Home = ({
                 )}
               </div>
 
-              {/* Acceso rápido a Guardados */}
-              {savedIds.length > 0 && (
-                <button
-                  onClick={() => setOnlySaved(s => !s)}
-                  className="btn"
-                  title="Ver mis profesores guardados para matrícula"
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: 13,
-                    fontSize: 13,
-                    fontWeight: 800,
-                    background: onlySaved ? "rgba(232, 119, 34, 0.16)" : "var(--ghost-bg)",
-                    color: onlySaved ? OR : "var(--text-dark)",
-                    border: `1.5px solid ${onlySaved ? OR : "var(--border-color)"}`,
-                    flexShrink: 0
-                  }}
-                >
-                  <BookmarkIcon filled={onlySaved} />
-                  <span>{savedIds.length}</span>
-                </button>
-              )}
-
               {/* Botón de Filtros (Facultad y Sede) */}
               <button
                 onClick={() => setShowFilters(f => !f)}
                 className="btn"
                 style={{
-                  padding: "10px 15px",
+                  padding: "10px 14px",
                   borderRadius: 13,
                   fontSize: 13,
                   fontWeight: 800,
                   background: showFilters || activeFilterCount > 0 ? "var(--light-blue)" : "var(--ghost-bg)",
                   color: showFilters || activeFilterCount > 0 ? "var(--primary-blue)" : "var(--text-dark)",
                   border: `1.5px solid ${showFilters || activeFilterCount > 0 ? "var(--primary-blue)" : "var(--border-color)"}`,
-                  flexShrink: 0
+                  flexShrink: 0,
+                  width: "100%"
                 }}
               >
                 <span>🎛️ {showFilters ? "Ocultar filtros" : "Filtros"}</span>
@@ -400,6 +372,30 @@ export const Home = ({
                         </button>
                       );
                     })}
+
+                    {savedIds.length > 0 && (
+                      <button
+                        onClick={() => setOnlySaved(s => !s)}
+                        aria-pressed={onlySaved}
+                        style={{
+                          padding: "5px 12px",
+                          borderRadius: 999,
+                          fontSize: 12.5,
+                          cursor: "pointer",
+                          fontWeight: 700,
+                          border: "1.5px solid",
+                          transition: "all .18s",
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
+                          fontFamily: "inherit",
+                          background: onlySaved ? OR : "var(--surface-subtle)",
+                          color: onlySaved ? "#fff" : OR,
+                          borderColor: onlySaved ? OR : "rgba(232,119,34,0.4)"
+                        }}
+                      >
+                        🔖 Mis guardados ({savedIds.length})
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -524,14 +520,16 @@ export const Home = ({
       {/* BANNER de "¿No encuentras a tu profe?" */}
       <div style={{ maxWidth: 880, margin: "18px auto 0", padding: "0 16px" }}>
         <div className="add-banner hero-grid-pattern" style={{ marginBottom: 0 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 15, background: "rgba(255,255,255,0.16)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0, border: "1px solid rgba(255,255,255,0.2)" }}>
-            👨‍🏫
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 15, background: "rgba(255,255,255,0.16)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0, border: "1px solid rgba(255,255,255,0.2)" }}>
+              👨‍🏫
+            </div>
+            <div>
+              <div style={{ color: "#fff", fontWeight: 800, fontSize: 16.5, marginBottom: 3 }}>¿No encuentras a tu profesor?</div>
+              <div style={{ color: "rgba(255,255,255,.84)", fontSize: 13.5, fontWeight: 500 }}>Agrégalo en segundos o súmale un curso para ayudar a toda la UCSUR.</div>
+            </div>
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: "#fff", fontWeight: 800, fontSize: 16.5, marginBottom: 3 }}>¿No encuentras a tu profesor?</div>
-            <div style={{ color: "rgba(255,255,255,.84)", fontSize: 13.5, fontWeight: 500 }}>Agrégalo en segundos o súmale un curso para ayudar a toda la UCSUR.</div>
-          </div>
-          <button className="btn-cta" style={{ fontSize: 13.5, padding: "11px 20px", flexShrink: 0 }} onClick={() => navigate("agregar")}>
+          <button className="btn-cta promo-banner-btn" style={{ fontSize: 13.5, padding: "11px 20px" }} onClick={() => navigate("agregar")}>
             ➕ Agregar Profesor
           </button>
         </div>
@@ -636,7 +634,7 @@ export const Home = ({
               </div>
               <div style={{ color: "var(--text-muted)", fontSize: 14, marginBottom: 24, fontWeight: 500 }}>
                 {onlySaved
-                  ? "Usa el ícono de marcador en cualquier profesor para compararlo antes de tu matrícula."
+                  ? "Entra al perfil de cualquier profesor y presiona 'Guardar profe' para compararlo antes de tu matrícula."
                   : "Intenta con otro nombre o agrega al profesor si aún no está registrado."}
               </div>
               <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
@@ -652,7 +650,6 @@ export const Home = ({
 
           {filtered.slice(0, visibleCount).map((p, i) => {
             const accent = FAC_COLOR[p.facultad] || B;
-            const isSaved = savedIds.includes(p.id);
             const isTopBadge = (p.rating || 0) >= 4.5 && (p.totalReseñas || 0) >= 5;
             const sedesList = p.sedes || [p.sede].filter(Boolean);
             const facsList = p.facultades?.slice(0, 2) || [p.facultad].filter(Boolean);
@@ -681,7 +678,7 @@ export const Home = ({
                       <div style={{ color: "rgba(255,255,255,0.84)", fontSize: 13.5, fontWeight: 500 }}>¡Pásales el link de la página y sálvales el ciclo!</div>
                     </div>
                     <button
-                      className="btn"
+                      className="btn promo-banner-btn"
                       onClick={(e) => {
                         e.preventDefault();
                         const text = "Mira las reseñas de los profes antes de matricularte y salva tu ciclo 🚀 👉 " + window.location.origin;
@@ -717,7 +714,7 @@ export const Home = ({
                       <div style={{ color: "rgba(255,255,255,0.92)", fontSize: 13.5, fontWeight: 500 }}>Mientras más personas califiquen, ¡mejores referencias tendremos todos!</div>
                     </div>
                     <button
-                      className="btn"
+                      className="btn promo-banner-btn"
                       onClick={(e) => {
                         e.preventDefault();
                         const text = "Únete a la comunidad y revisa qué profes valen la pena en UCSUR 🌱 👉 " + window.location.origin;
@@ -779,7 +776,7 @@ export const Home = ({
                                 gap: 5
                               }}
                             >
-                              <span style={{ width: 6, height: 6, borderRadius: "50%", background: fAccent, flexShrink: 0 }} />
+                              <span style={{ width: 6, height: 6, borderRadius: "50%", background: fAccent, flexShrink: 0, alignSelf: "flex-start", marginTop: 5 }} />
                               <span>{FAC_EMOJI[f] || ""} {f}</span>
                             </span>
                           );
@@ -788,24 +785,7 @@ export const Home = ({
                     </div>
 
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <RatingChip r={p.rating} />
-                        {toggleSaveProf && (
-                          <button
-                            type="button"
-                            className={`bookmark-btn${isSaved ? " saved" : ""}`}
-                            title={isSaved ? "Quitar de guardados" : "Guardar para comparar"}
-                            aria-label={isSaved ? "Quitar profesor de guardados" : "Guardar profesor"}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              toggleSaveProf(p.id, p.nombre);
-                            }}
-                          >
-                            <BookmarkIcon filled={isSaved} />
-                          </button>
-                        )}
-                      </div>
+                      <RatingChip r={p.rating} />
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <Stars value={p.rating} size={12} gap={1.5} />
                         <span className="tabular-nums" style={{ fontSize: 11, color: "var(--text-light)", fontWeight: 700 }}>

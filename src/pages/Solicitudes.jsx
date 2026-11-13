@@ -129,7 +129,7 @@ export const Solicitudes = ({
           </div>
 
           {/* Quick Stats */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: "0 1 auto", minWidth: 230, width: "min(100%, 260px)" }}>
+          <div className="solicitudes-hero-stats">
             <div
               style={{
                 background: "rgba(255,255,255,0.1)",
@@ -430,7 +430,7 @@ export const Solicitudes = ({
             value={filtroTextoActivas}
             onChange={(e) => setFiltroTextoActivas(e.target.value)}
           />
-          <div className="hide-scrollbar" style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2, maxWidth: "100%" }}>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
             {["Todas", ...SEDES].map((s) => (
               <button
                 key={s}
@@ -522,7 +522,7 @@ export const Solicitudes = ({
                   </div>
                 </div>
 
-                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", maxWidth: "100%" }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", flex: "1 1 210px", justifyContent: "flex-end", maxWidth: "100%" }}>
                   <button
                     className="btn btn-ghost"
                     onClick={() => handleShareWhatsApp(sol)}
