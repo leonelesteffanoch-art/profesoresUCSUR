@@ -209,7 +209,7 @@ export const Home = ({
               {/* Botón de Filtros (Facultad y Sede) */}
               <button
                 onClick={() => setShowFilters(f => !f)}
-                className="btn"
+                className="btn search-filter-btn"
                 style={{
                   padding: "10px 14px",
                   borderRadius: 13,
@@ -217,9 +217,7 @@ export const Home = ({
                   fontWeight: 800,
                   background: showFilters || activeFilterCount > 0 ? "var(--light-blue)" : "var(--ghost-bg)",
                   color: showFilters || activeFilterCount > 0 ? "var(--primary-blue)" : "var(--text-dark)",
-                  border: `1.5px solid ${showFilters || activeFilterCount > 0 ? "var(--primary-blue)" : "var(--border-color)"}`,
-                  flexShrink: 0,
-                  width: "100%"
+                  border: `1.5px solid ${showFilters || activeFilterCount > 0 ? "var(--primary-blue)" : "var(--border-color)"}`
                 }}
               >
                 <span>🎛️ {showFilters ? "Ocultar filtros" : "Filtros"}</span>

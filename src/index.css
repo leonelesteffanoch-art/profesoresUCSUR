@@ -786,6 +786,10 @@ body {
   width: auto;
   flex-shrink: 0;
 }
+.search-filter-btn {
+  width: auto;
+  flex-shrink: 0;
+}
 @media (max-width: 680px) {
   .search-bar-row {
     display: grid;
@@ -800,6 +804,10 @@ body {
   .search-select {
     width: 100% !important;
     min-width: 0 !important;
+  }
+  .search-filter-btn {
+    width: 100%;
+    min-width: 0;
   }
   .desktop-only {
     display: none !important;
