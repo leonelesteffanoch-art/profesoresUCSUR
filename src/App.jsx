@@ -10,6 +10,7 @@ import "./index.css";
 import { Header } from "./components/Header.jsx";
 import { Footer } from "./components/Footer.jsx";
 import { Toast } from "./components/UI/Toast.jsx";
+import { ScrollToTop } from "./components/UI/ScrollToTop.jsx";
 import { Home } from "./pages/Home.jsx";
 import { Ranking } from "./pages/Ranking.jsx";
 import { Agregar } from "./pages/Agregar.jsx";
@@ -19,7 +20,7 @@ import { Solicitudes } from "./pages/Solicitudes.jsx";
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 
 // Wrapper that resolves profesor from URL param
-function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, reportadosLocal, setReportadosLocal, votados, setVotados, formRef, recomendarFacultad, navigate }) {
+function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, reportes, reportadosLocal, setReportadosLocal, votados, setVotados, formRef, recomendarFacultad, navigate, savedIds, toggleSaveProf, setRankCursoFiltro }) {
   const { profId } = useParams();
   const nav = useNavigate();
   const [form, setForm] = useState(FORM_EMPTY);
@@ -126,6 +127,12 @@ function PerfilRoute({ profesores, resenas, setResenas, carreras, showToast, rep
         reportes={reportes} reportadosLocal={reportadosLocal} reportarResena={reportarResena}
         formRef={formRef}
         recomendarFacultad={recomendarFacultad}
+        savedIds={savedIds}
+        toggleSaveProf={toggleSaveProf}
+        onSelectCourse={(curso) => {
+          setRankCursoFiltro?.(curso);
+          nav("/ranking");
+        }}
       />
     </div>
   );
@@ -173,7 +180,24 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
     localStorage.setItem("rmp_theme", darkMode ? "dark" : "light");
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute("content", darkMode ? "#071126" : "#0C447C");
   }, [darkMode]);
+
+  const [savedIds, setSavedIds] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("rmp_saved_profs") || "[]"); }
+    catch { return []; }
+  });
+
+  const toggleSaveProf = useCallback((profId, profNombre) => {
+    setSavedIds(prev => {
+      const exists = prev.includes(profId);
+      const next = exists ? prev.filter(id => id !== profId) : [...prev, profId];
+      try { localStorage.setItem("rmp_saved_profs", JSON.stringify(next)); } catch {}
+      showToast(exists ? `🔖 Quitaste a ${profNombre || "profesor"} de tu lista` : `🔖 Guardaste a ${profNombre || "profesor"} en tu lista`);
+      return next;
+    });
+  }, []);
 
   const [votados, setVotados] = useState(() => {
     try { return JSON.parse(localStorage.getItem("rmp_votes") || "{}"); }
@@ -890,6 +914,8 @@ export default function App() {
                 noticias={noticias}
                 feedbacks={feedbacks}
                 solicitudes={solicitudes}
+                savedIds={savedIds}
+                toggleSaveProf={toggleSaveProf}
               />
             </div>
           } />
@@ -956,6 +982,9 @@ export default function App() {
               votados={votados} setVotados={setVotados}
               formRef={formRef} recomendarFacultad={recomendarFacultad}
               navigate={navigate}
+              savedIds={savedIds}
+              toggleSaveProf={toggleSaveProf}
+              setRankCursoFiltro={setRankCursoFiltro}
             />
           } />
 
@@ -1010,6 +1039,8 @@ export default function App() {
           } />
         </Routes>
       </main>
+
+      <ScrollToTop />
 
       <Footer onNavigate={navigate} />
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { B, BD } from "../constants.js";
+import { B, BD, OR } from "../constants.js";
 import { ThemeToggle } from "./UI/ThemeToggle.jsx";
 import { BrandLogo } from "./UI/BrandLogo.jsx";
 
@@ -9,29 +9,28 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
 
   useEffect(() => {
     let lastScroll = window.scrollY;
-    
+
     const handleScroll = () => {
       const currentScroll = window.scrollY;
-      
       if (currentScroll <= 60) {
         setHidden(false);
-      } else if (currentScroll > lastScroll) {
+      } else if (currentScroll > lastScroll + 6) {
         setHidden(true);
-      } else {
+      } else if (currentScroll < lastScroll - 4) {
         setHidden(false);
       }
       lastScroll = currentScroll;
     };
-    
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const links = [
-    ["home", "🏠", "Inicio"], 
-    ["ranking", "🏆", "Ranking"], 
+    ["home", "🏠", "Inicio"],
+    ["ranking", "🏆", "Ranking"],
     ["solicitudes", "🗳️", "Secciones Adicionales"],
-    ["agregar", "➕", "Agregar Profesor"], 
+    ["agregar", "➕", "Agregar Profesor"],
     ["feedback", "💡", "Sugerencias"],
     ["admin", "⚙️", "Admin"]
   ];
@@ -43,90 +42,135 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
 
   return (
     <>
-      <header style={{ 
-        background: `linear-gradient(135deg, ${BD} 0%, ${B} 100%)`, 
-        padding: "0 20px", 
-        display: "flex", 
-        alignItems: "center", 
-        gap: 10, 
-        height: 66, 
-        boxShadow: "0 4px 24px rgba(12,68,124,.35)", 
-        position: "sticky", 
-        top: 0, 
-        zIndex: 100,
-      }}>
+      <header
+        style={{
+          background: darkMode
+            ? `linear-gradient(135deg, rgba(7, 17, 38, 0.94) 0%, rgba(12, 46, 94, 0.92) 100%)`
+            : `linear-gradient(135deg, rgba(10, 56, 107, 0.96) 0%, rgba(21, 96, 170, 0.94) 100%)`,
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
+          padding: "0 20px",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          height: 66,
+          boxShadow: "0 6px 28px rgba(7, 25, 52, 0.25)",
+          position: "sticky",
+          top: 0,
+          zIndex: 100
+        }}
+      >
         <span
           onClick={() => handleNav("home")}
-          style={{ cursor: "pointer", display: "flex", alignItems: "center", flexShrink: 0, transition: "transform 0.15s ease" }}
+          style={{ cursor: "pointer", display: "flex", alignItems: "center", flexShrink: 0, transition: "transform 0.18s ease" }}
           onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
           aria-label="Ir a inicio"
         >
           <BrandLogo size="md" variant="light" showSubtitle={true} />
         </span>
+
         <span style={{ flex: 1 }} />
-        
-        <ThemeToggle isDark={darkMode} onToggle={() => setDarkMode(d => !d)} />
 
         {/* Desktop nav */}
-        <nav className="desktop-nav">
-          {links.map(([p, icon, label]) => (
-            <span 
-              key={p} 
-              className={`nav-link${page === p ? " active" : ""}`} 
-              onClick={() => handleNav(p)}
-              style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", padding: "6px 13px", borderRadius: 20, fontWeight: 800 } : {}}
-            >
-              {icon} {label}
-            </span>
-          ))}
+        <nav className="desktop-nav" aria-label="Navegación principal">
+          {links.map(([p, icon, label]) => {
+            const isActive = page === p;
+            const isFeedback = p === "feedback";
+            return (
+              <span
+                key={p}
+                className={`nav-link${isActive ? " active" : ""}`}
+                onClick={() => handleNav(p)}
+                style={
+                  isFeedback
+                    ? {
+                        background: isActive ? OR : "rgba(232, 119, 34, 0.2)",
+                        border: `1px solid ${isActive ? OR : "rgba(253, 186, 116, 0.38)"}`,
+                        color: "#fff",
+                        padding: "7px 13px",
+                        borderRadius: 999,
+                        fontWeight: 700
+                      }
+                    : {}
+                }
+              >
+                <span>{icon}</span>
+                <span>{label}</span>
+              </span>
+            );
+          })}
         </nav>
+
+        <ThemeToggle isDark={darkMode} onToggle={() => setDarkMode((d) => !d)} />
 
         {/* Mobile hamburger */}
         <button className="hamburger-btn" onClick={() => setMenuOpen(true)} aria-label="Abrir menú">
-          ☰
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="18" x2="20" y2="18" />
+          </svg>
         </button>
       </header>
 
       {/* Mobile drawer overlay */}
       <div className={`mobile-menu-overlay${menuOpen ? " open" : ""}`} onClick={() => setMenuOpen(false)} />
       <div className={`mobile-drawer${menuOpen ? " open" : ""}`}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <BrandLogo size="sm" variant="dark" showSubtitle={false} />
-          <button 
-            onClick={() => setMenuOpen(false)} 
-            style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "var(--text-muted)", padding: 4 }}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, paddingBottom: 14, borderBottom: "1px solid var(--border-color)" }}>
+          <BrandLogo size="sm" variant={darkMode ? "light" : "dark"} showSubtitle={false} />
+          <button
+            onClick={() => setMenuOpen(false)}
+            style={{ background: "var(--ghost-bg)", border: "1px solid var(--border-color)", borderRadius: 10, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, cursor: "pointer", color: "var(--text-muted)", fontWeight: 700 }}
             aria-label="Cerrar menú"
           >
             ✕
           </button>
         </div>
-        {links.map(([p, icon, label]) => (
-          <div 
-            key={p} 
-            className={`mobile-nav-link${page === p ? " active" : ""}`}
-            onClick={() => handleNav(p)}
-            style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", fontWeight: 800, marginTop: 8 } : {}}
-          >
-            <span style={{ fontSize: 20 }}>{icon}</span>
-            <span style={p === "feedback" ? { color: "#fff" } : {}}>{label}</span>
-          </div>
-        ))}
-        <div style={{ marginTop: "auto", paddingTop: 24, borderTop: "1px solid var(--border-color)" }}>
-          <div 
-            className="mobile-nav-link" 
-            onClick={() => setDarkMode(d => !d)} 
+
+        {links.map(([p, icon, label]) => {
+          const isActive = page === p;
+          const isFeedback = p === "feedback";
+          return (
+            <div
+              key={p}
+              className={`mobile-nav-link${isActive ? " active" : ""}`}
+              onClick={() => handleNav(p)}
+              style={
+                isFeedback
+                  ? {
+                      background: isActive ? OR : "rgba(232, 119, 34, 0.14)",
+                      border: `1px solid rgba(232, 119, 34, 0.35)`,
+                      color: isActive ? "#fff" : OR,
+                      fontWeight: 800,
+                      marginTop: 6
+                    }
+                  : {}
+              }
+            >
+              <span style={{ fontSize: 19 }}>{icon}</span>
+              <span style={isFeedback && isActive ? { color: "#fff" } : {}}>{label}</span>
+            </div>
+          );
+        })}
+
+        <div style={{ marginTop: "auto", paddingTop: 20, borderTop: "1px solid var(--border-color)" }}>
+          <div
+            className="mobile-nav-link"
+            onClick={() => setDarkMode((d) => !d)}
             style={{ color: "var(--text-muted)" }}
           >
-            <span style={{ fontSize: 20 }}>{darkMode ? "☀️" : "🌙"}</span>
-            <span>{darkMode ? "Modo claro" : "Modo oscuro"}</span>
+            <span style={{ fontSize: 19 }}>{darkMode ? "☀️" : "🌙"}</span>
+            <span>{darkMode ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}</span>
           </div>
         </div>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav 
+      <nav
         className="mobile-bottom-nav"
+        aria-label="Navegación móvil"
         style={{
           transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           transform: hidden ? "translateY(150%)" : "translateY(0)"
@@ -138,17 +182,41 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
           ["solicitudes", "🗳️", "Secciones\nAdicionales"],
           ["agregar", "➕", "Agregar\nProfesor"],
           ["feedback", "💡", "Sugerencias"]
-        ].map(([p, icon, label]) => (
-          <div 
-            key={p} 
-            className={`bottom-nav-item${page === p ? " active" : ""}`} 
-            onClick={() => navigate(p === "home" ? "/" : `/${p}`)}
-            style={p === "feedback" ? { background: "var(--primary-orange)", color: "#fff", borderRadius: 14 } : {}}
-          >
-            <span style={{ fontSize: 18, marginBottom: 0 }}>{icon}</span>
-            <span style={{ fontSize: 9.5, fontWeight: 800, color: p === "feedback" ? "#fff" : "inherit", whiteSpace: "pre-line", textAlign: "center", lineHeight: 1.05 }}>{label}</span>
-          </div>
-        ))}
+        ].map(([p, icon, label]) => {
+          const isActive = page === p;
+          const isFeedback = p === "feedback";
+          return (
+            <div
+              key={p}
+              className={`bottom-nav-item${isActive ? " active" : ""}`}
+              onClick={() => navigate(p === "home" ? "/" : `/${p}`)}
+              style={
+                isFeedback
+                  ? {
+                      background: isActive ? OR : "rgba(232, 119, 34, 0.12)",
+                      color: isActive ? "#fff" : OR,
+                      border: `1px solid ${isActive ? OR : "rgba(232, 119, 34, 0.28)"}`,
+                      borderRadius: 14
+                    }
+                  : {}
+              }
+            >
+              <span style={{ fontSize: 17, marginBottom: 0, lineHeight: 1 }}>{icon}</span>
+              <span
+                style={{
+                  fontSize: 9.5,
+                  fontWeight: 800,
+                  color: "inherit",
+                  whiteSpace: "pre-line",
+                  textAlign: "center",
+                  lineHeight: 1.08
+                }}
+              >
+                {label}
+              </span>
+            </div>
+          );
+        })}
       </nav>
     </>
   );
