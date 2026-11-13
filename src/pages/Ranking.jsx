@@ -85,19 +85,17 @@ export const Ranking = ({
   const hasFilters = facFiltro !== "Todas" || Boolean(cursoFiltro);
 
   return (
-    <div style={{ maxWidth: 880, margin: "0 auto", padding: "28px 16px 72px" }}>
+    <div className="page-shell" style={{ maxWidth: 880 }}>
       {/* Hero Header */}
       <div
-        className="card fade-in"
+        className="card fade-in hero-banner"
         style={{
           backgroundColor: BD,
           backgroundImage: `radial-gradient(at 15% 15%, rgba(56, 189, 248, 0.16) 0, transparent 48%), radial-gradient(at 88% 82%, rgba(232, 119, 34, 0.22) 0, transparent 52%), linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(145deg, #07294d 0%, ${BD} 48%, ${B} 100%)`,
           backgroundSize: "100% 100%, 100% 100%, 28px 28px, 28px 28px, 100% 100%",
-          padding: "30px 24px",
-          borderRadius: 24,
           color: "#fff",
           textAlign: "center",
-          marginBottom: 22,
+          marginBottom: 20,
           border: "1px solid rgba(255,255,255,0.08)",
           boxShadow: "var(--shadow-lg)",
         }}
@@ -189,35 +187,20 @@ export const Ranking = ({
       </div>
 
       {/* Tabs de Ranking */}
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          background: "var(--card-bg)",
-          border: "1px solid var(--border-color)",
-          borderRadius: 16,
-          padding: 6,
-          width: "fit-content",
-          overflowX: "auto",
-          maxWidth: "100%",
-          margin: "0 auto 28px",
-          boxShadow: "var(--shadow-sm)",
-        }}
-      >
+      <div className="ranking-tabs">
         {[
-          ["top", "⭐ Mejor Calificados"],
-          ["popular", "🔥 Más Reseñados"],
-          ["worst", "💔 Más Exigentes / Bajos"],
+          ["top", "⭐ Mejores"],
+          ["popular", "🔥 Populares"],
+          ["worst", "💔 Más Bajos"],
         ].map(([k, l]) => (
           <button
             key={k}
-            className="tab"
+            className="tab ranking-tab"
             onClick={() => setRankTab(k)}
             style={{
               background: rankTab === k ? "var(--primary-blue)" : "transparent",
               color: rankTab === k ? "#fff" : "var(--text-muted)",
               boxShadow: rankTab === k ? "0 4px 12px rgba(21,96,170,.28)" : "none",
-              whiteSpace: "nowrap",
             }}
           >
             {l}
@@ -228,7 +211,7 @@ export const Ranking = ({
       {rankTab === "top" && podio.length > 0 && (
         <>
           {/* Podio Top 3 */}
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "clamp(10px, 3vw, 22px)", marginBottom: 28, paddingTop: 10 }}>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "clamp(8px, 2.5vw, 22px)", marginBottom: 26, paddingTop: 6 }}>
             {ord.map((idx, i) => {
               const p = podio[idx];
               if (!p) return null;
@@ -249,18 +232,26 @@ export const Ranking = ({
                     textDecoration: "none",
                   }}
                 >
-                  <span style={{ fontSize: idx === 0 ? 38 : 28, marginBottom: 6, filter: "drop-shadow(0 4px 6px rgba(0,0,0,.18))" }}>
+                  <span style={{ fontSize: idx === 0 ? 36 : 26, marginBottom: 6, filter: "drop-shadow(0 4px 6px rgba(0,0,0,.18))" }}>
                     {medals[idx]}
                   </span>
                   <div
                     style={{
-                      borderRadius: 28,
+                      borderRadius: Math.round((idx === 0 ? 72 : 58) * 0.34) + 5,
                       padding: idx === 0 ? 3 : 0,
                       background: idx === 0 ? `linear-gradient(135deg, ${OR}, #fbbf24)` : "transparent",
                       boxShadow: idx === 0 ? "0 8px 24px rgba(232, 119, 34, 0.28)" : "none",
                     }}
                   >
-                    <Avatar name={p.nombre} fac={p.facultad} size={idx === 0 ? 74 : 58} />
+                    <div
+                      style={{
+                        borderRadius: Math.round((idx === 0 ? 72 : 58) * 0.34) + 2,
+                        padding: idx === 0 ? 2 : 0,
+                        background: idx === 0 ? "var(--bg-main)" : "transparent",
+                      }}
+                    >
+                      <Avatar name={p.nombre} fac={p.facultad} size={idx === 0 ? 72 : 58} />
+                    </div>
                   </div>
                   <div
                     style={{
@@ -489,9 +480,9 @@ export const Ranking = ({
                       </div>
                       {renderSubtitle(p)}
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                    <div className="ranking-pop-track">
                       <RatingChip r={p.rating} />
-                      <div style={{ width: 72, background: "var(--surface-subtle)", border: "1px solid var(--border-color)", borderRadius: 8, height: 9, overflow: "hidden" }}>
+                      <div className="ranking-pop-bar">
                         <div
                           style={{
                             width: `${((p.totalReseñas || 0) / maxR) * 100}%`,

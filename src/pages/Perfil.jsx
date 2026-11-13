@@ -120,7 +120,7 @@ export const Perfil = ({
   const shownReviews = filteredReviews.slice(0, visibleReviews);
 
   return (
-    <div style={{ maxWidth: 840, margin: "0 auto", padding: "24px 16px 72px" }}>
+    <div className="page-shell" style={{ maxWidth: 840 }}>
       <Helmet>
         <title>{selProf.nombre} | ProfesoresUCSUR</title>
         <meta
@@ -140,7 +140,8 @@ export const Perfil = ({
             <button
               type="button"
               className="btn"
-              onClick={() => toggleSaveProf(selProf.id)}
+              title="Se guarda localmente en tu navegador (100% anónimo, sin cuenta)"
+              onClick={() => toggleSaveProf(selProf.id, selProf.nombre)}
               style={{
                 fontSize: 13,
                 padding: "9px 15px",
@@ -218,15 +219,15 @@ export const Perfil = ({
       <div className="card fade-in" style={{ marginBottom: 20, overflow: "hidden", border: `1.5px solid ${facColor}35` }}>
         <div style={{ height: 4, background: `linear-gradient(90deg, ${facColor}, ${OR})` }} />
         <div
+          className="card-pad"
           style={{
             background: `linear-gradient(135deg, ${facColor}16 0%, rgba(232, 119, 34, 0.06) 100%)`,
-            padding: "24px 26px 22px",
             borderBottom: "1px solid var(--border-color)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 18, flexWrap: "wrap", marginBottom: 16 }}>
-            <Avatar name={selProf.nombre} fac={selProf.facultad} size={80} />
-            <div style={{ flex: 1, minWidth: 210 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 15, flexWrap: "wrap", marginBottom: 16 }}>
+            <Avatar name={selProf.nombre} fac={selProf.facultad} size={70} />
+            <div style={{ flex: 1, minWidth: 175 }}>
               <h1 style={{ fontSize: "clamp(21px, 3.5vw, 27px)", fontWeight: 800, color: "var(--text-dark)", lineHeight: 1.2, letterSpacing: "-0.02em", marginBottom: 10 }}>
                 {selProf.nombre}
               </h1>

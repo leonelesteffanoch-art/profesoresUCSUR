@@ -177,10 +177,8 @@ export const Home = ({
       {/* 🔍 BARRA DE BÚSQUEDA FLOTANTE COMPACTA E INTUITIVA */}
       <div
         ref={searchBarRef}
+        className="home-search-sticky"
         style={{
-          position: "sticky",
-          top: 66,
-          zIndex: 90,
           background: "var(--glass-sticky)",
           backdropFilter: "blur(18px)",
           WebkitBackdropFilter: "blur(18px)",
@@ -539,7 +537,7 @@ export const Home = ({
         </div>
       </div>
 
-      <div style={{ maxWidth: 880, margin: "24px auto 0", padding: "0 16px 64px" }}>
+      <div style={{ maxWidth: 880, margin: "24px auto 0", padding: "0 14px 86px" }}>
         {/* Carrusel de Nuevos Profesores */}
         {isSearchEmpty && profesoresNuevos.length > 0 && (
           <div style={{ marginBottom: 32 }}>
@@ -591,7 +589,7 @@ export const Home = ({
 
         {/* Contador de resultados cuando se busca, filtra o ve guardados */}
         {!loading && (!isSearchEmpty || sortBy !== "aleatorio") && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: onlySaved ? 10 : 14, flexWrap: "wrap", gap: 8 }}>
             <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text-muted)" }}>
               {onlySaved ? "🔖 En tu lista de guardados: " : "Mostrando "}
               <strong style={{ color: "var(--text-dark)" }}>{filtered.length}</strong> profesor{filtered.length === 1 ? "" : "es"}
@@ -601,6 +599,29 @@ export const Home = ({
                 Ver todos los profesores
               </button>
             )}
+          </div>
+        )}
+
+        {onlySaved && (
+          <div
+            className="fade-in"
+            style={{
+              marginBottom: 16,
+              padding: "11px 15px",
+              borderRadius: 13,
+              background: "var(--surface-subtle)",
+              border: "1px solid var(--border-color)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 8,
+              fontSize: 12.5,
+              color: "var(--text-muted)",
+              fontWeight: 600
+            }}
+          >
+            <span>🔒 Tus favoritos se guardan localmente en este dispositivo (100% anónimo, sin cuenta).</span>
           </div>
         )}
 
@@ -639,7 +660,22 @@ export const Home = ({
             return (
               <Fragment key={p.id}>
                 {i === 4 && !onlySaved && (
-                  <div className="card fade-in hero-grid-pattern" style={{ gridColumn: "1 / -1", backgroundColor: BD, backgroundImage: `linear-gradient(135deg, ${B}, ${BD})`, padding: "22px 26px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16, border: "1px solid rgba(255,255,255,0.14)" }}>
+                  <div
+                    className="card fade-in"
+                    style={{
+                      gridColumn: "1 / -1",
+                      backgroundColor: BD,
+                      backgroundImage: `linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(135deg, ${B}, ${BD})`,
+                      backgroundSize: "26px 26px, 26px 26px, 100% 100%",
+                      padding: "22px 24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: 16,
+                      border: "1px solid rgba(255,255,255,0.14)"
+                    }}
+                  >
                     <div>
                       <div style={{ color: "#fff", fontWeight: 800, fontSize: 17, marginBottom: 4 }}>¿Tus amigos andan perdidos con la matrícula?</div>
                       <div style={{ color: "rgba(255,255,255,0.84)", fontSize: 13.5, fontWeight: 500 }}>¡Pásales el link de la página y sálvales el ciclo!</div>
@@ -660,7 +696,22 @@ export const Home = ({
                 )}
 
                 {i === 12 && !onlySaved && (
-                  <div className="card fade-in hero-grid-pattern" style={{ gridColumn: "1 / -1", backgroundColor: OR, backgroundImage: `linear-gradient(135deg, ${OR}, #f59e0b)`, padding: "22px 26px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16, border: "1px solid rgba(255,255,255,0.18)" }}>
+                  <div
+                    className="card fade-in"
+                    style={{
+                      gridColumn: "1 / -1",
+                      backgroundColor: OR,
+                      backgroundImage: `linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(135deg, ${OR}, #d96518)`,
+                      backgroundSize: "26px 26px, 26px 26px, 100% 100%",
+                      padding: "22px 24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: 16,
+                      border: "1px solid rgba(255,255,255,0.18)"
+                    }}
+                  >
                     <div>
                       <div style={{ color: "#fff", fontWeight: 800, fontSize: 17, marginBottom: 4 }}>Ayuda a que la comunidad crezca 🌱</div>
                       <div style={{ color: "rgba(255,255,255,0.92)", fontSize: 13.5, fontWeight: 500 }}>Mientras más personas califiquen, ¡mejores referencias tendremos todos!</div>

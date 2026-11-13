@@ -36,24 +36,36 @@ export const Agregar = ({
   const carrerasForm = addProf.facultadAlumno ? (carreras[addProf.facultadAlumno] || []) : [...new Set(Object.values(carreras || {}).flat())].sort();
 
   return (
-    <div style={{ maxWidth: 960, margin: "0 auto", padding: "28px 16px 72px" }}>
+    <div className="page-shell" style={{ maxWidth: 960 }}>
       {/* Hero Banner Intuitivo */}
-      <div style={{ background: `linear-gradient(135deg, ${BD} 0%, ${B} 100%)`, borderRadius: 22, padding: "26px 28px", marginBottom: 22, boxShadow: "var(--shadow-lg)", color: "#fff", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(232,119,34,.18)", pointerEvents: "none" }} />
+      <div
+        className="card fade-in hero-banner"
+        style={{
+          backgroundColor: BD,
+          backgroundImage: `radial-gradient(at 15% 15%, rgba(56, 189, 248, 0.16) 0, transparent 48%), radial-gradient(at 88% 82%, rgba(232, 119, 34, 0.24) 0, transparent 52%), linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(145deg, #07294d 0%, ${BD} 48%, ${B} 100%)`,
+          backgroundSize: "100% 100%, 100% 100%, 28px 28px, 28px 28px, 100% 100%",
+          marginBottom: 22,
+          boxShadow: "var(--shadow-lg)",
+          color: "#fff",
+          border: "1px solid rgba(255,255,255,0.08)",
+          position: "relative",
+          overflow: "hidden"
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-          <div style={{ width: 46, height: 46, borderRadius: 14, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>
+          <div style={{ width: 46, height: 46, borderRadius: 14, background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 23, flexShrink: 0 }}>
             👨‍🏫
           </div>
-          <div>
-            <h1 style={{ fontSize: "clamp(20px, 4vw, 25px)", fontWeight: 800, lineHeight: 1.2 }}>Agregar Profesor o Curso</h1>
-            <p style={{ fontSize: 13.5, color: "rgba(255,255,255,0.8)", marginTop: 2, fontWeight: 500 }}>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ fontSize: "clamp(20px, 4vw, 26px)", fontWeight: 800, lineHeight: 1.2, letterSpacing: "-0.02em" }}>Agregar Profesor o Curso</h1>
+            <p style={{ fontSize: 13.5, color: "rgba(255,255,255,0.84)", marginTop: 3, fontWeight: 500 }}>
               Ayuda a mantener actualizada la guía de docentes de la Científica del Sur.
             </p>
           </div>
         </div>
 
         {/* Selector de Modo Principal Muy Claro */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, marginTop: 18 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10, marginTop: 18 }}>
           {[
             ["nuevo", "➕ Registrar Nuevo Profesor", "Si el docente aún no aparece en la plataforma"],
             ["curso", "📚 Asignar Curso a Profesor", "Si el docente ya existe pero dicta otro curso"]
@@ -75,7 +87,7 @@ export const Agregar = ({
                 }}
               >
                 <div style={{ fontWeight: 800, fontSize: 14.5, marginBottom: 3 }}>{title}</div>
-                <div style={{ fontSize: 12, opacity: active ? 0.75 : 0.8, fontWeight: 500 }}>{desc}</div>
+                <div style={{ fontSize: 12, opacity: active ? 0.78 : 0.84, fontWeight: 500 }}>{desc}</div>
               </div>
             );
           })}
@@ -83,10 +95,10 @@ export const Agregar = ({
       </div>
 
       {addMode === "nuevo" && (
-        <div className="card fade-in" style={{ padding: "28px 24px", display: "flex", flexWrap: "wrap", gap: 36 }}>
+        <div className="card card-pad fade-in" style={{ display: "flex", flexWrap: "wrap", gap: 28 }}>
           
           {/* Columna Izquierda: Datos del Profesor */}
-          <div style={{ flex: "1 1 350px", display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column", gap: 20 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, paddingBottom: 10, borderBottom: "1px solid var(--border-color)" }}>
               <span style={{ background: B, color: "#fff", width: 26, height: 26, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800 }}>1</span>
               <span style={{ fontWeight: 800, fontSize: 16, color: "var(--text-dark)" }}>Datos del docente</span>
@@ -109,12 +121,12 @@ export const Agregar = ({
               {sugerencias.length > 0 && (
                 <div className="fade-in" style={{
                   marginTop: 12,
-                  background: exactOrHighDuplicate ? "rgba(239, 68, 68, 0.08)" : "var(--ghost-bg)",
-                  border: `2px solid ${exactOrHighDuplicate ? "#ef4444" : OR}`,
+                  background: exactOrHighDuplicate ? "var(--danger-bg)" : "var(--surface-subtle)",
+                  border: `2px solid ${exactOrHighDuplicate ? "var(--danger-border)" : OR}`,
                   borderRadius: 16,
-                  padding: "14px 16px"
+                  padding: "14px"
                 }}>
-                  <div style={{ fontSize: 12.5, color: exactOrHighDuplicate ? "#ef4444" : OR, fontWeight: 800, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ fontSize: 12.5, color: exactOrHighDuplicate ? "var(--danger-text)" : OR, fontWeight: 800, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
                     <span>{exactOrHighDuplicate ? "🚨 ¡ALTO! ESTE PROFESOR YA PARECE ESTAR REGISTRADO:" : "⚠️ PROFESORES SIMILARES ENCONTRADOS — ¿Es alguno de ellos?"}</span>
                   </div>
 
@@ -131,7 +143,7 @@ export const Agregar = ({
                         border: "1px solid var(--border-color)",
                         flexWrap: "wrap"
                       }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 180, flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: "1 1 180px" }}>
                           <Avatar name={p.nombre} fac={p.facultad} size={38} />
                           <div style={{ minWidth: 0 }}>
                             <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
@@ -297,7 +309,7 @@ export const Agregar = ({
           </div>
           
           {/* Columna Derecha: Reseña Inicial */}
-          <div style={{ flex: "1 1 350px", display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 10, borderBottom: "1px solid var(--border-color)", marginBottom: 18 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ background: OR, color: "#fff", width: 26, height: 26, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800 }}>2</span>
@@ -316,7 +328,7 @@ export const Agregar = ({
             {addProf.incluirResena ? (
               <>
                 <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 10, letterSpacing: 0.4 }}>CALIFICA LOS 4 CRITERIOS <span style={{ color: OR }}>*</span></div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 18 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 8, marginBottom: 18 }}>
                   {CRIT.map(c => (
                     <div key={c} className={`crit-box${addProf[c] > 0 ? " active" : ""}`} style={{ padding: "12px 14px" }}>
                       <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6, fontWeight: 700 }}>{CRIT_ICON[c]} {CRIT_LABEL[c]}</div>
@@ -327,7 +339,7 @@ export const Agregar = ({
                 </div>
 
                 <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 8, letterSpacing: 0.4 }}>DATOS OPCIONALES DEL ALUMNO</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 12 }}>
                   <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.facultadAlumno}
                     onChange={e => setAddProf(prev => ({ ...prev, facultadAlumno: e.target.value, carrera: "" }))}>
                     <option value="">🏫 Tu facultad...</option>
@@ -344,13 +356,13 @@ export const Agregar = ({
                     {carrerasForm.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
-                <div style={{ marginBottom: 16, display: "flex", gap: 10 }}>
-                  <select className="input" style={{ flex: 1, padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.ciclo || ""}
+                <div style={{ marginBottom: 16, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 10 }}>
+                  <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.ciclo || ""}
                     onChange={e => setAddProf(prev => ({ ...prev, ciclo: e.target.value }))}>
                     <option value="">📅 Ciclo cursado...</option>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => <option key={n} value={String(n)}>Ciclo {n}</option>)}
                   </select>
-                  <select className="input" style={{ flex: 1, padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.semestre || ""}
+                  <select className="input" style={{ padding: "10px 12px", fontSize: 13, cursor: "pointer" }} value={addProf.semestre || ""}
                     onChange={e => setAddProf(prev => ({ ...prev, semestre: e.target.value }))}>
                     <option value="">🗓️ Semestre...</option>
                     {SEMESTRES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -360,7 +372,7 @@ export const Agregar = ({
                 <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-light)", marginBottom: 8, letterSpacing: 0.4 }}>TU COMENTARIO <span style={{ color: OR }}>*</span></div>
                 <textarea className="textarea" style={{ fontSize: 14, padding: 12, minHeight: 95 }} value={addProf.texto} onChange={e => { if (e.target.value.length <= 500) setAddProf(prev => ({ ...prev, texto: e.target.value })); }} placeholder="¿Cómo explica? ¿Qué tal sus exámenes y trato con los alumnos?" maxLength={500} />
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
-                  <span style={{ fontSize: 11, color: addProf.texto.length >= 450 ? "#DC2626" : "var(--text-light)", fontWeight: 600 }}>{addProf.texto.length} / 500</span>
+                  <span className="tabular-nums" style={{ fontSize: 11, color: addProf.texto.length >= 450 ? "var(--danger-text)" : "var(--text-light)", fontWeight: 600 }}>{addProf.texto.length} / 500</span>
                   {addProf.texto.length < 20 && addProf.texto.length > 0 && <span style={{ fontSize: 11, color: OR, fontWeight: 700 }}>Mínimo 20 caracteres</span>}
                 </div>
               </>
@@ -383,7 +395,7 @@ export const Agregar = ({
       )}
 
       {addMode === "curso" && (
-        <div className="card fade-in" style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
+        <div className="card card-pad fade-in" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <div>
             <label style={{ fontSize: 14, fontWeight: 800, color: "var(--text-dark)", display: "block", marginBottom: 8 }}>
               1. Busca y selecciona al profesor existente

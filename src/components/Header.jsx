@@ -43,6 +43,7 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
   return (
     <>
       <header
+        className="site-header"
         style={{
           background: darkMode
             ? `linear-gradient(135deg, rgba(7, 17, 38, 0.94) 0%, rgba(12, 46, 94, 0.92) 100%)`
@@ -50,11 +51,9 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
           borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
-          padding: "0 20px",
           display: "flex",
           alignItems: "center",
           gap: 10,
-          height: 66,
           boxShadow: "0 6px 28px rgba(7, 25, 52, 0.25)",
           position: "sticky",
           top: 0,
@@ -179,9 +178,9 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
         {[
           ["home", "🏠", "Inicio"],
           ["ranking", "🏆", "Ranking"],
-          ["solicitudes", "🗳️", "Secciones\nAdicionales"],
-          ["agregar", "➕", "Agregar\nProfesor"],
-          ["feedback", "💡", "Sugerencias"]
+          ["solicitudes", "🗳️", "Secciones"],
+          ["agregar", "➕", "Agregar"],
+          ["feedback", "💡", "Sugerir"]
         ].map(([p, icon, label]) => {
           const isActive = page === p;
           const isFeedback = p === "feedback";
@@ -193,23 +192,36 @@ export const Header = ({ page, navigate, darkMode, setDarkMode }) => {
               style={
                 isFeedback
                   ? {
-                      background: isActive ? OR : "rgba(232, 119, 34, 0.12)",
+                      background: isActive ? OR : "transparent",
                       color: isActive ? "#fff" : OR,
-                      border: `1px solid ${isActive ? OR : "rgba(232, 119, 34, 0.28)"}`,
-                      borderRadius: 14
+                      position: "relative"
                     }
                   : {}
               }
             >
-              <span style={{ fontSize: 17, marginBottom: 0, lineHeight: 1 }}>{icon}</span>
+              {isFeedback && !isActive && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 5,
+                    right: "24%",
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: OR,
+                    boxShadow: `0 0 6px ${OR}`
+                  }}
+                />
+              )}
+              <span style={{ fontSize: 18, marginBottom: 0, lineHeight: 1 }}>{icon}</span>
               <span
                 style={{
-                  fontSize: 9.5,
+                  fontSize: 10,
                   fontWeight: 800,
                   color: "inherit",
-                  whiteSpace: "pre-line",
+                  whiteSpace: "nowrap",
                   textAlign: "center",
-                  lineHeight: 1.08
+                  lineHeight: 1.1
                 }}
               >
                 {label}
